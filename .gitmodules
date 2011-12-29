@@ -1,0 +1,3 @@
+[submodule "test/backbone"]
+	path = test/backbone
+	url = https://github.com/documentcloud/backbone.git
