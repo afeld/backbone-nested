@@ -20,7 +20,7 @@ $(document).ready(function() {
     },
     addresses: [
       {
-        city: "Brookyln",
+        city: "Brooklyn",
         state: "NY"
       },
       {
@@ -38,7 +38,7 @@ $(document).ready(function() {
     equals(doc.get('gender'), 'M');
   });
 
-  test("NestedModel: get 1-1 backwards compatibility", function() {
+  test("NestedModel: get 1-1 returns attributes object", function() {
     equals(doc.get('name').first, 'Aidan');
     equals(doc.get('name').last, 'Feldman');
   });
@@ -46,6 +46,20 @@ $(document).ready(function() {
   test("NestedModel: get 1-1", function() {
     equals(doc.get('name.first'), 'Aidan');
     equals(doc.get('name.last'), 'Feldman');
+  });
+
+  test("NestedModel: get 1-N dot notation", function() {
+    equals(doc.get('addresses.0.city'), 'Brooklyn');
+    equals(doc.get('addresses.0.state'), 'NY');
+    equals(doc.get('addresses.1.city'), 'Oak Park');
+    equals(doc.get('addresses.1.state'), 'IL');
+  });
+
+  test("NestedModel: get 1-N square bracket notation", function() {
+    equals(doc.get('addresses[0].city'), 'Brooklyn');
+    equals(doc.get('addresses[0].state'), 'NY');
+    equals(doc.get('addresses[1].city'), 'Oak Park');
+    equals(doc.get('addresses[1].state'), 'IL');
   });
 
   // Backbone.sync = window.originalSync;
