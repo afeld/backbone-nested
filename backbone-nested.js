@@ -11,13 +11,8 @@ Backbone.NestedModel = Backbone.Model.extend({
     
     if (result instanceof Backbone.Collection){
       if (attrPath.length > 1){
-        result = result.at(attrPath[1]);
-        var otherAttrs = attrPath.slice(2);
-        if (otherAttrs.length){
-          result = result.get(otherAttrs);
-        } else {
-          result = result.toJSON();
-        }
+        var otherAttrs = _.rest(attrPath);
+        result = result.getNested(otherAttrs);
         
       } else {
         result = result.toJSON();
@@ -31,6 +26,7 @@ Backbone.NestedModel = Backbone.Model.extend({
       if (attrPath.length > 1){
         var otherAttrs = _.rest(attrPath);
         result = result.get(otherAttrs);
+        
       } else {
         result = result.toJSON();
 
@@ -135,6 +131,17 @@ Backbone.NestedModel = Backbone.Model.extend({
 
 Backbone.NestedCollection = Backbone.Collection.extend({
 
-  model: Backbone.NestedModel
+  model: Backbone.NestedModel,
+
+  getNested: function(attrPath){
+    var model = this.at(attrPath[0]);
+
+    if (attrPath.length > 1){
+      var otherAttrs = _.rest(attrPath);
+      return model.get(otherAttrs);
+    } else {
+      return model.toJSON();
+    }
+  }
 
 });
