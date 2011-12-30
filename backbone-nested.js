@@ -9,7 +9,25 @@ Backbone.NestedModel = Backbone.Model.extend({
       childAttr = attrPath[0],
       result = Backbone.Model.prototype.get.call(this, childAttr);
     
-    if (typeof result === 'object'){
+    if (result instanceof Backbone.Collection){
+      if (attrPath.length > 1){
+        result = result.at(attrPath[1]);
+        var otherAttrs = attrPath.slice(2);
+        if (otherAttrs.length){
+          result = result.get(otherAttrs);
+        } else {
+          result = result.toJSON();
+        }
+        
+      } else {
+        result = result.toJSON();
+
+        if (window.console){
+          window.console.log("Square bracket notation is preferred for accesing values of attribute '" + attrStr + "'.");
+        }
+      }
+
+    } else if (result instanceof Backbone.Model){
       if (attrPath.length > 1){
         var otherAttrs = _.rest(attrPath);
         result = result.get(otherAttrs);
@@ -21,6 +39,7 @@ Backbone.NestedModel = Backbone.Model.extend({
         }
       }
     }
+    // else it's a leaf
 
     return result;
   },
@@ -33,7 +52,8 @@ Backbone.NestedModel = Backbone.Model.extend({
         val = attrObj[childAttr];
 
       if (_.isArray(val)){
-        // TODO hande nested arrays
+        var nestedCollection = this.ensureNestedCollection(childAttr);
+        nestedCollection.reset(val);
 
       } else if (typeof val === 'object'){
         // nested attributes
@@ -50,8 +70,10 @@ Backbone.NestedModel = Backbone.Model.extend({
   },
 
   ensureNestedModel: function(attr){
-    var nestedModel = this.attributes[attr];
-    if (typeof nestedModel !== 'object'){ // !(childAttr in this.attributes)
+    var nestedModel = Backbone.Model.prototype.get.call(this, attr);
+
+    // TODO handle overwrite vs. modification?
+    if (!(nestedModel instanceof Backbone.NestedModel)){ // !(childAttr in this.attributes)
       // create nested model
       nestedModel = new Backbone.NestedModel();
       var setOpts = {};
@@ -60,6 +82,21 @@ Backbone.NestedModel = Backbone.Model.extend({
     }
 
     return nestedModel;
+  },
+
+  ensureNestedCollection: function(attr){
+    var nestedCollection = Backbone.Model.prototype.get.call(this, attr);
+
+    // TODO handle overwrite vs. modification?
+    if (!(nestedCollection instanceof Backbone.NestedCollection)){ // !(childAttr in this.attributes)
+      // create nested collection
+      nestedCollection = new Backbone.NestedCollection();
+      var setOpts = {};
+      setOpts[attr] = nestedCollection;
+      Backbone.Model.prototype.set.call(this, setOpts, {silent: true});
+    }
+
+    return nestedCollection;
   }
 
 }, {
@@ -92,5 +129,12 @@ Backbone.NestedModel = Backbone.Model.extend({
     result[attrPath[0]] = newVal;
     return result;
   }
+
+});
+
+
+Backbone.NestedCollection = Backbone.Collection.extend({
+
+  model: Backbone.NestedModel
 
 });
