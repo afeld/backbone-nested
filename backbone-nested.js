@@ -5,7 +5,7 @@ Backbone.NestedModel = Backbone.Model.extend({
   },
 
   get: function(attrStr){
-    var attrPath = attrStr.split(/\.|\[|\]\.?/), //.match(/[^\.\[\]]+/g),
+    var attrPath = this.attrPath(attrStr),
       result = this.attributes;
 
     // walk down the list of attributes
@@ -26,7 +26,7 @@ Backbone.NestedModel = Backbone.Model.extend({
     var attrPath, dest, val;
 
     for (var attrStr in attrs){
-      attrPath = attrStr.split(/\.|\[|\]\.?/); //.match(/[^\.\[\]]+/g),
+      attrPath = this.attrPath(attrStr);
       dest = this.attributes;
 
       // walk down the list of attributes
@@ -37,6 +37,10 @@ Backbone.NestedModel = Backbone.Model.extend({
       val = attrs[attrStr];
       dest[attrPath] = val;
     }
+  },
+
+  attrPath: function(attrStr){
+    return attrStr.match(/[^\.\[\]]+/g);
   }
 
 });

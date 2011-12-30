@@ -37,6 +37,8 @@ $(document).ready(function() {
   }
 
 
+  // ----- GET --------
+
   test("NestedModel: get", function() {
     var doc = createModel();
     equals(doc.get('gender'), 'M');
@@ -70,21 +72,49 @@ $(document).ready(function() {
     equals(doc.get('addresses[1].state'), 'IL');
   });
 
+  test("NestedModel: get 1-N returns attributes object", function() {
+    var doc = createModel();
+
+    var addr0 = doc.get('addresses[0]');
+    equals(addr0.city, 'Brooklyn');
+    equals(addr0.state, 'NY');
+
+    var addr1 = doc.get('addresses[1]');
+    equals(addr1.city, 'Oak Park');
+    equals(addr1.state, 'IL');
+  });
+
+
+  // ----- SET --------
 
   test("NestedModel: set", function() {
     var doc = createModel();
     equals(doc.get('gender'), 'M');
-    doc.set({'gender': 'F'});
+    doc.set({gender: 'F'});
     equals(doc.get('gender'), 'F');
   });
 
-  test("NestedModel: set 1-1", function() {
+  test("NestedModel: set 1-1 on leaves", function() {
     var doc = createModel();
     equals(doc.get('name.first'), 'Aidan');
     equals(doc.get('name.last'), 'Feldman');
 
     doc.set({'name.first': 'Jeremy'});
     doc.set({'name.last': 'Ashkenas'});
+
+    equals(doc.get('name.first'), 'Jeremy');
+    equals(doc.get('name.last'), 'Ashkenas');
+  });
+
+  test("NestedModel: set 1-1 with object", function() {
+    var doc = createModel();
+
+    doc.set({
+      name: {
+        first: 'Jeremy',
+        last: 'Ashkenas'
+      }
+    });
 
     equals(doc.get('name.first'), 'Jeremy');
     equals(doc.get('name.last'), 'Ashkenas');
@@ -119,6 +149,28 @@ $(document).ready(function() {
     doc.set({'addresses[0].state': 'WA'});
     doc.set({'addresses[1].city': 'Minneapolis'});
     doc.set({'addresses[1].state': 'MN'});
+
+    equals(doc.get('addresses[0].city'), 'Seattle');
+    equals(doc.get('addresses[0].state'), 'WA');
+    equals(doc.get('addresses[1].city'), 'Minneapolis');
+    equals(doc.get('addresses[1].state'), 'MN');
+  });
+
+  test("NestedModel: set 1-N with an object", function() {
+    var doc = createModel();
+
+    doc.set({
+      'addresses[0]': {
+        city: 'Seattle',
+        state: 'WA'
+      }
+    });
+    doc.set({
+      'addresses[1]': {
+        city: 'Minneapolis',
+        state: 'MN'
+      }
+    });
 
     equals(doc.get('addresses[0].city'), 'Seattle');
     equals(doc.get('addresses[0].state'), 'WA');
