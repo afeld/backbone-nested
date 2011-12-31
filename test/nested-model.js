@@ -19,6 +19,10 @@ $(document).ready(function() {
       gender: 'M',
       name: {
         first: "Aidan",
+        middle: {
+          initial: 'L',
+          full: 'Lee'
+        },
         last: "Feldman"
       },
       addresses: [
@@ -64,12 +68,14 @@ $(document).ready(function() {
   test("NestedModel#get() 1-1 returns attributes object", function() {
     var doc = createModel();
     equals(doc.get('name').first, 'Aidan');
+    equals(doc.get('name').middle.initial, 'L');
     equals(doc.get('name').last, 'Feldman');
   });
 
   test("NestedModel#get() 1-1", function() {
     var doc = createModel();
     equals(doc.get('name.first'), 'Aidan');
+    equals(doc.get('name.middle.initial'), 'L');
     equals(doc.get('name.last'), 'Feldman');
   });
 

@@ -65,6 +65,22 @@ Backbone.NestedModel = Backbone.Model.extend({
     }
   },
 
+  toJSON: function(){
+    var json = Backbone.Model.prototype.toJSON.call(this),
+      val;
+    
+    for (var attr in json){
+      val = json[attr];
+
+      // convert nested attributes to JSON
+      if (val instanceof Backbone.Model || val instanceof Backbone.Collection){
+        json[attr] = val.toJSON();
+      }
+    }
+
+    return json;
+  },
+
   ensureNestedModel: function(attr){
     var nestedModel = Backbone.Model.prototype.get.call(this, attr);
 
