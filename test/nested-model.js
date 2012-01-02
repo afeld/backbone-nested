@@ -41,6 +41,16 @@ $(document).ready(function() {
   }
 
 
+  // ----- ATTR_PATH --------
+
+  test("NestedModel.attrPath()", function() {
+    deepEqual(Backbone.NestedModel.attrPath('foo'), ['foo']);
+    deepEqual(Backbone.NestedModel.attrPath('foo.bar'), ['foo', 'bar']);
+    deepEqual(Backbone.NestedModel.attrPath('foo[0]'), ['foo', 0]);
+    deepEqual(Backbone.NestedModel.attrPath('foo[0].bar'), ['foo', 0, 'bar']);
+  });
+
+
   // ----- CREATE_ATTR_OBJ --------
 
   test("NestedModel.createAttrObj() simple", function() {
@@ -57,6 +67,19 @@ $(document).ready(function() {
     var result = Backbone.NestedModel.createAttrObj('foo.bar', 'baz');
     equals(result.foo.bar, 'baz');
   });
+
+  test("NestedModel.createAttrObj() respects arrays", function() {
+    var result = Backbone.NestedModel.createAttrObj('foo', {bar: ['baz', 'boop']});
+    equals(_.isArray(result.foo.bar), true);
+    equals(result.foo.bar[0], 'baz');
+  });
+
+  test("NestedModel.createAttrObj() respects array accessors", function() {
+    var result = Backbone.NestedModel.createAttrObj('foo[0]', 'bar');
+    equals(_.isArray(result.foo), true);
+    equals(result.foo[0], 'bar');
+  });
+
 
   // ----- GET --------
 
@@ -168,15 +191,13 @@ $(document).ready(function() {
     equals(doc.get('addresses[1].city'), 'Oak Park');
     equals(doc.get('addresses[1].state'), 'IL');
 
-    doc.set({'addresses[0].city': 'Seattle'});
-    doc.set({'addresses[0].state': 'WA'});
-    doc.set({'addresses[1].city': 'Minneapolis'});
-    doc.set({'addresses[1].state': 'MN'});
+    doc.set({'addresses[0].city': 'Manhattan'});
+    doc.set({'addresses[1].city': 'Chicago'});
 
-    equals(doc.get('addresses[0].city'), 'Seattle');
-    equals(doc.get('addresses[0].state'), 'WA');
-    equals(doc.get('addresses[1].city'), 'Minneapolis');
-    equals(doc.get('addresses[1].state'), 'MN');
+    equals(doc.get('addresses[0].city'), 'Manhattan');
+    equals(doc.get('addresses[0].state'), 'NY');
+    equals(doc.get('addresses[1].city'), 'Chicago');
+    equals(doc.get('addresses[1].state'), 'IL');
   });
 
   test("NestedModel#set() 1-N with an object", function() {

@@ -26,7 +26,7 @@ Backbone.NestedModel = Backbone.Model.extend({
       if (attrPath.length > 1){
         var otherAttrs = _.rest(attrPath);
         result = result.get(otherAttrs);
-        
+
       } else {
         result = result.toJSON();
 
@@ -48,8 +48,18 @@ Backbone.NestedModel = Backbone.Model.extend({
         val = attrObj[childAttr];
 
       if (_.isArray(val)){
-        var nestedCollection = this.ensureNestedCollection(childAttr);
-        nestedCollection.reset(val);
+        var nestedCollection = this.ensureNestedCollection(childAttr),
+          model;
+
+        for (var i = 0; i < val.length; i++){
+          model = nestedCollection.at(i);
+          if (model){
+            // nested model already exists in collection
+            model.set(val[i]);
+          } else {
+            nestedCollection.add(val[i], {at: i});
+          }
+        }
 
       } else if (typeof val === 'object'){
         // nested attributes
@@ -114,8 +124,21 @@ Backbone.NestedModel = Backbone.Model.extend({
 }, {
   // class methods
 
-  attrPath: function(attrStr){
-    return _.isString(attrStr) ? attrStr.match(/[^\.\[\]]+/g) : attrStr;
+  attrPath: function(attrStrOrPath){
+    var path;
+    
+    if (_.isString(attrStrOrPath)){
+      // TODO this parsing can probably be more efficient
+      path = attrStrOrPath.match(/[^\.\[\]]+/g);
+      path = _.map(path, function(val){
+        // convert array accessors to numbers
+        return val.match(/^\d+$/) ? parseInt(val) : val;
+      });
+    } else {
+      path = attrStrOrPath;
+    }
+
+    return path;
   },
 
   createAttrObj: function(attrStr, val){
@@ -137,8 +160,10 @@ Backbone.NestedModel = Backbone.Model.extend({
         break;
     }
 
-    var result = {};
-    result[attrPath[0]] = newVal;
+    var childAttr = attrPath[0],
+      result = _.isNumber(childAttr) ? [] : {};
+    
+    result[childAttr] = newVal;
     return result;
   }
 
