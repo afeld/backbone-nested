@@ -4,8 +4,8 @@ Backbone.NestedModel = Backbone.Model.extend({
     Backbone.Model.prototype.constructor.apply( this, arguments );
   },
 
-  get: function(attrStr){
-    var attrPath = Backbone.NestedModel.attrPath(attrStr),
+  get: function(attrStrOrPath){
+    var attrPath = Backbone.NestedModel.attrPath(attrStrOrPath),
       childAttr = attrPath[0],
       result = Backbone.Model.prototype.get.call(this, childAttr);
     
@@ -18,7 +18,7 @@ Backbone.NestedModel = Backbone.Model.extend({
         result = result.toJSON();
 
         if (window.console){
-          window.console.log("Square bracket notation is preferred for accesing values of attribute '" + attrStr + "'.");
+          window.console.log("Square bracket notation is preferred for accesing values of attribute '" + attrStrOrPath + "'.");
         }
       }
 
@@ -31,7 +31,7 @@ Backbone.NestedModel = Backbone.Model.extend({
         result = result.toJSON();
 
         if (window.console){
-          window.console.log("Dot notation is preferred for accesing values of attribute '" + attrStr + "'.");
+          window.console.log("Dot notation is preferred for accesing values of attribute '" + attrStrOrPath + "'.");
         }
       }
     }
@@ -141,13 +141,13 @@ Backbone.NestedModel = Backbone.Model.extend({
     return path;
   },
 
-  createAttrObj: function(attrStr, val){
-    var attrPath = this.attrPath(attrStr),
+  createAttrObj: function(attrStrOrPath, val){
+    var attrPath = this.attrPath(attrStrOrPath),
       newVal;
 
     switch (attrPath.length){
       case 0:
-        throw "no valid attributes: '" + attrStr + "'";
+        throw "no valid attributes: '" + attrStrOrPath + "'";
         break;
       
       case 1:
