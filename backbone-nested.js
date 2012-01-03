@@ -34,6 +34,11 @@ Backbone.NestedModel = Backbone.Model.extend({
     return this.get(attrPath);
   },
 
+  has: function(attr){
+    // for some reason this is not how Backbone.Model is implemented - it accesses the attributes object directly
+    return !_.isUndefined(this.get(attr));
+  },
+
   set: function(attrs, opts){
     for (var attrStr in attrs){
       var attrPath = Backbone.NestedModel.attrPath(attrStr),
@@ -203,14 +208,19 @@ Backbone.NestedCollection = Backbone.Collection.extend({
   model: Backbone.NestedModel,
 
   getNested: function(attrPath){
-    var model = this.at(attrPath[0]);
+    var model = this.at(attrPath[0]),
+      result;
 
-    if (attrPath.length > 1){
-      var otherAttrs = _.rest(attrPath);
-      return model.get(otherAttrs);
-    } else {
-      return model.toJSON();
+    if (model){
+      if (attrPath.length > 1){
+        var otherAttrs = _.rest(attrPath);
+        result = model.get(otherAttrs);
+      } else {
+        result = model.toJSON();
+      }
     }
+
+    return result;
   }
 
 });

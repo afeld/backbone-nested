@@ -152,6 +152,48 @@ $(document).ready(function() {
   });
 
 
+  // ----- HAS --------
+
+  test("#has()", function() {
+    var doc = createModel();
+    ok(doc.has('gender'));
+    ok(!doc.has('foo'));
+  });
+
+  test("#get() 1-1", function() {
+    var doc = createModel();
+
+    ok(doc.has('name.first'));
+    ok(doc.has('name.middle.initial'));
+    ok(doc.has('name.last'));
+    ok(!doc.has('name.foo'));
+  });
+
+  test("#get() 1-N dot notation", function() {
+    var doc = createModel();
+    
+    ok(doc.has('addresses.0'));
+    ok(doc.has('addresses.0.city'));
+    ok(doc.has('addresses.0.state'));
+    ok(doc.has('addresses.1'));
+    ok(doc.has('addresses.1.city'));
+    ok(doc.has('addresses.1.state'));
+    ok(!doc.has('addresses.2'));
+  });
+
+  test("#get() 1-N square bracket notation", function() {
+    var doc = createModel();
+
+    ok(doc.has('addresses[0]'));
+    ok(doc.has('addresses[0].city'));
+    ok(doc.has('addresses[0].state'));
+    ok(doc.has('addresses[1]'));
+    ok(doc.has('addresses[1].city'));
+    ok(doc.has('addresses[1].state'));
+    ok(!doc.has('addresses[2]'));
+  });
+
+
   // ----- SET --------
 
   test("#set()", function() {
