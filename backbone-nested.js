@@ -49,22 +49,23 @@ Backbone.NestedModel = Backbone.Model.extend({
 
       if (_.isArray(val)){
         var nestedCollection = this.ensureNestedCollection(childAttr),
-          model;
+          model, collOpts;
 
         for (var i = 0; i < val.length; i++){
           model = nestedCollection.at(i);
           if (model){
             // nested model already exists in collection
-            model.set(val[i]);
+            model.set(val[i], opts);
           } else {
-            nestedCollection.add(val[i], {at: i});
+            collOpts = _.defaults({at: i}, opts);
+            nestedCollection.add(val[i], collOpts);
           }
         }
 
       } else if (typeof val === 'object'){
         // nested attributes
         var nestedModel = this.ensureNestedModel(childAttr);
-        nestedModel.set(val);
+        nestedModel.set(val, opts);
 
       } else {
         // leaf
@@ -98,12 +99,27 @@ Backbone.NestedModel = Backbone.Model.extend({
     if (!(nestedModel instanceof Backbone.NestedModel)){ // !(childAttr in this.attributes)
       // create nested model
       nestedModel = new Backbone.NestedModel();
+
       var setOpts = {};
       setOpts[attr] = nestedModel;
       Backbone.Model.prototype.set.call(this, setOpts, {silent: true});
+
+      nestedModel.bind('change', function(model){
+        this.onNestedModelChange(model, model.collection, attr);
+      }, this);
     }
 
     return nestedModel;
+  },
+
+  onNestedModelChange: function(model, collection, attr){
+    var changedAttrs = model.changedAttributes(); // TODO for some reason this is returning all attributes, not just changed ones
+    for (var childAttr in changedAttrs){
+      this.trigger('change:' + attr + '.' + childAttr, this, {});
+    }
+
+    this.trigger('change:' + attr, this);
+    this.change();
   },
 
   ensureNestedCollection: function(attr){
@@ -150,11 +166,11 @@ Backbone.NestedModel = Backbone.Model.extend({
         throw "no valid attributes: '" + attrStrOrPath + "'";
         break;
       
-      case 1:
+      case 1: // leaf
         newVal = val;
         break;
       
-      default:
+      default: // nested attributes
         var otherAttrs = _.rest(attrPath);
         newVal = this.createAttrObj(otherAttrs, val);
         break;

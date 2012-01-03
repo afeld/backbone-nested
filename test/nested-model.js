@@ -244,6 +244,35 @@ $(document).ready(function() {
   });
 
 
+  // ----- CHANGE EVENTS --------
+
+  test("change event on top-level attribute", function() {
+    var doc = createModel();
+    doc.bind('change', function(){ ok(true); });
+    doc.bind('change:gender', function(){ ok(true); });
+
+    expect(2);
+    doc.set({'gender': 'F'});
+  });
+
+  test("change event on nested attribute", function() {
+    var doc = createModel(),
+      callbacksFired = [false, false, false, false];
+    
+    doc.bind('change', function(){ callbacksFired[0] = true });
+    doc.bind('change:name', function(){ callbacksFired[1] = true });
+    doc.bind('change:name.first', function(){ callbacksFired[2] = true });
+    doc.bind('change:name.last', function(){ callbacksFired[3] = true });
+
+    doc.set({'name.first': 'Bob'});
+
+    ok(callbacksFired[0], "'change' should fire");
+    ok(callbacksFired[1], "'change:name' should fire");
+    ok(callbacksFired[2], "'change:name.first' should fire");
+    ok(!callbacksFired[3], "'change:name.last' should not fire");
+  });
+
+
   // Backbone.sync = window.originalSync;
 
 });
