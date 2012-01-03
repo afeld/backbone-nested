@@ -105,14 +105,14 @@ Backbone.NestedModel = Backbone.Model.extend({
       Backbone.Model.prototype.set.call(this, setOpts, {silent: true});
 
       nestedModel.bind('all', function(evt){
-        this.onNestedModelChange(this, attr, evt);
+        this.onNestedModelChange(attr, evt);
       }, this);
     }
 
     return nestedModel;
   },
 
-  onNestedModelChange: function(model, attr, evt){
+  onNestedModelChange: function(attr, evt){
     var matchData = evt.match(/^change(:(.+))?$/);
     if (matchData){
       // change event
@@ -136,9 +136,31 @@ Backbone.NestedModel = Backbone.Model.extend({
       var setOpts = {};
       setOpts[attr] = nestedCollection;
       Backbone.Model.prototype.set.call(this, setOpts, {silent: true});
+
+      nestedCollection.bind('all', function(evt, model){
+        this.onNestedCollectionChange(model, attr, evt);
+      }, this);
     }
 
     return nestedCollection;
+  },
+
+  onNestedCollectionChange: function(model, attr, evt){
+    var coll = this.attributes[attr],
+      index = coll.indexOf(model),
+      matchData = evt.match(/^change(:(.+))?$/);
+    
+    if (matchData){
+      // change event
+      var childAttr = matchData[2];
+      if (childAttr){ // 'change:nested'
+        this.trigger('change:' + attr + '[' + index + '].' + childAttr, this, {});
+      } else { // 'change'
+        this.trigger('change:' + attr + '[' + index + ']', this);
+        this.trigger('change:' + attr, this);
+        this.change();
+      }
+    }
   }
 
 }, {

@@ -262,7 +262,7 @@ $(document).ready(function() {
     doc.bind('change', function(){ callbacksFired[0] = true });
     doc.bind('change:name', function(){ callbacksFired[1] = true });
     doc.bind('change:name.first', function(){ callbacksFired[2] = true });
-    
+
     doc.bind('change:name.last', function(){ ok(false, "'change:name.last' should not fire"); });
     doc.bind('change:gender', function(){ ok(false, "'change:gender' should not fire"); });
 
@@ -315,6 +315,26 @@ $(document).ready(function() {
     ok(callbacksFired[2], "'change:name.middle' should fire");
     ok(callbacksFired[3], "'change:name.middle.initial' should fire");
     ok(callbacksFired[4], "'change:name.middle.full' should fire");
+  });
+
+  test("change event on nested array", function() {
+    var doc = createModel(),
+      callbacksFired = [false, false, false, false];
+    
+    doc.bind('change', function(){ callbacksFired[0] = true });
+    doc.bind('change:addresses', function(){ callbacksFired[1] = true });
+    doc.bind('change:addresses[0]', function(){ callbacksFired[2] = true });
+    doc.bind('change:addresses[0].city', function(){ callbacksFired[3] = true });
+    
+    doc.bind('change:addresses[0].state', function(){ ok(false, "'change:addresses[0].state' should not fire"); });
+    doc.bind('change:addresses[1]', function(){ ok(false, "'change:addresses[1]' should not fire"); });
+
+    doc.set({'addresses[0].city': 'New York'});
+
+    ok(callbacksFired[0], "'change' should fire");
+    ok(callbacksFired[1], "'change:addresses' should fire");
+    ok(callbacksFired[2], "'change:addresses[0]' should fire");
+    ok(callbacksFired[3], "'change:addresses[0].city' should fire");
   });
 
 
