@@ -9,7 +9,8 @@ Backbone.NestedModel = Backbone.Model.extend({
       childAttr = attrPath[0],
       result = Backbone.Model.prototype.get.call(this, childAttr);
     
-    if (result instanceof Backbone.Collection){
+    if (result instanceof Backbone.Collection || result instanceof Backbone.Model){
+      // nested attribute
       if (attrPath.length > 1){
         var otherAttrs = _.rest(attrPath);
         result = result.getNested(otherAttrs);
@@ -18,26 +19,19 @@ Backbone.NestedModel = Backbone.Model.extend({
         result = result.toJSON();
 
         if (window.console){
-          window.console.log("Square bracket notation is preferred for accesing values of attribute '" + attrStrOrPath + "'.");
+          window.console.log("Backbone-Nested syntax is preferred for accesing values of attribute '" + attrStrOrPath + "'.");
         }
       }
 
-    } else if (result instanceof Backbone.Model){
-      if (attrPath.length > 1){
-        var otherAttrs = _.rest(attrPath);
-        result = result.get(otherAttrs);
-
-      } else {
-        result = result.toJSON();
-
-        if (window.console){
-          window.console.log("Dot notation is preferred for accesing values of attribute '" + attrStrOrPath + "'.");
-        }
-      }
     }
     // else it's a leaf
 
     return result;
+  },
+
+  // alias for .get(), so that the NestedModel acts like a NestedCollection
+  getNested: function(attrPath){
+    return this.get(attrPath);
   },
 
   set: function(attrs, opts){
@@ -48,6 +42,7 @@ Backbone.NestedModel = Backbone.Model.extend({
         val = attrObj[childAttr];
 
       if (_.isArray(val)){
+        // nested array of attributes
         var nestedCollection = this.ensureNestedCollection(childAttr),
           model, collOpts;
 
