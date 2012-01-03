@@ -1,3 +1,11 @@
+/**
+ * Backbone-Nested 0.1.0 - An extension of Backbone.js that keeps track of nested attributes
+ *
+ * https://github.com/afeld/backbone-nested
+ *
+ * Copyright (c) 2011-2012 Aidan Feldman
+ * MIT Licensed (LICENSE)
+ */
 Backbone.NestedModel = Backbone.Model.extend({
   
   constructor: function(attrs, opts){
@@ -91,6 +99,9 @@ Backbone.NestedModel = Backbone.Model.extend({
 
     return json;
   },
+
+
+  // private
 
   ensureNestedModel: function(attr){
     var nestedModel = Backbone.Model.prototype.get.call(this, attr);
