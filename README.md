@@ -30,31 +30,32 @@ user.bind('change:name.first', function(){ ... });
 
 ## Usage
 
-1. Add `backbone-nested.js` to your HTML `<head>`, after `backbone.js` is included.
-```html
-<script type="text/javascript" src="backbone.js"></script>
-<script type="text/javascript" src="backbone-nested.js"></script>
-```
+1. Download the [latest version](https://github.com/afeld/backbone-nested/downloads), and add `backbone-nested.js` to your HTML `<head>`, **after** `backbone.js` is included.
+
+    ```html
+    <script type="text/javascript" src="backbone.js"></script>
+    <script type="text/javascript" src="backbone-nested.js"></script>
+    ```
+
 2. Change your models to extend from `Backbone.NestedModel`, e.g.
-```javascript
-var Person = Backbone.Model.extend({
-  // ...
-});
 
-// becomes
+    ```javascript
+    var Person = Backbone.Model.extend({ ... });
+    
+    // becomes
+    
+    var Person = Backbone.NestedModel.extend({ ... });
+    ```
 
-var Person = Backbone.NestedModel.extend({
-  // ...
-});
-```
 3. Change your getters and setters to not access nested attributes directly, e.g.
-```javascript
-user.get('name').first = 'Bob';
 
-// becomes
-
-user.set({'name.first': 'Bob'});
-```
+    ```javascript
+    user.get('name').first = 'Bob';
+    
+    // becomes
+    
+    user.set({'name.first': 'Bob'});
+    ```
 
 Best of all, `Backbone.NestedModel` is designed to be a drop-in replacement of `Backbone.Model`, so the switch can be made gradually.  See [here](https://github.com/afeld/backbone-nested/issues?labels=Parity) for any known feature-parity issues.
 
@@ -69,6 +70,7 @@ user.set({
   'name.middle.initial': 'H'
 });
 user.get('name.first') // returns 'Bob'
+user.get('name.middle.initial') // returns 'H'
 
 // object syntax
 user.set({
@@ -86,6 +88,22 @@ user.set({
   ]
 });
 user.get('addresses[0].state') // returns 'NY'
+```
+
+`"change"` events can be bound to nested attributes in the same way, and changing nested attributes will fire up the chain:
+
+```javascript
+// all of these will fire when 'name.middle.initial' is set or changed
+user.bind('change', function(){ ... });
+user.bind('change:name', function(){ ... });
+user.bind('change:name.middle', function(){ ... });
+user.bind('change:name.middle.initial', function(){ ... });
+
+// all of these will fire when the first address is added or changed
+user.bind('change', function(){ ... });
+user.bind('change:addresses', function(){ ... });
+user.bind('change:addresses[0]', function(){ ... });
+user.bind('change:addresses[0].city', function(){ ... });
 ```
 
 ## Contributing
