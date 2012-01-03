@@ -43,7 +43,7 @@ $(document).ready(function() {
 
   // ----- ATTR_PATH --------
 
-  test("NestedModel.attrPath()", function() {
+  test(".attrPath()", function() {
     deepEqual(Backbone.NestedModel.attrPath('foo'), ['foo']);
     deepEqual(Backbone.NestedModel.attrPath('foo.bar'), ['foo', 'bar']);
     deepEqual(Backbone.NestedModel.attrPath('foo[0]'), ['foo', 0]);
@@ -53,56 +53,75 @@ $(document).ready(function() {
 
   // ----- CREATE_ATTR_OBJ --------
 
-  test("NestedModel.createAttrObj() simple", function() {
+  test(".createAttrObj() simple", function() {
     var result = Backbone.NestedModel.createAttrObj('foo', 'bar');
     equals(result.foo, 'bar');
   });
 
-  test("NestedModel.createAttrObj() value object", function() {
+  test(".createAttrObj() value object", function() {
     var result = Backbone.NestedModel.createAttrObj('foo', {bar: 'baz'});
-    equals(result.foo.bar, 'baz');
+    deepEqual(result, {
+      foo: {
+        bar: 'baz'
+      }
+    });
   });
 
-  test("NestedModel.createAttrObj() nested attribute", function() {
+  test(".createAttrObj() nested attribute", function() {
     var result = Backbone.NestedModel.createAttrObj('foo.bar', 'baz');
-    equals(result.foo.bar, 'baz');
+
+    deepEqual(result, {
+      foo: {
+        bar: 'baz'
+      }
+    });
   });
 
-  test("NestedModel.createAttrObj() respects arrays", function() {
+  test(".createAttrObj() respects arrays", function() {
     var result = Backbone.NestedModel.createAttrObj('foo', {bar: ['baz', 'boop']});
-    equals(_.isArray(result.foo.bar), true);
-    equals(result.foo.bar[0], 'baz');
+
+    deepEqual(result, {
+      foo: {
+        bar: ['baz', 'boop']
+      }
+    });
   });
 
-  test("NestedModel.createAttrObj() respects array accessors", function() {
+  test(".createAttrObj() respects array accessors", function() {
     var result = Backbone.NestedModel.createAttrObj('foo[0]', 'bar');
-    equals(_.isArray(result.foo), true);
-    equals(result.foo[0], 'bar');
+    deepEqual(result, {foo: ['bar']});
   });
 
 
   // ----- GET --------
 
-  test("NestedModel#get()", function() {
+  test("#get()", function() {
     var doc = createModel();
     equals(doc.get('gender'), 'M');
   });
 
-  test("NestedModel#get() 1-1 returns attributes object", function() {
-    var doc = createModel();
-    equals(doc.get('name').first, 'Aidan');
-    equals(doc.get('name').middle.initial, 'L');
-    equals(doc.get('name').last, 'Feldman');
+  test("#get() 1-1 returns attributes object", function() {
+    var doc = createModel(),
+      name = doc.get('name');
+    
+    deepEqual(name, {
+      first: 'Aidan',
+      middle: {
+        initial: 'L',
+        full: 'Lee'
+      },
+      last: 'Feldman'
+    });
   });
 
-  test("NestedModel#get() 1-1", function() {
+  test("#get() 1-1", function() {
     var doc = createModel();
     equals(doc.get('name.first'), 'Aidan');
     equals(doc.get('name.middle.initial'), 'L');
     equals(doc.get('name.last'), 'Feldman');
   });
 
-  test("NestedModel#get() 1-N dot notation", function() {
+  test("#get() 1-N dot notation", function() {
     var doc = createModel();
     equals(doc.get('addresses.0.city'), 'Brooklyn');
     equals(doc.get('addresses.0.state'), 'NY');
@@ -110,7 +129,7 @@ $(document).ready(function() {
     equals(doc.get('addresses.1.state'), 'IL');
   });
 
-  test("NestedModel#get() 1-N square bracket notation", function() {
+  test("#get() 1-N square bracket notation", function() {
     var doc = createModel();
     equals(doc.get('addresses[0].city'), 'Brooklyn');
     equals(doc.get('addresses[0].state'), 'NY');
@@ -118,29 +137,31 @@ $(document).ready(function() {
     equals(doc.get('addresses[1].state'), 'IL');
   });
 
-  test("NestedModel#get() 1-N returns attributes object", function() {
+  test("#get() 1-N returns attributes object", function() {
     var doc = createModel();
 
-    var addr0 = doc.get('addresses[0]');
-    equals(addr0.city, 'Brooklyn');
-    equals(addr0.state, 'NY');
+    deepEqual(doc.get('addresses[0]'), {
+      city: 'Brooklyn',
+      state: 'NY'
+    });
 
-    var addr1 = doc.get('addresses[1]');
-    equals(addr1.city, 'Oak Park');
-    equals(addr1.state, 'IL');
+    deepEqual(doc.get('addresses[1]'), {
+      city: 'Oak Park',
+      state: 'IL'
+    });
   });
 
 
   // ----- SET --------
 
-  test("NestedModel#set()", function() {
+  test("#set()", function() {
     var doc = createModel();
     equals(doc.get('gender'), 'M');
     doc.set({gender: 'F'});
     equals(doc.get('gender'), 'F');
   });
 
-  test("NestedModel#set() 1-1 on leaves", function() {
+  test("#set() 1-1 on leaves", function() {
     var doc = createModel();
     equals(doc.get('name.first'), 'Aidan');
     equals(doc.get('name.last'), 'Feldman');
@@ -152,7 +173,7 @@ $(document).ready(function() {
     equals(doc.get('name.last'), 'Ashkenas');
   });
 
-  test("NestedModel#set() 1-1 with object", function() {
+  test("#set() 1-1 with object", function() {
     var doc = createModel();
 
     doc.set({
@@ -166,7 +187,7 @@ $(document).ready(function() {
     equals(doc.get('name.last'), 'Ashkenas');
   });
 
-  test("NestedModel#set() 1-N dot notation on leaves", function() {
+  test("#set() 1-N dot notation on leaves", function() {
     var doc = createModel();
     equals(doc.get('addresses.0.city'), 'Brooklyn');
     equals(doc.get('addresses.0.state'), 'NY');
@@ -184,7 +205,7 @@ $(document).ready(function() {
     equals(doc.get('addresses.1.state'), 'MN');
   });
 
-  test("NestedModel#set() 1-N square bracket notation on leaves", function() {
+  test("#set() 1-N square bracket notation on leaves", function() {
     var doc = createModel();
     equals(doc.get('addresses[0].city'), 'Brooklyn');
     equals(doc.get('addresses[0].state'), 'NY');
@@ -200,7 +221,7 @@ $(document).ready(function() {
     equals(doc.get('addresses[1].state'), 'IL');
   });
 
-  test("NestedModel#set() 1-N with an object", function() {
+  test("#set() 1-N with an object", function() {
     var doc = createModel();
 
     doc.set({
