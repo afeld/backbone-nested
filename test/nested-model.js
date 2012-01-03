@@ -257,19 +257,64 @@ $(document).ready(function() {
 
   test("change event on nested attribute", function() {
     var doc = createModel(),
-      callbacksFired = [false, false, false, false];
+      callbacksFired = [false, false, false];
     
     doc.bind('change', function(){ callbacksFired[0] = true });
     doc.bind('change:name', function(){ callbacksFired[1] = true });
     doc.bind('change:name.first', function(){ callbacksFired[2] = true });
-    doc.bind('change:name.last', function(){ callbacksFired[3] = true });
+    
+    doc.bind('change:name.last', function(){ ok(false, "'change:name.last' should not fire"); });
+    doc.bind('change:gender', function(){ ok(false, "'change:gender' should not fire"); });
 
     doc.set({'name.first': 'Bob'});
 
     ok(callbacksFired[0], "'change' should fire");
     ok(callbacksFired[1], "'change:name' should fire");
     ok(callbacksFired[2], "'change:name.first' should fire");
-    ok(!callbacksFired[3], "'change:name.last' should not fire");
+  });
+
+  test("change event on deeply nested attribute", function() {
+    var doc = createModel(),
+      callbacksFired = [false, false, false, false];
+    
+    doc.bind('change', function(){ callbacksFired[0] = true });
+    doc.bind('change:name', function(){ callbacksFired[1] = true });
+    doc.bind('change:name.middle', function(){ callbacksFired[2] = true });
+    doc.bind('change:name.middle.full', function(){ callbacksFired[3] = true });
+
+    doc.bind('change:name.middle.initial', function(){ ok(false, "'change:name.middle.initial' should not fire"); });
+    doc.bind('change:name.first', function(){ ok(false, "'change:name.first' should not fire"); });
+
+    doc.set({'name.middle.full': 'Leonard'});
+
+    ok(callbacksFired[0], "'change' should fire");
+    ok(callbacksFired[1], "'change:name' should fire");
+    ok(callbacksFired[2], "'change:name.middle' should fire");
+    ok(callbacksFired[3], "'change:name.middle.full' should fire");
+  });
+
+  test("change event on deeply nested attribute with object", function() {
+    var doc = createModel(),
+      callbacksFired = [false, false, false, false, false];
+    
+    doc.bind('change', function(){ callbacksFired[0] = true });
+    doc.bind('change:name', function(){ callbacksFired[1] = true });
+    doc.bind('change:name.middle', function(){ callbacksFired[2] = true });
+    doc.bind('change:name.middle.initial', function(){ callbacksFired[3] = true });
+    doc.bind('change:name.middle.full', function(){ callbacksFired[4] = true });
+
+    doc.bind('change:name.first', function(){ ok(false, "'change:name.first' should not fire"); });
+
+    doc.set({'name.middle': {
+      initial: 'F',
+      full: 'Frankenfurter'
+    }});
+
+    ok(callbacksFired[0], "'change' should fire");
+    ok(callbacksFired[1], "'change:name' should fire");
+    ok(callbacksFired[2], "'change:name.middle' should fire");
+    ok(callbacksFired[3], "'change:name.middle.initial' should fire");
+    ok(callbacksFired[4], "'change:name.middle.full' should fire");
   });
 
 

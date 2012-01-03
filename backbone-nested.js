@@ -104,22 +104,26 @@ Backbone.NestedModel = Backbone.Model.extend({
       setOpts[attr] = nestedModel;
       Backbone.Model.prototype.set.call(this, setOpts, {silent: true});
 
-      nestedModel.bind('change', function(model){
-        this.onNestedModelChange(model, model.collection, attr);
+      nestedModel.bind('all', function(evt){
+        this.onNestedModelChange(this, attr, evt);
       }, this);
     }
 
     return nestedModel;
   },
 
-  onNestedModelChange: function(model, collection, attr){
-    var changedAttrs = model.changedAttributes(); // TODO for some reason this is returning all attributes, not just changed ones
-    for (var childAttr in changedAttrs){
-      this.trigger('change:' + attr + '.' + childAttr, this, {});
+  onNestedModelChange: function(model, attr, evt){
+    var matchData = evt.match(/^change(:(.+))?$/);
+    if (matchData){
+      // change event
+      var childAttr = matchData[2];
+      if (childAttr){ // 'change:nested'
+        this.trigger('change:' + attr + '.' + childAttr, this, {});
+      } else { // 'change'
+        this.trigger('change:' + attr, this);
+        this.change();
+      }
     }
-
-    this.trigger('change:' + attr, this);
-    this.change();
   },
 
   ensureNestedCollection: function(attr){
