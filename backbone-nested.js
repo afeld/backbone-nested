@@ -17,29 +17,19 @@ Backbone.NestedModel = Backbone.Model.extend({
       childAttr = attrPath[0],
       result = Backbone.Model.prototype.get.call(this, childAttr);
     
-    if (result instanceof Backbone.Collection || result instanceof Backbone.Model){
-      // nested attribute
-      if (attrPath.length > 1){
-        var otherAttrs = _.rest(attrPath);
-        result = result.getNested(otherAttrs);
-        
-      } else {
-        result = result.toJSON();
+    // walk through the child attributes
+    for (var i = 1; i < attrPath.length; i++){
+      childAttr = attrPath[i];
+      result = result[childAttr];
+    }
 
-        if (window.console){
-          window.console.log("Backbone-Nested syntax is preferred for accesing values of attribute '" + attrStrOrPath + "'.");
-        }
-      }
-
+    // check if the result is an Object, Array, etc.
+    if (_.isObject(result) && window.console){
+      window.console.log("Backbone-Nested syntax is preferred for accesing values of attribute '" + attrStrOrPath + "'.");
     }
     // else it's a leaf
 
     return result;
-  },
-
-  // alias for .get(), so that the NestedModel acts like a NestedCollection
-  getNested: function(attrPath){
-    return this.get(attrPath);
   },
 
   has: function(attr){
@@ -54,33 +44,7 @@ Backbone.NestedModel = Backbone.Model.extend({
         attrObj = Backbone.NestedModel.createAttrObj(attrPath, attrs[attrStr]),
         val = attrObj[childAttr];
 
-      if (_.isArray(val)){
-        // nested array of attributes
-        var nestedCollection = this.ensureNestedCollection(childAttr),
-          model, collOpts;
-
-        for (var i = 0; i < val.length; i++){
-          model = nestedCollection.at(i);
-          if (model){
-            // nested model already exists in collection
-            model.set(val[i], opts);
-          } else {
-            collOpts = _.defaults({at: i}, opts);
-            nestedCollection.add(val[i], collOpts);
-          }
-        }
-
-      } else if (typeof val === 'object'){
-        // nested attributes
-        var nestedModel = this.ensureNestedModel(childAttr);
-        nestedModel.set(val, opts);
-
-      } else {
-        // leaf
-        var setOpts = {};
-        setOpts[childAttr] = val;
-        Backbone.Model.prototype.set.call(this, setOpts, opts);
-      }
+      this.mergeAttrs(attrObj);
     }
   },
 
@@ -103,66 +67,31 @@ Backbone.NestedModel = Backbone.Model.extend({
 
   // private
 
-  ensureNestedModel: function(attr){
-    var nestedModel = Backbone.Model.prototype.get.call(this, attr);
+  mergeAttrs: function(source, dest, stack){
+    dest || (dest = this.attributes);
+    stack || (stack = []);
 
-    // TODO handle overwrite vs. modification?
-    if (!(nestedModel instanceof Backbone.NestedModel)){ // !(childAttr in this.attributes)
-      // create nested model
-      nestedModel = new Backbone.NestedModel();
-
-      var setOpts = {};
-      setOpts[attr] = nestedModel;
-      Backbone.Model.prototype.set.call(this, setOpts, {silent: true});
-
-      nestedModel.bind('all', function(evt){
-        this.onNestedAttrChange(attr, evt);
-      }, this);
-    }
-
-    return nestedModel;
-  },
-
-  onNestedAttrChange: function(attr, evt){
-    var matchData = evt.match(/^change(:(.+))?$/);
-    if (matchData){
-      // change event
-      var childAttr = matchData[2];
-      if (childAttr){ // 'change:nested'
-        this.trigger('change:' + attr + '.' + childAttr, this, {});
-      } else { // 'change'
-        this.trigger('change:' + attr, this);
-        this.change();
-      }
-    }
-  },
-
-  ensureNestedCollection: function(attr){
-    var nestedCollection = Backbone.Model.prototype.get.call(this, attr);
-
-    // TODO handle overwrite vs. modification?
-    if (!(nestedCollection instanceof Backbone.NestedCollection)){ // !(childAttr in this.attributes)
-      // create nested collection
-      nestedCollection = new Backbone.NestedCollection();
-      var setOpts = {};
-      setOpts[attr] = nestedCollection;
-      Backbone.Model.prototype.set.call(this, setOpts, {silent: true});
-
-      nestedCollection.bind('all', function(evt, model){
-        this.onNestedCollectionChange(model, attr, evt);
-      }, this);
-    }
-
-    return nestedCollection;
-  },
-
-  onNestedCollectionChange: function(model, attr, evt){
-    var coll = this.attributes[attr],
-      index = coll.indexOf(model),
-      fullAttr = attr + '[' + index + ']';
+    var self = this,
+      attrStr;
     
-    this.onNestedAttrChange(fullAttr, evt);
-    this.onNestedAttrChange(attr, evt);
+    _.each(source, function(sourceVal, prop){
+      var destVal = dest[prop];
+
+      var newStack = stack.concat([prop]);
+      if (prop in dest && _.isObject(sourceVal) && _.isObject(destVal)){
+        self.mergeAttrs(sourceVal, destVal, newStack);
+      } else {
+        dest[prop] = sourceVal;
+      }
+      
+      attrStr = Backbone.NestedModel.createAttrStr(newStack);
+      self.trigger('change:' + attrStr);
+    });
+
+    attrStr = Backbone.NestedModel.createAttrStr(stack);
+    this.trigger('change:' + attrStr);
+    this.trigger('change');
+    return dest;
   }
 
 }, {
@@ -209,29 +138,15 @@ Backbone.NestedModel = Backbone.Model.extend({
     
     result[childAttr] = newVal;
     return result;
-  }
+  },
 
-});
+  createAttrStr: function(attrPath){
+    var attrStr = attrPath[0];
+    _.each(_.rest(attrPath), function(attr){
+      attrStr += _.isNumber(attr) ? ('[' + attr + ']') : ('.' + attr);
+    });
 
-
-Backbone.NestedCollection = Backbone.Collection.extend({
-
-  model: Backbone.NestedModel,
-
-  getNested: function(attrPath){
-    var model = this.at(attrPath[0]),
-      result;
-
-    if (model){
-      if (attrPath.length > 1){
-        var otherAttrs = _.rest(attrPath);
-        result = model.get(otherAttrs);
-      } else {
-        result = model.toJSON();
-      }
-    }
-
-    return result;
+    return attrStr;
   }
 
 });
