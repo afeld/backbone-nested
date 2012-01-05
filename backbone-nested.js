@@ -49,19 +49,8 @@ Backbone.NestedModel = Backbone.Model.extend({
   },
 
   toJSON: function(){
-    var json = Backbone.Model.prototype.toJSON.call(this),
-      val;
-    
-    for (var attr in json){
-      val = json[attr];
-
-      // convert nested attributes to JSON
-      if (val instanceof Backbone.Model || val instanceof Backbone.Collection){
-        json[attr] = val.toJSON();
-      }
-    }
-
-    return json;
+    var json = Backbone.Model.prototype.toJSON();
+    return _.deepClone(json);
   },
 
 
@@ -153,6 +142,7 @@ Backbone.NestedModel = Backbone.Model.extend({
 
 
 _.mixin({
+
   deepMerge: function(dest){
     _.each(_.rest(arguments), function(source){
       var sourceVal, destVal;
@@ -167,5 +157,16 @@ _.mixin({
       }
     });
     return dest;
+  },
+
+  deepClone: function(obj){
+    var result = _.clone(obj); // shallow clone
+    if (_.isObject(obj)){
+      _.each(obj, function(val, key){
+        result[key] = _.deepClone(val);
+      });
+    }
+    return result;
   }
+
 });
