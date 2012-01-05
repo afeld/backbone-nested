@@ -38,12 +38,16 @@ Backbone.NestedModel = Backbone.Model.extend({
   },
 
   set: function(attrs, opts){
+    opts || (opts = {});
+
     for (var attrStr in attrs){
       var attrPath = Backbone.NestedModel.attrPath(attrStr),
         attrObj = Backbone.NestedModel.createAttrObj(attrPath, attrs[attrStr]);
 
       this.mergeAttrs(attrObj);
     }
+
+    this.change(opts);
   },
 
   toJSON: function(){
@@ -72,12 +76,11 @@ Backbone.NestedModel = Backbone.Model.extend({
       }
       
       attrStr = Backbone.NestedModel.createAttrStr(newStack);
-      self.trigger('change:' + attrStr);
+      self.trigger('change:' + attrStr); // TODO don't trigger if silent
     });
 
     attrStr = Backbone.NestedModel.createAttrStr(stack);
-    this.trigger('change:' + attrStr);
-    this.change();
+    this.trigger('change:' + attrStr); // TODO don't trigger if silent
     return dest;
   }
 

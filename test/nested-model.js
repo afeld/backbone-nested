@@ -299,20 +299,20 @@ $(document).ready(function() {
 
   test("change event on nested attribute", function() {
     var doc = createModel(),
-      callbacksFired = [false, false, false];
+      callbacksFired = [0, 0, 0];
     
-    doc.bind('change', function(){ callbacksFired[0] = true });
-    doc.bind('change:name', function(){ callbacksFired[1] = true });
-    doc.bind('change:name.first', function(){ callbacksFired[2] = true });
+    doc.bind('change', function(){ callbacksFired[0] += 1 });
+    doc.bind('change:name', function(){ callbacksFired[1] += 1 });
+    doc.bind('change:name.first', function(){ callbacksFired[2] += 1 });
 
     doc.bind('change:name.last', function(){ ok(false, "'change:name.last' should not fire"); });
     doc.bind('change:gender', function(){ ok(false, "'change:gender' should not fire"); });
 
     doc.set({'name.first': 'Bob'});
 
-    ok(callbacksFired[0], "'change' should fire");
-    ok(callbacksFired[1], "'change:name' should fire");
-    ok(callbacksFired[2], "'change:name.first' should fire");
+    equal(callbacksFired[0], 1, "'change' should fire once");
+    equal(callbacksFired[1], 1, "'change:name' should fire once");
+    equal(callbacksFired[2], 1, "'change:name.first' should fire once");
   });
 
   test("change event on deeply nested attribute", function() {
