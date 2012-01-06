@@ -50,6 +50,16 @@ Backbone.NestedModel = Backbone.Model.extend({
     this.change(opts);
   },
 
+  unset: function(attrStr, opts){
+    var attrPath = Backbone.NestedModel.attrPath(attrStr);
+    if (attrPath.length > 1){
+      throw "unset() not yet implemented for nested attributes";
+      // see https://github.com/afeld/backbone-nested/issues/1
+    } else {
+      Backbone.Model.prototype.unset.apply(this, arguments);
+    }
+  },
+
   toJSON: function(){
     var json = Backbone.Model.prototype.toJSON();
     return _.deepClone(json);

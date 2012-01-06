@@ -400,6 +400,21 @@ $(document).ready(function() {
   });
 
 
+  // ----- UNSET --------
+
+  test("#unset() simple", function() {
+    var doc = createModel();
+    doc.unset('gender');
+    ok(_.isUndefined(doc.get('gender')));
+  });
+
+  test("#unset() nested attribute", function() {
+    var doc = createModel();
+    doc.unset('name.first');
+    ok(_.isUndefined(doc.get('name.first')));
+  });
+
+
   // Backbone.sync = window.originalSync;
 
 });
