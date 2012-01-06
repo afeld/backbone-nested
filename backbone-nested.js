@@ -80,7 +80,6 @@ Backbone.NestedModel = Backbone.Model.extend({
     });
 
     attrStr = Backbone.NestedModel.createAttrStr(stack);
-    this.trigger('change:' + attrStr, self, dest); // TODO don't trigger if silent
     return dest;
   }
 
