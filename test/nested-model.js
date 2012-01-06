@@ -315,6 +315,26 @@ $(document).ready(function() {
     equal(callbacksFired[2], 1, "'change:name.first' should fire once");
   });
 
+  test("attribute change event receives new value", function() {
+    var doc = createModel();
+    
+    doc.bind('change:name', function(model, newVal){
+      deepEqual(newVal, {
+        'first': 'Bob',
+        'middle': {
+          'initial': 'L',
+          'full': 'Lee'
+        },
+        'last': 'Feldman'
+      });
+    });
+    doc.bind('change:name.first', function(model, newVal){
+      equal(newVal, 'Bob');
+    });
+
+    doc.set({'name.first': 'Bob'});
+  });
+
   test("change event on deeply nested attribute", function() {
     var doc = createModel(),
       callbacksFired = [false, false, false, false];
