@@ -63,6 +63,8 @@ Best of all, `Backbone.NestedModel` is designed to be a drop-in replacement of `
 
 `get()` and `set()` will work as before, but nested attributes should be accessed using the Backbone-Nested string syntax:
 
+### 1-1
+
 ```javascript
 // dot syntax
 user.set({
@@ -79,8 +81,12 @@ user.set({
     last: 'Obama'
   }
 });
+```
 
-// nested arrays
+### 1-N
+
+```javascript
+// object syntax
 user.set({
   'addresses': [
     {city: 'Brooklyn', state: 'NY'},
@@ -88,7 +94,14 @@ user.set({
   ]
 });
 user.get('addresses[0].state') // returns 'NY'
+
+// square bracket syntax
+user.set({
+  'addresses[1].state': 'MI'
+});
 ```
+
+### Change Events
 
 `"change"` events can be bound to nested attributes in the same way, and changing nested attributes will fire up the chain:
 
