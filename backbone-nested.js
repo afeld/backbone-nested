@@ -40,7 +40,7 @@ Backbone.NestedModel = Backbone.Model.extend({
 
   set: function(attrs, opts){
     opts || (opts = {});
-    var newAttrs = _.clone(this.attributes);
+    var newAttrs = _.deepClone(this.attributes);
 
     for (var attrStr in attrs){
       var attrPath = Backbone.NestedModel.attrPath(attrStr),
@@ -57,9 +57,9 @@ Backbone.NestedModel = Backbone.Model.extend({
     if (attrPath.length > 1){
       throw "unset() not yet implemented for nested attributes";
       // see https://github.com/afeld/backbone-nested/issues/1
-    } else {
-      Backbone.Model.prototype.unset.apply(this, arguments);
     }
+
+    return Backbone.Model.prototype.unset.apply(this, arguments);
   },
 
   toJSON: function(){
@@ -71,7 +71,6 @@ Backbone.NestedModel = Backbone.Model.extend({
   // private
 
   mergeAttrs: function(source, dest, stack){
-    dest || (dest = this.attributes);
     stack || (stack = []);
 
     var self = this,
