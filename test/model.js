@@ -1,3 +1,4 @@
+// yanked from Backbone 0.5.2 test suite
 $(document).ready(function() {
 
   module("Backbone.Model");
