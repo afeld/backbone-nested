@@ -55,11 +55,22 @@ Backbone.NestedModel = Backbone.Model.extend({
   unset: function(attrStr, opts){
     var attrPath = Backbone.NestedModel.attrPath(attrStr);
     if (attrPath.length > 1){
-      throw "unset() not yet implemented for nested attributes";
-      // see https://github.com/afeld/backbone-nested/issues/1
+      // walk through the child attributes
+      var resultObj = this.get(_.initial(attrPath)),
+        leafAttr = _.last(attrPath);
+
+      if (resultObj && resultObj[leafAttr]){
+        delete resultObj[leafAttr];
+
+        if (!(opts && opts.silent)){
+          this.trigger('change:' + attrStr, this, void 0, opts);
+        }
+      }
+    } else {
+      Backbone.Model.prototype.unset.apply(this, arguments);
     }
 
-    return Backbone.Model.prototype.unset.apply(this, arguments);
+    return this;
   },
 
   toJSON: function(){
