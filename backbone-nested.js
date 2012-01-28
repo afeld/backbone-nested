@@ -86,12 +86,12 @@ Backbone.NestedModel = Backbone.Model.extend({
         dest[prop] = sourceVal;
       }
       
-      attrStr = Backbone.NestedModel.createAttrStr(newStack);
-      self.trigger('change:' + attrStr, self, dest[prop]); // TODO don't trigger if silent
+      // let the superclass handle change events for top-level attributes
+      if (newStack.length > 1){
+        attrStr = Backbone.NestedModel.createAttrStr(newStack);
+        self.trigger('change:' + attrStr, self, dest[prop]); // TODO don't trigger if silent
+      }
     });
-
-    attrStr = Backbone.NestedModel.createAttrStr(stack);
-    return dest;
   }
 
 }, {
