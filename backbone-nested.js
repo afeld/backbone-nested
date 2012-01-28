@@ -34,20 +34,22 @@ Backbone.NestedModel = Backbone.Model.extend({
 
   has: function(attr){
     // for some reason this is not how Backbone.Model is implemented - it accesses the attributes object directly
-    return !_.isUndefined(this.get(attr));
+    var result = this.get(attr);
+    return !(result === null || _.isUndefined(result));
   },
 
   set: function(attrs, opts){
     opts || (opts = {});
+    var newAttrs = _.clone(this.attributes);
 
     for (var attrStr in attrs){
       var attrPath = Backbone.NestedModel.attrPath(attrStr),
         attrObj = Backbone.NestedModel.createAttrObj(attrPath, attrs[attrStr]);
 
-      this.mergeAttrs(attrObj);
+      this.mergeAttrs(attrObj, newAttrs);
     }
 
-    this.change(opts);
+    return Backbone.Model.prototype.set.call(this, newAttrs, opts);
   },
 
   unset: function(attrStr, opts){
