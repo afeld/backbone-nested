@@ -46,13 +46,15 @@ Backbone.NestedModel = Backbone.Model.extend({
       var attrPath = Backbone.NestedModel.attrPath(attrStr),
         attrObj = Backbone.NestedModel.createAttrObj(attrPath, attrs[attrStr]);
 
-      this.mergeAttrs(newAttrs, attrObj);
+      this.mergeAttrs(newAttrs, attrObj, opts);
     }
 
     return Backbone.Model.prototype.set.call(this, newAttrs, opts);
   },
 
   unset: function(attrStr, opts){
+    opts || (opts = {});
+
     var attrPath = Backbone.NestedModel.attrPath(attrStr);
     if (attrPath.length > 1){
       // walk through the child attributes
@@ -62,9 +64,10 @@ Backbone.NestedModel = Backbone.Model.extend({
       if (resultObj && resultObj[leafAttr]){
         delete resultObj[leafAttr];
 
-        if (!(opts && opts.silent)){
+        if (!opts.silent){
           this.trigger('change:' + attrStr, this, void 0, opts);
         }
+        this.change(opts);
       }
     } else {
       Backbone.Model.prototype.unset.apply(this, arguments);
@@ -81,7 +84,7 @@ Backbone.NestedModel = Backbone.Model.extend({
 
   // private
 
-  mergeAttrs: function(dest, source, stack){
+  mergeAttrs: function(dest, source, opts, stack){
     stack || (stack = []);
 
     var self = this,
@@ -92,15 +95,15 @@ Backbone.NestedModel = Backbone.Model.extend({
 
       var newStack = stack.concat([prop]);
       if (prop in dest && _.isObject(sourceVal) && _.isObject(destVal)){
-        self.mergeAttrs(destVal, sourceVal, newStack);
+        self.mergeAttrs(destVal, sourceVal, opts, newStack);
       } else {
         dest[prop] = sourceVal;
       }
       
       // let the superclass handle change events for top-level attributes
-      if (newStack.length > 1){
+      if (!opts.silent && newStack.length > 1){
         attrStr = Backbone.NestedModel.createAttrStr(newStack);
-        self.trigger('change:' + attrStr, self, dest[prop]); // TODO don't trigger if silent
+        self.trigger('change:' + attrStr, self, dest[prop]);
       }
     });
   }

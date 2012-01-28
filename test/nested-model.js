@@ -292,6 +292,16 @@ $(document).ready(function() {
     equal(callbacksFired[2], 1, "'change:name.first' should fire once");
   });
 
+  test("change event doesn't fire on silent", function() {
+    var doc = createModel();
+    
+    doc.bind('change', function(){ ok(false, "'change' should not fire"); });
+    doc.bind('change:name', function(){ ok(false, "'change:name' should not fire"); });
+    doc.bind('change:name.first', function(){ ok(false, "'change:name.first' should not fire"); });
+
+    doc.set({'name.first': 'Bob'}, {silent: true});
+  });
+
   test("attribute change event receives new value", function() {
     var doc = createModel();
     
