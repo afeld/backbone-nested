@@ -53,11 +53,6 @@ $(document).ready(function() {
 
   // ----- CREATE_ATTR_OBJ --------
 
-  test(".createAttrObj() simple", function() {
-    var result = Backbone.NestedModel.createAttrObj('foo', 'bar');
-    equals(result.foo, 'bar');
-  });
-
   test(".createAttrObj() value object", function() {
     var result = Backbone.NestedModel.createAttrObj('foo', {bar: 'baz'});
     deepEqual(result, {
@@ -94,11 +89,6 @@ $(document).ready(function() {
 
 
   // ----- GET --------
-
-  test("#get()", function() {
-    var doc = createModel();
-    equals(doc.get('gender'), 'M');
-  });
 
   test("#get() 1-1 returns attributes object", function() {
     var doc = createModel(),
@@ -154,12 +144,6 @@ $(document).ready(function() {
 
   // ----- HAS --------
 
-  test("#has()", function() {
-    var doc = createModel();
-    ok(doc.has('gender'));
-    ok(!doc.has('foo'));
-  });
-
   test("#get() 1-1", function() {
     var doc = createModel();
 
@@ -195,13 +179,6 @@ $(document).ready(function() {
 
 
   // ----- SET --------
-
-  test("#set()", function() {
-    var doc = createModel();
-    equals(doc.get('gender'), 'M');
-    doc.set({gender: 'F'});
-    equals(doc.get('gender'), 'F');
-  });
 
   test("#set() 1-1 on leaves", function() {
     var doc = createModel();
@@ -401,12 +378,6 @@ $(document).ready(function() {
 
 
   // ----- UNSET --------
-
-  test("#unset() simple", function() {
-    var doc = createModel();
-    doc.unset('gender');
-    ok(_.isUndefined(doc.get('gender')));
-  });
 
   test("#unset() nested attribute", function() {
     var doc = createModel();
