@@ -119,6 +119,18 @@ user.bind('change:addresses[0]', function(){ ... });
 user.bind('change:addresses[0].city', function(){ ... });
 ```
 
+## Special Methods
+
+### remove()
+
+Acts like `unset()`, but if the unset item is an element in an array, compact the array.  For example:
+
+```javascript
+user.get('addresses').length; //=> 2
+user.remove('addresses[0]');
+user.get('addresses').length; //=> 1
+```
+
 ## Contributing
 
 Pull requests are more than welcome - please add tests, which can be run by opening test/index.html.

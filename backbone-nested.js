@@ -64,6 +64,25 @@ Backbone.NestedModel = Backbone.Model.extend({
     return this;
   },
 
+  remove: function(attrStr, opts){
+    this.unset(attrStr, opts);
+
+    var attrPath = Backbone.NestedModel.attrPath(attrStr);
+    if (_.isNumber(_.last(attrPath))){
+      var aryPath = _.initial(attrPath),
+        childAry = this.get(aryPath);
+      
+      // compact the array (remove falsy values)
+      for (var i = 0; i < childAry.length; i++){
+        if (!childAry[i]){
+          childAry.splice(i, 1);
+        }
+      }
+    }
+
+    return this;
+  },
+
   toJSON: function(){
     var json = Backbone.Model.prototype.toJSON();
     return _.deepClone(json);

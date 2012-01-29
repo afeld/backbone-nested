@@ -487,6 +487,17 @@ $(document).ready(function() {
   });
 
 
+  // ----- REMOVE --------
+
+  test("#remove() on nested array", function() {
+    var doc = createModel();
+    doc.remove('addresses[0]');
+
+    ok(doc.get('addresses[0]'));
+    equals(doc.get('addresses[1]'), void 0);
+  });
+
+
   // Backbone.sync = window.originalSync;
 
 });
