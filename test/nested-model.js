@@ -48,6 +48,8 @@ $(document).ready(function() {
     deepEqual(Backbone.NestedModel.attrPath('foo.bar'), ['foo', 'bar']);
     deepEqual(Backbone.NestedModel.attrPath('foo[0]'), ['foo', 0]);
     deepEqual(Backbone.NestedModel.attrPath('foo[0].bar'), ['foo', 0, 'bar']);
+    deepEqual(Backbone.NestedModel.attrPath('foo[]'), ['foo', '-1']);
+    deepEqual(Backbone.NestedModel.attrPath('foo[].bar'), ['foo', '-1', 'bar']);
   });
 
 
@@ -260,6 +262,40 @@ $(document).ready(function() {
     equals(doc.get('addresses[0].state'), 'WA');
     equals(doc.get('addresses[1].city'), 'Minneapolis');
     equals(doc.get('addresses[1].state'), 'MN');
+  });
+
+  test("#set() 1-N append to existing array", function() {
+    var doc = createModel();
+
+    doc.set({
+      'addresses[]': {
+        city: 'Seattle',
+        state: 'WA'
+      }
+    });
+    doc.set({
+      'addresses[]': {
+        city: 'Minneapolis',
+        state: 'MN'
+      }
+    });
+
+    equals(doc.get('addresses[2].city'), 'Seattle');
+    equals(doc.get('addresses[2].state'), 'WA');
+    equals(doc.get('addresses[3].city'), 'Minneapolis');
+    equals(doc.get('addresses[3].state'), 'MN');
+  });
+
+  test("#set() 1-N append to non-existent attribute", function() {
+    var doc = createModel();
+
+    doc.set({
+      'bikes[]': {
+        brand: 'Gary Fisher'
+      }
+    });
+
+    equals(doc.get('bikes[0].brand'), 'Gary Fisher');
   });
 
 

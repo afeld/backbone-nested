@@ -96,7 +96,14 @@ Backbone.NestedModel = Backbone.Model.extend({
       var newStack = stack.concat([prop]);
       if (prop in dest && _.isObject(sourceVal) && _.isObject(destVal)){
         self.mergeAttrs(destVal, sourceVal, opts, newStack);
+      } else if (prop === '-1'){
+        // append to existing array
+        dest.push(sourceVal);
       } else {
+        if (sourceVal && sourceVal['-1']){
+          // append to non-existing array
+          sourceVal = [sourceVal['-1']];
+        }
         dest[prop] = sourceVal;
       }
       
@@ -115,6 +122,8 @@ Backbone.NestedModel = Backbone.Model.extend({
     var path;
     
     if (_.isString(attrStrOrPath)){
+      // change all appends to '-1'
+      attrStrOrPath = attrStrOrPath.replace(/\[\]/g, '[-1]');
       // TODO this parsing can probably be more efficient
       path = attrStrOrPath.match(/[^\.\[\]]+/g);
       path = _.map(path, function(val){
