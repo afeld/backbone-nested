@@ -422,6 +422,26 @@ $(document).ready(function() {
     ok(callbacksFired[3], "'change:addresses[0].city' should fire");
   });
 
+  test("change+add when adding to array", function() {
+    var doc = createModel(),
+      callbacksFired = [false, false, false];
+    
+    doc.bind('change', function(){ callbacksFired[0] = true });
+    doc.bind('change:addresses', function(){ callbacksFired[1] = true });
+    doc.bind('add:addresses', function(){ callbacksFired[2] = true });
+
+    doc.set({
+      'addresses[2]': {
+        city: 'Seattle',
+        state: 'WA'
+      }
+    });
+
+    ok(callbacksFired[0], "'change' should fire");
+    ok(callbacksFired[1], "'change:addresses' should fire");
+    ok(callbacksFired[2], "'add:addresses' should fire");
+  });
+
   test("change+add event on append", function() {
     var doc = createModel(),
       callbacksFired = [false, false, false];
