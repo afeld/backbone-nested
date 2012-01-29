@@ -1,6 +1,6 @@
 # Backbone-Nested
 
-A plugin to make [Backbone.js](http://documentcloud.github.com/backbone) keep track of nested attributes.
+A plugin to make [Backbone.js](http://documentcloud.github.com/backbone) keep track of nested attributes.  [Download](https://github.com/afeld/backbone-nested/tags).
 
 ## The Need
 
@@ -30,9 +30,11 @@ user.bind('change:name.first', function(){ ... });
 
 ## Usage
 
-1. Download the [latest version](https://github.com/afeld/backbone-nested/downloads), and add `backbone-nested.js` to your HTML `<head>`, **after** `backbone.js` is included (tested against Backbone v0.5.3).
+1. Download the latest version [here](https://github.com/afeld/backbone-nested/tags), and add `backbone-nested.js` to your HTML `<head>`, **after** `backbone.js` is included ([tested](http://afeld.github.com/backbone-nested/test/) against jQuery v1.7.1, Underscore v1.3.1 and Backbone v0.5.3).
 
     ```html
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="underscore.js"></script>
     <script type="text/javascript" src="backbone.js"></script>
     <script type="text/javascript" src="backbone-nested.js"></script>
     ```
