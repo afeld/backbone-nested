@@ -144,6 +144,15 @@ user.remove('addresses[0]');
 user.get('addresses').length; //=> 1
 ```
 
+## Warnings
+
+Accessing a nested attribute will throw a warning in your console, because it's safer to use the getter syntax above.  To silence these warnings, add an argument of `{silent: true}` to `get()`:
+
+```javascript
+user.get('addresses[0]'); // gives a warning in your console
+user.get('addresses[0]', {silent:true}); // (silent)
+```
+
 ## Contributing
 
 Pull requests are more than welcome - please add tests, which can be run by opening test/index.html.

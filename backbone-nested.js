@@ -12,7 +12,9 @@ Backbone.NestedModel = Backbone.Model.extend({
     Backbone.Model.prototype.constructor.apply( this, arguments );
   },
 
-  get: function(attrStrOrPath){
+  get: function(attrStrOrPath, opts){
+    opts || (opts = {});
+
     var attrPath = Backbone.NestedModel.attrPath(attrStrOrPath),
       childAttr = attrPath[0],
       result = Backbone.Model.prototype.get.call(this, childAttr);
@@ -28,7 +30,7 @@ Backbone.NestedModel = Backbone.Model.extend({
     }
 
     // check if the result is an Object, Array, etc.
-    if (_.isObject(result) && window.console){
+    if (!opts.silent && _.isObject(result) && window.console){
       window.console.log("Backbone-Nested syntax is preferred for accesing values of attribute '" + attrStrOrPath + "'.");
     }
     // else it's a leaf
@@ -38,7 +40,7 @@ Backbone.NestedModel = Backbone.Model.extend({
 
   has: function(attr){
     // for some reason this is not how Backbone.Model is implemented - it accesses the attributes object directly
-    var result = this.get(attr);
+    var result = this.get(attr, {silent: true});
     return !(result === null || _.isUndefined(result));
   },
 
@@ -70,7 +72,7 @@ Backbone.NestedModel = Backbone.Model.extend({
     var attrPath = Backbone.NestedModel.attrPath(attrStr);
     if (_.isNumber(_.last(attrPath))){
       var aryPath = _.initial(attrPath),
-        childAry = this.get(aryPath);
+        childAry = this.get(aryPath, {silent: true});
       
       // compact the array (remove falsy values)
       for (var i = 0; i < childAry.length; i++){
