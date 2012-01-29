@@ -103,7 +103,7 @@ user.set({
 
 ## Events
 
-### 'change'
+### "change"
 
 `"change"` events can be bound to nested attributes in the same way, and changing nested attributes will fire up the chain:
 
@@ -121,13 +121,13 @@ user.bind('change:addresses[0]', function(model, newAddr){ ... });
 user.bind('change:addresses[0].city', function(model, newCity){ ... });
 ```
 
-### 'add' and 'remove'
+### "add" and "remove"
 
 Additionally, nested arrays fire `"add"` and `"remove"` events:
 
 ```javascript
 user.bind('add:addresses', function(model, newAddr){ ... });
-user.bind('remove:addresses', function(model){ ... });
+user.bind('remove:addresses', function(model, oldAddr){ ... });
 ```
 
 ## Special Methods

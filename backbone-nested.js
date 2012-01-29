@@ -124,7 +124,7 @@ Backbone.NestedModel = Backbone.Model.extend({
           if (!oldVal && destVal){
             this.trigger('add:' + attrStr, this, destVal);
           } else if (oldVal && !destVal){
-            this.trigger('remove:' + attrStr, this, destVal);
+            this.trigger('remove:' + attrStr, this, oldVal);
           }
         }
       }
