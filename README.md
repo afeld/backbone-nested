@@ -4,7 +4,7 @@ A plugin to make [Backbone.js](http://documentcloud.github.com/backbone) keep tr
 
 ## The Need
 
-Suppose you have a Backbone Model with nested attributes.  Updating the nested attribute won't cause the model's `"change"` event to fire, which is confusing.
+Suppose you have a Backbone Model with nested attributes, perhaps to remain consistent with your document-oriented database.  Updating the nested attribute won't cause the model's `"change"` event to fire, which is confusing.
 
 ```javascript
 var user = new Backbone.Model({
@@ -30,7 +30,7 @@ user.bind('change:name.first', function(){ ... });
 
 ## Usage
 
-1. Download the [latest version](https://github.com/afeld/backbone-nested/downloads), and add `backbone-nested.js` to your HTML `<head>`, **after** `backbone.js` is included.
+1. Download the [latest version](https://github.com/afeld/backbone-nested/downloads), and add `backbone-nested.js` to your HTML `<head>`, **after** `backbone.js` is included (tested against Backbone v0.5.3).
 
     ```html
     <script type="text/javascript" src="backbone.js"></script>
@@ -57,7 +57,7 @@ user.bind('change:name.first', function(){ ... });
     user.set({'name.first': 'Bob'});
     ```
 
-Best of all, `Backbone.NestedModel` is designed to be a drop-in replacement of `Backbone.Model`, so the switch can be made gradually.  See [here](https://github.com/afeld/backbone-nested/issues?labels=Parity) for any known feature-parity issues.
+Best of all, `Backbone.NestedModel` is designed to be a [backwards-compatible](http://afeld.github.com/backbone-nested/test/), drop-in replacement of `Backbone.Model`, so the switch can be made painlessly.
 
 ## Nested Attributes
 
