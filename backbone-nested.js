@@ -21,6 +21,10 @@ Backbone.NestedModel = Backbone.Model.extend({
     for (var i = 1; i < attrPath.length; i++){
       childAttr = attrPath[i];
       result = result[childAttr];
+      if (!result){
+        // value not present
+        break;
+      }
     }
 
     // check if the result is an Object, Array, etc.
@@ -53,25 +57,9 @@ Backbone.NestedModel = Backbone.Model.extend({
   },
 
   unset: function(attrStr, opts){
-    opts || (opts = {});
-
-    var attrPath = Backbone.NestedModel.attrPath(attrStr);
-    if (attrPath.length > 1){
-      // walk through the child attributes
-      var resultObj = this.get(_.initial(attrPath)),
-        leafAttr = _.last(attrPath);
-
-      if (resultObj && resultObj[leafAttr]){
-        delete resultObj[leafAttr];
-
-        if (!opts.silent){
-          this.trigger('change:' + attrStr, this, void 0, opts);
-        }
-        this.change(opts);
-      }
-    } else {
-      Backbone.Model.prototype.unset.apply(this, arguments);
-    }
+    var setOpts = {};
+    setOpts[attrStr] = void 0;
+    this.set(setOpts, opts);
 
     return this;
   },
@@ -89,9 +77,9 @@ Backbone.NestedModel = Backbone.Model.extend({
 
     _.each(source, function(sourceVal, prop){
       var destVal = dest[prop],
+        newStack = stack.concat([prop]),
         attrStr;
 
-      var newStack = stack.concat([prop]);
       if (prop in dest && _.isObject(sourceVal) && _.isObject(destVal)){
         this.mergeAttrs(destVal, sourceVal, opts, newStack);
       } else if (prop === '-1'){
