@@ -101,29 +101,40 @@ user.set({
 });
 ```
 
-### Change Events
+## Events
+
+### 'change'
 
 `"change"` events can be bound to nested attributes in the same way, and changing nested attributes will fire up the chain:
 
 ```javascript
 // all of these will fire when 'name.middle.initial' is set or changed
-user.bind('change', function(){ ... });
-user.bind('change:name', function(){ ... });
-user.bind('change:name.middle', function(){ ... });
-user.bind('change:name.middle.initial', function(){ ... });
+user.bind('change', function(model, newVal){ ... });
+user.bind('change:name', function(model, newName){ ... });
+user.bind('change:name.middle', function(model, newMiddleName){ ... });
+user.bind('change:name.middle.initial', function(model, newInitial){ ... });
 
 // all of these will fire when the first address is added or changed
-user.bind('change', function(){ ... });
-user.bind('change:addresses', function(){ ... });
-user.bind('change:addresses[0]', function(){ ... });
-user.bind('change:addresses[0].city', function(){ ... });
+user.bind('change', function(model, newVal){ ... });
+user.bind('change:addresses', function(model, addrs){ ... });
+user.bind('change:addresses[0]', function(model, newAddr){ ... });
+user.bind('change:addresses[0].city', function(model, newCity){ ... });
+```
+
+### 'add' and 'remove'
+
+Additionally, nested arrays fire `"add"` and `"remove"` events:
+
+```javascript
+user.bind('add:addresses', function(model, newAddr){ ... });
+user.bind('remove:addresses', function(model){ ... });
 ```
 
 ## Special Methods
 
 ### remove()
 
-Acts like `unset()`, but if the unset item is an element in an array, compact the array.  For example:
+Acts like `unset()`, but if the unset item is an element in a nested array, the array will be compacted.  For example:
 
 ```javascript
 user.get('addresses').length; //=> 2
