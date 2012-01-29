@@ -442,6 +442,21 @@ $(document).ready(function() {
     ok(callbacksFired[2], "'add:addresses' should fire");
   });
 
+  test("change+remove when unsetting on array", function() {
+    var doc = createModel(),
+      callbacksFired = [false, false, false];
+    
+    doc.bind('change', function(){ callbacksFired[0] = true });
+    doc.bind('change:addresses', function(){ callbacksFired[1] = true });
+    doc.bind('remove:addresses', function(){ callbacksFired[2] = true });
+
+    doc.unset('addresses[1]');
+
+    ok(callbacksFired[0], "'change' should fire");
+    ok(callbacksFired[1], "'change:addresses' should fire");
+    ok(callbacksFired[2], "'remove:addresses' should fire");
+  });
+
   test("change+add event on append", function() {
     var doc = createModel(),
       callbacksFired = [false, false, false];

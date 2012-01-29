@@ -93,17 +93,22 @@ Backbone.NestedModel = Backbone.Model.extend({
       }
 
       if (prop in dest && _.isObject(sourceVal) && _.isObject(destVal)){
-        dest[prop] = this.mergeAttrs(destVal, sourceVal, opts, newStack);
+        destVal = dest[prop] = this.mergeAttrs(destVal, sourceVal, opts, newStack);
       } else {
-        dest[prop] = sourceVal;
+        var oldVal = destVal;
 
-        if (_.isArray(dest) && !destVal && !opts.silent){
+        destVal = dest[prop] = sourceVal;
+
+        if (_.isArray(dest) && !opts.silent){
           attrStr = Backbone.NestedModel.createAttrStr(stack);
-          this.trigger('add:' + attrStr, this, destVal);
+
+          if (!oldVal && destVal){
+            this.trigger('add:' + attrStr, this, destVal);
+          } else if (oldVal && !destVal){
+            this.trigger('remove:' + attrStr, this, destVal);
+          }
         }
       }
-
-      destVal = dest[prop];
       
       // let the superclass handle change events for top-level attributes
       if (!opts.silent && newStack.length > 1){
