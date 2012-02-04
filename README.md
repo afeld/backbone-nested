@@ -1,6 +1,6 @@
 # Backbone-Nested
 
-A plugin to make [Backbone.js](http://documentcloud.github.com/backbone) keep track of nested attributes.  [Download](https://github.com/afeld/backbone-nested/tags).
+A plugin to make [Backbone.js](http://documentcloud.github.com/backbone) keep track of nested attributes.  [Download minified version](https://github.com/afeld/backbone-nested/downloads).
 
 ## The Need
 
