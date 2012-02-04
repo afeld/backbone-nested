@@ -299,6 +299,16 @@ $(document).ready(function() {
   });
 
 
+  // ----- TO_JSON --------
+
+  test("#toJSON()", function() {
+    var doc = createModel(),
+      json = doc.toJSON();
+    
+    deepEqual(json, doc.attributes);
+  });
+
+
   // ----- CHANGE EVENTS --------
 
   test("change event on top-level attribute", function() {
