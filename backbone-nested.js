@@ -86,7 +86,7 @@ Backbone.NestedModel = Backbone.Model.extend({
   },
 
   toJSON: function(){
-    var json = Backbone.Model.prototype.toJSON();
+    var json = Backbone.Model.prototype.toJSON.apply(this);
     return _.deepClone(json);
   },
 
