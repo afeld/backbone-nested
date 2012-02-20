@@ -7,10 +7,6 @@
  * MIT Licensed (LICENSE)
  */
 Backbone.NestedModel = Backbone.Model.extend({
-  
-  constructor: function(attrs, opts){
-    Backbone.Model.prototype.constructor.apply( this, arguments );
-  },
 
   get: function(attrStrOrPath, opts){
     opts || (opts = {});
@@ -202,22 +198,6 @@ Backbone.NestedModel = Backbone.Model.extend({
 
 
 _.mixin({
-
-  deepMerge: function(dest){
-    _.each(_.rest(arguments), function(source){
-      var sourceVal, destVal;
-      for (var prop in source){
-        sourceVal = source[prop];
-        destVal = dest[prop];
-        if (prop in dest && _.isObject(sourceVal) && _.isObject(destVal)){
-          _.deepMerge(destVal, sourceVal);
-        } else {
-          dest[prop] = sourceVal;
-        }
-      }
-    });
-    return dest;
-  },
 
   deepClone: function(obj){
     var result = _.clone(obj); // shallow clone
