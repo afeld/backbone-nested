@@ -499,6 +499,36 @@ $(document).ready(function() {
   });
 
 
+  // ----- ADD --------
+
+  test("#add() on nested array succeeds", function() {
+    var doc = createModel(),
+      attrs = {
+        city: 'Lincoln',
+        state: 'NE'
+      };
+
+    doc.add('addresses', attrs);
+
+    deepEqual(doc.get('addresses[2]'), attrs);
+  });
+
+  test("#add() on nested array should trigger 'add' event", function() {
+    var doc = createModel(),
+      callbackFired = false;
+
+    doc.bind('add:addresses', function(){
+      callbackFired = true;
+    });
+    doc.add('addresses', {
+      city: 'Lincoln',
+      state: 'NE'
+    });
+
+    ok(callbackFired, "callback wasn't fired");
+  });
+
+
   // ----- REMOVE --------
 
   test("#remove() on nested array succeeds", function() {

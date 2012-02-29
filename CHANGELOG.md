@@ -3,7 +3,8 @@
 [commits](https://github.com/afeld/backbone-nested/compare/v1.0.3...master)
 
 * Backbone 0.9.1 compatibiity
-* 'remove' event on nested arrays
+* fire 'remove' event from remove()
+* added add() method
 
 ## 1.0.3
 

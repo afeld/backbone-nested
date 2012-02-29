@@ -70,6 +70,11 @@ Backbone.NestedModel = Backbone.Model.extend({
     return this;
   },
 
+  add: function(attrStr, value, opts){
+    var current = this.get(attrStr, {silent: true});
+    this.set(attrStr + '[' + current.length + ']', value, opts);
+  },
+
   remove: function(attrStr, opts){
     opts = opts || {};
 

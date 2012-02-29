@@ -134,6 +134,19 @@ user.bind('remove:addresses', function(model, oldAddr){ ... });
 
 ## Special Methods
 
+### add()
+
+Acts like `set()`, but appends the item to the nested array.  For example:
+
+```javascript
+user.get('addresses').length; //=> 2
+user.add('addresses', {
+  city: 'Seattle',
+  state: 'WA'
+});
+user.get('addresses').length; //=> 3
+```
+
 ### remove()
 
 Acts like `unset()`, but if the unset item is an element in a nested array, the array will be compacted.  For example:
