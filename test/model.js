@@ -1,17 +1,33 @@
-// yanked from Backbone 0.5.2 test suite
+// yanked from Backbone 0.9.1 test suite
 $(document).ready(function() {
 
-  module("Backbone.Model");
-
   // Variable to catch the last request.
-  window.lastRequest = null;
+  var lastRequest = null;
+  // Variable to catch ajax params.
+  var ajaxParams = null;
+  var sync = Backbone.sync;
+  var ajax = $.ajax;
+  var urlRoot = null;
 
-  window.originalSync = Backbone.sync;
+  module("Backbone.Model", {
 
-  // Stub out Backbone.request...
-  Backbone.sync = function() {
-    lastRequest = _.toArray(arguments);
-  };
+    setup: function() {
+      Backbone.sync = function() {
+        lastRequest = _.toArray(arguments);
+        sync.apply(this, arguments);
+      };
+      $.ajax = function(params) { ajaxParams = params; };
+      urlRoot = Backbone.Model.prototype.urlRoot;
+      Backbone.Model.prototype.urlRoot = '/';
+    },
+
+    teardown: function() {
+      Backbone.sync = sync;
+      $.ajax = ajax;
+      Backbone.Model.prototype.urlRoot = urlRoot;
+    }
+
+  });
 
   var attrs = {
     id     : '1-the-tempest',
@@ -20,7 +36,7 @@ $(document).ready(function() {
     length : 123
   };
 
-  var proxy = Backbone.NestedModel.extend();
+  var proxy = Backbone.Model.extend();
   var doc = new proxy(attrs);
 
   var klass = Backbone.Collection.extend({
@@ -30,184 +46,222 @@ $(document).ready(function() {
   var collection = new klass();
   collection.add(doc);
 
-  test("NestedModel: initialize", function() {
-    var NestedModel = Backbone.NestedModel.extend({
+  test("Model: initialize", function() {
+    var Model = Backbone.Model.extend({
       initialize: function() {
         this.one = 1;
-        equals(this.collection, collection);
+        equal(this.collection, collection);
       }
     });
-    var model = new NestedModel({}, {collection: collection});
-    equals(model.one, 1);
-    equals(model.collection, collection);
+    var model = new Model({}, {collection: collection});
+    equal(model.one, 1);
+    equal(model.collection, collection);
   });
 
-  test("NestedModel: initialize with attributes and options", function() {
-    var NestedModel = Backbone.NestedModel.extend({
+  test("Model: initialize with attributes and options", function() {
+    var Model = Backbone.Model.extend({
       initialize: function(attributes, options) {
         this.one = options.one;
       }
     });
-    var model = new NestedModel({}, {one: 1});
-    equals(model.one, 1);
+    var model = new Model({}, {one: 1});
+    equal(model.one, 1);
   });
 
-  test("NestedModel: url", function() {
-    equals(doc.url(), '/collection/1-the-tempest');
+  test("Model: initialize with parsed attributes", function() {
+    var Model = Backbone.Model.extend({
+      parse: function(obj) {
+        obj.value += 1;
+        return obj;
+      }
+    });
+    var model = new Model({value: 1}, {parse: true});
+    equal(model.get('value'), 2);
+  });
+
+  test("Model: url", function() {
+    equal(doc.url(), '/collection/1-the-tempest');
     doc.collection.url = '/collection/';
-    equals(doc.url(), '/collection/1-the-tempest');
+    equal(doc.url(), '/collection/1-the-tempest');
     doc.collection = null;
-    var failed = false;
-    try {
-      doc.url();
-    } catch (e) {
-      failed = true;
-    }
-    equals(failed, true);
+    doc.urlRoot = null;
+    raises(function() { doc.url(); });
     doc.collection = collection;
   });
 
-  test("NestedModel: url when using urlRoot, and uri encoding", function() {
-    var NestedModel = Backbone.NestedModel.extend({
+  test("Model: url when using urlRoot, and uri encoding", function() {
+    var Model = Backbone.Model.extend({
       urlRoot: '/collection'
     });
-    var model = new NestedModel();
-    equals(model.url(), '/collection');
+    var model = new Model();
+    equal(model.url(), '/collection');
     model.set({id: '+1+'});
-    equals(model.url(), '/collection/%2B1%2B');
+    equal(model.url(), '/collection/%2B1%2B');
   });
 
-  test("NestedModel: clone", function() {
+  test("Model: url when using urlRoot as a function to determine urlRoot at runtime", function() {
+    var Model = Backbone.Model.extend({
+      urlRoot: function() {
+        return '/nested/' + this.get('parent_id') + '/collection';
+      }
+    });
+
+    var model = new Model({parent_id: 1});
+    equal(model.url(), '/nested/1/collection');
+    model.set({id: 2});
+    equal(model.url(), '/nested/1/collection/2');
+  });
+
+  test("Model: clone", function() {
     attrs = { 'foo': 1, 'bar': 2, 'baz': 3};
-    a = new Backbone.NestedModel(attrs);
+    a = new Backbone.Model(attrs);
     b = a.clone();
-    equals(a.get('foo'), 1);
-    equals(a.get('bar'), 2);
-    equals(a.get('baz'), 3);
-    equals(b.get('foo'), a.get('foo'), "Foo should be the same on the clone.");
-    equals(b.get('bar'), a.get('bar'), "Bar should be the same on the clone.");
-    equals(b.get('baz'), a.get('baz'), "Baz should be the same on the clone.");
+    equal(a.get('foo'), 1);
+    equal(a.get('bar'), 2);
+    equal(a.get('baz'), 3);
+    equal(b.get('foo'), a.get('foo'), "Foo should be the same on the clone.");
+    equal(b.get('bar'), a.get('bar'), "Bar should be the same on the clone.");
+    equal(b.get('baz'), a.get('baz'), "Baz should be the same on the clone.");
     a.set({foo : 100});
-    equals(a.get('foo'), 100);
-    equals(b.get('foo'), 1, "Changing a parent attribute does not change the clone.");
+    equal(a.get('foo'), 100);
+    equal(b.get('foo'), 1, "Changing a parent attribute does not change the clone.");
   });
 
-  test("NestedModel: isNew", function() {
+  test("Model: isNew", function() {
     attrs = { 'foo': 1, 'bar': 2, 'baz': 3};
-    a = new Backbone.NestedModel(attrs);
+    a = new Backbone.Model(attrs);
     ok(a.isNew(), "it should be new");
     attrs = { 'foo': 1, 'bar': 2, 'baz': 3, 'id': -5 };
-    a = new Backbone.NestedModel(attrs);
+    a = new Backbone.Model(attrs);
     ok(!a.isNew(), "any defined ID is legal, negative or positive");
     attrs = { 'foo': 1, 'bar': 2, 'baz': 3, 'id': 0 };
-    a = new Backbone.NestedModel(attrs);
+    a = new Backbone.Model(attrs);
     ok(!a.isNew(), "any defined ID is legal, including zero");
-    ok( new Backbone.NestedModel({          }).isNew(), "is true when there is no id");
-    ok(!new Backbone.NestedModel({ 'id': 2  }).isNew(), "is false for a positive integer");
-    ok(!new Backbone.NestedModel({ 'id': -5 }).isNew(), "is false for a negative integer");
+    ok( new Backbone.Model({          }).isNew(), "is true when there is no id");
+    ok(!new Backbone.Model({ 'id': 2  }).isNew(), "is false for a positive integer");
+    ok(!new Backbone.Model({ 'id': -5 }).isNew(), "is false for a negative integer");
   });
 
-  test("NestedModel: get", function() {
-    equals(doc.get('title'), 'The Tempest');
-    equals(doc.get('author'), 'Bill Shakespeare');
+  test("Model: get", function() {
+    equal(doc.get('title'), 'The Tempest');
+    equal(doc.get('author'), 'Bill Shakespeare');
   });
 
-  test("NestedModel: escape", function() {
-    equals(doc.escape('title'), 'The Tempest');
+  test("Model: escape", function() {
+    equal(doc.escape('title'), 'The Tempest');
     doc.set({audience: 'Bill & Bob'});
-    equals(doc.escape('audience'), 'Bill &amp; Bob');
+    equal(doc.escape('audience'), 'Bill &amp; Bob');
     doc.set({audience: 'Tim > Joan'});
-    equals(doc.escape('audience'), 'Tim &gt; Joan');
+    equal(doc.escape('audience'), 'Tim &gt; Joan');
     doc.set({audience: 10101});
-    equals(doc.escape('audience'), '10101');
+    equal(doc.escape('audience'), '10101');
     doc.unset('audience');
-    equals(doc.escape('audience'), '');
+    equal(doc.escape('audience'), '');
   });
 
-  test("NestedModel: has", function() {
+  test("Model: has", function() {
     attrs = {};
-    a = new Backbone.NestedModel(attrs);
-    equals(a.has("name"), false);
+    a = new Backbone.Model(attrs);
+    equal(a.has("name"), false);
     _([true, "Truth!", 1, false, '', 0]).each(function(value) {
       a.set({'name': value});
-      equals(a.has("name"), true);
+      equal(a.has("name"), true);
     });
     a.unset('name');
-    equals(a.has('name'), false);
+    equal(a.has('name'), false);
     _([null, undefined]).each(function(value) {
       a.set({'name': value});
-      equals(a.has("name"), false);
+      equal(a.has("name"), false);
     });
   });
 
-  test("NestedModel: set and unset", function() {
+  test("Model: set and unset", function() {
+    expect(8);
     attrs = {id: 'id', foo: 1, bar: 2, baz: 3};
-    a = new Backbone.NestedModel(attrs);
+    a = new Backbone.Model(attrs);
     var changeCount = 0;
-    a.bind("change:foo", function() { changeCount += 1; });
+    a.on("change:foo", function() { changeCount += 1; });
     a.set({'foo': 2});
-    ok(a.get('foo')== 2, "Foo should have changed.");
+    ok(a.get('foo') == 2, "Foo should have changed.");
     ok(changeCount == 1, "Change count should have incremented.");
     a.set({'foo': 2}); // set with value that is not new shouldn't fire change event
-    ok(a.get('foo')== 2, "Foo should NOT have changed, still 2");
+    ok(a.get('foo') == 2, "Foo should NOT have changed, still 2");
     ok(changeCount == 1, "Change count should NOT have incremented.");
 
+    a.validate = function(attrs) {
+      equal(attrs.foo, void 0, "don't ignore values when unsetting");
+    };
     a.unset('foo');
-    ok(a.get('foo')== null, "Foo should have changed");
+    equal(a.get('foo'), void 0, "Foo should have changed");
+    delete a.validate;
     ok(changeCount == 2, "Change count should have incremented for unset.");
 
     a.unset('id');
-    equals(a.id, undefined, "Unsetting the id should remove the id property.");
+    equal(a.id, undefined, "Unsetting the id should remove the id property.");
   });
 
-  test("NestedModel: multiple unsets", function() {
+  test("Model: multiple unsets", function() {
     var i = 0;
     var counter = function(){ i++; };
-    var model = new Backbone.NestedModel({a: 1});
-    model.bind("change:a", counter);
+    var model = new Backbone.Model({a: 1});
+    model.on("change:a", counter);
     model.set({a: 2});
     model.unset('a');
     model.unset('a');
-    equals(i, 2, 'Unset does not fire an event for missing attributes.');
+    equal(i, 2, 'Unset does not fire an event for missing attributes.');
   });
 
-  test("NestedModel: using a non-default id attribute.", function() {
-    var MongoNestedModel = Backbone.NestedModel.extend({idAttribute : '_id'});
-    var model = new MongoNestedModel({id: 'eye-dee', _id: 25, title: 'NestedModel'});
-    equals(model.get('id'), 'eye-dee');
-    equals(model.id, 25);
-    equals(model.isNew(), false);
+  test("Model: unset and changedAttributes", function() {
+    var model = new Backbone.Model({a: 1});
+    model.unset('a', {silent: true});
+    var changedAttributes = model.changedAttributes();
+    ok('a' in changedAttributes, 'changedAttributes should contain unset properties');
+
+    changedAttributes = model.changedAttributes();
+    ok('a' in changedAttributes, 'changedAttributes should contain unset properties when running changedAttributes again after an unset.');
+  });
+
+  test("Model: using a non-default id attribute.", function() {
+    var MongoModel = Backbone.Model.extend({idAttribute : '_id'});
+    var model = new MongoModel({id: 'eye-dee', _id: 25, title: 'Model'});
+    equal(model.get('id'), 'eye-dee');
+    equal(model.id, 25);
+    equal(model.isNew(), false);
     model.unset('_id');
-    equals(model.id, undefined);
-    equals(model.isNew(), true);
+    equal(model.id, undefined);
+    equal(model.isNew(), true);
   });
 
-  test("NestedModel: set an empty string", function() {
-    var model = new Backbone.NestedModel({name : "NestedModel"});
+  test("Model: set an empty string", function() {
+    var model = new Backbone.Model({name : "Model"});
     model.set({name : ''});
-    equals(model.get('name'), '');
+    equal(model.get('name'), '');
   });
 
-  test("NestedModel: clear", function() {
+  test("Model: clear", function() {
     var changed;
-    var model = new Backbone.NestedModel({name : "NestedModel"});
-    model.bind("change:name", function(){ changed = true; });
+    var model = new Backbone.Model({id: 1, name : "Model"});
+    model.on("change:name", function(){ changed = true; });
+    model.on("change", function() {
+      var changedAttrs = model.changedAttributes();
+      ok('name' in changedAttrs);
+    });
     model.clear();
-    equals(changed, true);
-    equals(model.get('name'), undefined);
+    equal(changed, true);
+    equal(model.get('name'), undefined);
   });
 
-  test("NestedModel: defaults", function() {
-    var Defaulted = Backbone.NestedModel.extend({
+  test("Model: defaults", function() {
+    var Defaulted = Backbone.Model.extend({
       defaults: {
         "one": 1,
         "two": 2
       }
     });
     var model = new Defaulted({two: null});
-    equals(model.get('one'), 1);
-    equals(model.get('two'), null);
-    Defaulted = Backbone.NestedModel.extend({
+    equal(model.get('one'), 1);
+    equal(model.get('two'), null);
+    Defaulted = Backbone.Model.extend({
       defaults: function() {
         return {
           "one": 3,
@@ -216,166 +270,207 @@ $(document).ready(function() {
       }
     });
     var model = new Defaulted({two: null});
-    equals(model.get('one'), 3);
-    equals(model.get('two'), null);
+    equal(model.get('one'), 3);
+    equal(model.get('two'), null);
   });
 
-  test("NestedModel: change, hasChanged, changedAttributes, previous, previousAttributes", function() {
-    var model = new Backbone.NestedModel({name : "Tim", age : 10});
-    equals(model.changedAttributes(), false);
-    model.bind('change', function() {
+  test("Model: change, hasChanged, changedAttributes, previous, previousAttributes", function() {
+    var model = new Backbone.Model({name : "Tim", age : 10});
+    equal(model.changedAttributes(), false);
+    model.on('change', function() {
       ok(model.hasChanged('name'), 'name changed');
       ok(!model.hasChanged('age'), 'age did not');
       ok(_.isEqual(model.changedAttributes(), {name : 'Rob'}), 'changedAttributes returns the changed attrs');
-      equals(model.previous('name'), 'Tim');
+      equal(model.previous('name'), 'Tim');
       ok(_.isEqual(model.previousAttributes(), {name : "Tim", age : 10}), 'previousAttributes is correct');
     });
     model.set({name : 'Rob'}, {silent : true});
-    equals(model.hasChanged(), true);
-    equals(model.hasChanged('name'), true);
+    equal(model.hasChanged(), true);
+    equal(model.hasChanged('name'), true);
     model.change();
-    equals(model.get('name'), 'Rob');
+    equal(model.get('name'), 'Rob');
   });
 
-  test("NestedModel: change with options", function() {
+  test("Model: changedAttributes", function() {
+    var model = new Backbone.Model({a: 'a', b: 'b'});
+    equal(model.changedAttributes(), false);
+    equal(model.changedAttributes({a: 'a'}), false);
+    equal(model.changedAttributes({a: 'b'}).a, 'b');
+  });
+
+  test("Model: change with options", function() {
     var value;
-    var model = new Backbone.NestedModel({name: 'Rob'});
-    model.bind('change', function(model, options) {
+    var model = new Backbone.Model({name: 'Rob'});
+    model.on('change', function(model, options) {
       value = options.prefix + model.get('name');
     });
     model.set({name: 'Bob'}, {silent: true});
     model.change({prefix: 'Mr. '});
-    equals(value, 'Mr. Bob');
+    equal(value, 'Mr. Bob');
     model.set({name: 'Sue'}, {prefix: 'Ms. '});
-    equals(value, 'Ms. Sue');
+    equal(value, 'Ms. Sue');
   });
 
-  test("NestedModel: change after initialize", function () {
+  test("Model: change after initialize", function () {
     var changed = 0;
     var attrs = {id: 1, label: 'c'};
-    var obj = new Backbone.NestedModel(attrs);
-    obj.bind('change', function() { changed += 1; });
+    var obj = new Backbone.Model(attrs);
+    obj.on('change', function() { changed += 1; });
     obj.set(attrs);
-    equals(changed, 0);
+    equal(changed, 0);
   });
 
-  test("NestedModel: save within change event", function () {
-    var model = new Backbone.NestedModel({firstName : "Taylor", lastName: "Swift"});
-    model.bind('change', function () {
+  test("Model: save within change event", function () {
+    var model = new Backbone.Model({firstName : "Taylor", lastName: "Swift"});
+    model.on('change', function () {
       model.save();
       ok(_.isEqual(lastRequest[1], model));
     });
     model.set({lastName: 'Hicks'});
   });
 
-  test("NestedModel: save", function() {
-    doc.save({title : "Henry V"});
-    equals(lastRequest[0], 'update');
-    ok(_.isEqual(lastRequest[1], doc));
-  });
-
-  test("NestedModel: fetch", function() {
-    doc.fetch();
-    ok(lastRequest[0], 'read');
-    ok(_.isEqual(lastRequest[1], doc));
-  });
-
-  test("NestedModel: destroy", function() {
-    doc.destroy();
-    equals(lastRequest[0], 'delete');
-    ok(_.isEqual(lastRequest[1], doc));
-  });
-
-  test("NestedModel: non-persisted destroy", function() {
-    attrs = { 'foo': 1, 'bar': 2, 'baz': 3};
-    a = new Backbone.NestedModel(attrs);
-    a.sync = function() { throw "should not be called"; };
-    ok(a.destroy(), "non-persisted model should not call sync");
-  });
-
-  test("NestedModel: validate", function() {
-    var lastError;
-    var model = new Backbone.NestedModel();
+  test("Model: validate after save", function() {
+    var lastError, model = new Backbone.Model();
     model.validate = function(attrs) {
       if (attrs.admin) return "Can't change admin status.";
     };
-    model.bind('error', function(model, error) {
+    model.sync = function(method, model, options) {
+      options.success.call(this, {admin: true});
+    };
+    model.save(null, {error: function(model, error) {
+      lastError = error;
+    }});
+
+    equal(lastError, "Can't change admin status.");
+  });
+
+  test("Model: isValid", function() {
+    var model = new Backbone.Model({valid: true});
+    model.validate = function(attrs) {
+      if (!attrs.valid) return "invalid";
+    };
+    equal(model.isValid(), true);
+    equal(model.set({valid: false}), false);
+    equal(model.isValid(), true);
+    ok(model.set('valid', false, {silent: true}));
+    equal(model.isValid(), false);
+  });
+
+  test("Model: save", function() {
+    doc.save({title : "Henry V"});
+    equal(lastRequest[0], 'update');
+    ok(_.isEqual(lastRequest[1], doc));
+  });
+
+  test("Model: save in positional style", function() {
+    var model = new Backbone.Model();
+    model.sync = function(method, model, options) {
+      options.success();
+    };
+    model.save('title', 'Twelfth Night');
+    equal(model.get('title'), 'Twelfth Night');
+  });
+
+  test("Model: fetch", function() {
+    doc.fetch();
+    equal(lastRequest[0], 'read');
+    ok(_.isEqual(lastRequest[1], doc));
+  });
+
+  test("Model: destroy", function() {
+    doc.destroy();
+    equal(lastRequest[0], 'delete');
+    ok(_.isEqual(lastRequest[1], doc));
+  });
+
+  test("Model: non-persisted destroy", function() {
+    attrs = { 'foo': 1, 'bar': 2, 'baz': 3};
+    a = new Backbone.Model(attrs);
+    a.sync = function() { throw "should not be called"; };
+    a.destroy();
+    ok(true, "non-persisted model should not call sync");
+  });
+
+  test("Model: validate", function() {
+    var lastError;
+    var model = new Backbone.Model();
+    model.validate = function(attrs) {
+      if (attrs.admin != this.get('admin')) return "Can't change admin status.";
+    };
+    model.on('error', function(model, error) {
       lastError = error;
     });
     var result = model.set({a: 100});
-    equals(result, model);
-    equals(model.get('a'), 100);
-    equals(lastError, undefined);
+    equal(result, model);
+    equal(model.get('a'), 100);
+    equal(lastError, undefined);
     result = model.set({admin: true}, {silent: true});
-    equals(lastError, undefined);
-    equals(model.get('admin'), true);
-    result = model.set({a: 200, admin: true});
-    equals(result, false);
-    equals(model.get('a'), 100);
-    equals(lastError, "Can't change admin status.");
+    equal(model.get('admin'), true);
+    result = model.set({a: 200, admin: false});
+    equal(lastError, "Can't change admin status.");
+    equal(result, false);
+    equal(model.get('a'), 100);
   });
 
-  test("NestedModel: validate on unset and clear", function() {
+  test("Model: validate on unset and clear", function() {
     var error;
-    var model = new Backbone.NestedModel({name: "One"});
+    var model = new Backbone.Model({name: "One"});
     model.validate = function(attrs) {
-      if ("name" in attrs) {
-        if (!attrs.name) {
-          error = true;
-          return "No thanks.";
-        }
+      if (!attrs.name) {
+        error = true;
+        return "No thanks.";
       }
     };
     model.set({name: "Two"});
-    equals(model.get('name'), 'Two');
-    equals(error, undefined);
+    equal(model.get('name'), 'Two');
+    equal(error, undefined);
     model.unset('name');
-    equals(error, true);
-    equals(model.get('name'), 'Two');
+    equal(error, true);
+    equal(model.get('name'), 'Two');
     model.clear();
-    equals(model.get('name'), 'Two');
+    equal(model.get('name'), 'Two');
     delete model.validate;
     model.clear();
-    equals(model.get('name'), undefined);
+    equal(model.get('name'), undefined);
   });
 
-  test("NestedModel: validate with error callback", function() {
+  test("Model: validate with error callback", function() {
     var lastError, boundError;
-    var model = new Backbone.NestedModel();
+    var model = new Backbone.Model();
     model.validate = function(attrs) {
       if (attrs.admin) return "Can't change admin status.";
     };
     var callback = function(model, error) {
       lastError = error;
     };
-    model.bind('error', function(model, error) {
+    model.on('error', function(model, error) {
       boundError = true;
     });
     var result = model.set({a: 100}, {error: callback});
-    equals(result, model);
-    equals(model.get('a'), 100);
-    equals(lastError, undefined);
-    equals(boundError, undefined);
+    equal(result, model);
+    equal(model.get('a'), 100);
+    equal(lastError, undefined);
+    equal(boundError, undefined);
     result = model.set({a: 200, admin: true}, {error: callback});
-    equals(result, false);
-    equals(model.get('a'), 100);
-    equals(lastError, "Can't change admin status.");
-    equals(boundError, undefined);
+    equal(result, false);
+    equal(model.get('a'), 100);
+    equal(lastError, "Can't change admin status.");
+    equal(boundError, undefined);
   });
 
-  test("NestedModel: defaults always extend attrs (#459)", function() {
-    var Defaulted = Backbone.NestedModel.extend({
+  test("Model: defaults always extend attrs (#459)", function() {
+    var Defaulted = Backbone.Model.extend({
       defaults: {one: 1},
       initialize : function(attrs, opts) {
-        equals(attrs.one, 1);
+        equal(this.attributes.one, 1);
       }
     });
     var providedattrs = new Defaulted({});
     var emptyattrs = new Defaulted();
   });
 
-  test("NestedModel: Inherit class properties", function() {
-    var Parent = Backbone.NestedModel.extend({
+  test("Model: Inherit class properties", function() {
+    var Parent = Backbone.Model.extend({
       instancePropSame: function() {},
       instancePropDiff: function() {}
     }, {
@@ -388,33 +483,33 @@ $(document).ready(function() {
     var adult = new Parent;
     var kid   = new Child;
 
-    equals(Child.classProp, Parent.classProp);
+    equal(Child.classProp, Parent.classProp);
     notEqual(Child.classProp, undefined);
 
-    equals(kid.instancePropSame, adult.instancePropSame);
+    equal(kid.instancePropSame, adult.instancePropSame);
     notEqual(kid.instancePropSame, undefined);
 
     notEqual(Child.prototype.instancePropDiff, Parent.prototype.instancePropDiff);
     notEqual(Child.prototype.instancePropDiff, undefined);
   });
 
-  test("NestedModel: Nested change events don't clobber previous attributes", function() {
-    var A = Backbone.NestedModel.extend({
+  test("Model: Nested change events don't clobber previous attributes", function() {
+    var A = Backbone.Model.extend({
       initialize: function() {
-        this.bind("change:state", function(a, newState) {
-          equals(a.previous('state'), undefined);
-          equals(newState, 'hello');
+        this.on("change:state", function(a, newState) {
+          equal(a.previous('state'), undefined);
+          equal(newState, 'hello');
           // Fire a nested change event.
           this.set({ other: "whatever" });
         });
       }
     });
 
-    var B = Backbone.NestedModel.extend({
+    var B = Backbone.Model.extend({
       initialize: function() {
-        this.get("a").bind("change:state", function(a, newState) {
-          equals(a.previous('state'), undefined);
-          equals(newState, 'hello');
+        this.get("a").on("change:state", function(a, newState) {
+          equal(a.previous('state'), undefined);
+          equal(newState, 'hello');
         });
       }
     });
@@ -422,6 +517,165 @@ $(document).ready(function() {
     a = new A();
     b = new B({a: a});
     a.set({state: 'hello'});
+  });
+
+  test("hasChanged/set should use same comparison", function() {
+    expect(2);
+    var changed = 0, model = new Backbone.Model({a: null});
+    model.on('change', function() {
+      ok(this.hasChanged('a'));
+    })
+    .on('change:a', function() {
+      changed++;
+    })
+    .set({a: undefined});
+    equal(changed, 1);
+  });
+
+  test("#582, #425, change:attribute callbacks should fire after all changes have occurred", 9, function() {
+    var model = new Backbone.Model;
+
+    var assertion = function() {
+      equal(model.get('a'), 'a');
+      equal(model.get('b'), 'b');
+      equal(model.get('c'), 'c');
+    };
+
+    model.on('change:a', assertion);
+    model.on('change:b', assertion);
+    model.on('change:c', assertion);
+
+    model.set({a: 'a', b: 'b', c: 'c'});
+  });
+
+  test("#871, set with attributes property", function() {
+    var model = new Backbone.Model();
+    model.set({attributes: true});
+    ok(model.has('attributes'));
+  });
+
+  test("set value regardless of equality/change", function() {
+    var model = new Backbone.Model({x: []});
+    var a = [];
+    model.set({x: a});
+    ok(model.get('x') === a);
+  });
+
+  test("unset fires change for undefined attributes", 1, function() {
+    var model = new Backbone.Model({x: undefined});
+    model.on('change:x', function(){ ok(true); });
+    model.unset('x');
+  });
+
+  test("set: undefined values", function() {
+    var model = new Backbone.Model({x: undefined});
+    ok('x' in model.attributes);
+  });
+
+  test("change fires change:attr", 1, function() {
+    var model = new Backbone.Model({x: 1});
+    model.set({x: 2}, {silent: true});
+    model.on('change:x', function(){ ok(true); });
+    model.change();
+  });
+
+  test("hasChanged is false after original values are set", function() {
+    var model = new Backbone.Model({x: 1});
+    model.on('change:x', function(){ ok(false); });
+    model.set({x: 2}, {silent: true});
+    ok(model.hasChanged());
+    model.set({x: 1}, {silent: true});
+    ok(!model.hasChanged());
+  });
+
+  test("set/hasChanged object prototype props", function() {
+    var model = new Backbone.Model();
+    ok(!model.hasChanged('toString'));
+    model.set({toString: undefined});
+    model.unset('toString', {silent: true});
+    ok(model.hasChanged());
+  });
+
+  test("save with `wait` succeeds without `validate`", function() {
+    var model = new Backbone.Model();
+    model.save({x: 1}, {wait: true});
+    ok(lastRequest[1] === model);
+  });
+
+  test("`hasChanged` for falsey keys", function() {
+    var model = new Backbone.Model();
+    model.set({x: true}, {silent: true});
+    ok(!model.hasChanged(0));
+    ok(!model.hasChanged(''));
+  });
+
+  test("`previous` for falsey keys", function() {
+    var model = new Backbone.Model({0: true, '': true});
+    model.set({0: false, '': false}, {silent: true});
+    equal(model.previous(0), true);
+    equal(model.previous(''), true);
+  });
+
+  test("`save` with `wait` sends correct attributes", function() {
+    var changed = 0;
+    var model = new Backbone.Model({x: 1, y: 2});
+    model.on('change:x', function() { changed++; });
+    model.save({x: 3}, {wait: true});
+    deepEqual(JSON.parse(ajaxParams.data), {x: 3, y: 2});
+    equal(model.get('x'), 1);
+    equal(changed, 0);
+    lastRequest[2].success({});
+    equal(model.get('x'), 3);
+    equal(changed, 1);
+  });
+
+  test("nested `set` during `'change:attr'`", 1, function() {
+    var model = new Backbone.Model();
+    model.on('change:x', function() { ok(true); });
+    model.on('change:y', function() {
+      model.set({x: true});
+      // only fires once
+      model.set({x: true});
+    });
+    model.set({y: true});
+  });
+
+  test("nested `change` only fires once", 1, function() {
+    var model = new Backbone.Model();
+    model.on('change', function() {
+      ok(true);
+      model.change();
+    });
+    model.set({x: true});
+  });
+
+  test("no `'change'` event if no changes", function() {
+    var model = new Backbone.Model();
+    model.on('change', function() { ok(false); });
+    model.change();
+  });
+
+  test("nested `set` suring `'change'`", 3, function() {
+    var count = 0;
+    var model = new Backbone.Model();
+    model.on('change', function() {
+      switch(count++) {
+        case 0:
+          deepEqual(this.changedAttributes(), {x: true});
+          model.set({y: true});
+          break;
+        case 1:
+          deepEqual(this.changedAttributes(), {x: true, y: true});
+          model.set({z: true});
+          break;
+        case 2:
+          deepEqual(this.changedAttributes(), {x: true, y: true, z: true});
+          break;
+        default:
+          ok(false);
+      }
+    });
+    model.set({x: true});
   });
 
 });
