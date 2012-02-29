@@ -57,7 +57,7 @@ Backbone.NestedModel = Backbone.Model.extend({
       var attrPath = Backbone.NestedModel.attrPath(attrStr),
         attrObj = Backbone.NestedModel.createAttrObj(attrPath, attrs[attrStr]);
 
-      this.mergeAttrs(newAttrs, attrObj, opts);
+      this._mergeAttrs(newAttrs, attrObj, opts);
     }
 
     return Backbone.NestedModel.__super__.set.call(this, newAttrs, opts);
@@ -94,7 +94,7 @@ Backbone.NestedModel = Backbone.Model.extend({
 
   // private
 
-  mergeAttrs: function(dest, source, opts, stack){
+  _mergeAttrs: function(dest, source, opts, stack){
     stack || (stack = []);
 
     _.each(source, function(sourceVal, prop){
@@ -115,7 +115,7 @@ Backbone.NestedModel = Backbone.Model.extend({
       }
 
       if (prop in dest && _.isObject(sourceVal) && _.isObject(destVal)){
-        destVal = dest[prop] = this.mergeAttrs(destVal, sourceVal, opts, newStack);
+        destVal = dest[prop] = this._mergeAttrs(destVal, sourceVal, opts, newStack);
       } else {
         var oldVal = destVal;
 
