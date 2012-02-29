@@ -13,7 +13,7 @@ Backbone.NestedModel = Backbone.Model.extend({
 
     var attrPath = Backbone.NestedModel.attrPath(attrStrOrPath),
       childAttr = attrPath[0],
-      result = Backbone.Model.prototype.get.call(this, childAttr);
+      result = Backbone.NestedModel.__super__.get.call(this, childAttr);
     
     // walk through the child attributes
     for (var i = 1; i < attrPath.length; i++){
@@ -51,7 +51,7 @@ Backbone.NestedModel = Backbone.Model.extend({
       this.mergeAttrs(newAttrs, attrObj, opts);
     }
 
-    return Backbone.Model.prototype.set.call(this, newAttrs, opts);
+    return Backbone.NestedModel.__super__.set.call(this, newAttrs, opts);
   },
 
   unset: function(attrStr, opts){
@@ -82,7 +82,7 @@ Backbone.NestedModel = Backbone.Model.extend({
   },
 
   toJSON: function(){
-    var json = Backbone.Model.prototype.toJSON.apply(this);
+    var json = Backbone.NestedModel.__super__.toJSON.apply(this);
     return _.deepClone(json);
   },
 
