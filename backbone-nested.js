@@ -17,12 +17,12 @@ Backbone.NestedModel = Backbone.Model.extend({
     
     // walk through the child attributes
     for (var i = 1; i < attrPath.length; i++){
-      childAttr = attrPath[i];
-      result = result[childAttr];
       if (!result){
         // value not present
         break;
       }
+      childAttr = attrPath[i];
+      result = result[childAttr];
     }
 
     // check if the result is an Object, Array, etc.
@@ -40,10 +40,19 @@ Backbone.NestedModel = Backbone.Model.extend({
     return !(result === null || _.isUndefined(result));
   },
 
-  set: function(attrs, opts){
-    opts || (opts = {});
-    var newAttrs = _.deepClone(this.attributes);
+  set: function(key, value, opts){
+    var attrs;
+    if (_.isObject(key) || key == null) {
+      attrs = key;
+      opts = value;
+    } else {
+      attrs = {};
+      attrs[key] = value;
+    }
+    opts = opts || {};
 
+    var newAttrs = _.deepClone(this.attributes);
+    
     for (var attrStr in attrs){
       var attrPath = Backbone.NestedModel.attrPath(attrStr),
         attrObj = Backbone.NestedModel.createAttrObj(attrPath, attrs[attrStr]);
@@ -55,28 +64,24 @@ Backbone.NestedModel = Backbone.Model.extend({
   },
 
   unset: function(attrStr, opts){
-    var setOpts = {};
-    setOpts[attrStr] = void 0;
-    this.set(setOpts, opts);
+    opts = _.extend({}, opts, {unset: true});
+    this.set(attrStr, null, opts);
 
     return this;
   },
 
   remove: function(attrStr, opts){
-    this.unset(attrStr, opts);
+    var attrPath = Backbone.NestedModel.attrPath(attrStr),
+      val = this.get(_.initial(attrPath)),
+      i = _.last(attrPath);
 
-    var attrPath = Backbone.NestedModel.attrPath(attrStr);
-    if (_.isNumber(_.last(attrPath))){
-      var aryPath = _.initial(attrPath),
-        childAry = this.get(aryPath, {silent: true});
-      
-      // compact the array (remove falsy values)
-      for (var i = 0; i < childAry.length; i++){
-        if (!childAry[i]){
-          childAry.splice(i, 1);
-        }
-      }
+    if (!_.isArray(val)){
+      throw new Error("remove() must be called on a nested array");
     }
+
+    // remove the element from the array
+    val.splice(i, 1);
+    this.set(attrStr, val, opts);
 
     return this;
   },
@@ -147,7 +152,7 @@ Backbone.NestedModel = Backbone.Model.extend({
       // change all appends to '-1'
       attrStrOrPath = attrStrOrPath.replace(/\[\]/g, '[-1]');
       // TODO this parsing can probably be more efficient
-      path = attrStrOrPath.match(/[^\.\[\]]+/g);
+      path = (attrStrOrPath === '') ? [''] : attrStrOrPath.match(/[^\.\[\]]+/g);
       path = _.map(path, function(val){
         // convert array accessors to numbers
         return val.match(/^\d+$/) ? parseInt(val) : val;

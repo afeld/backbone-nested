@@ -44,6 +44,8 @@ $(document).ready(function() {
   // ----- ATTR_PATH --------
 
   test(".attrPath()", function() {
+    deepEqual(Backbone.NestedModel.attrPath(''), ['']);
+    deepEqual(Backbone.NestedModel.attrPath('0'), [0]);
     deepEqual(Backbone.NestedModel.attrPath('foo'), ['foo']);
     deepEqual(Backbone.NestedModel.attrPath('foo.bar'), ['foo', 'bar']);
     deepEqual(Backbone.NestedModel.attrPath('foo[0]'), ['foo', 0]);
