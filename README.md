@@ -168,7 +168,7 @@ user.get('addresses[0]', {silent:true}); // (silent)
 
 ## Changelog
 
-#### 1.1.0 ([diff](https://github.com/afeld/backbone-nested/compare/v1.0.3...1.1.0?w=1))
+#### 1.1.0 ([diff](https://github.com/afeld/backbone-nested/compare/v1.0.3...v1.1.0?w=1))
 
 * Backbone 0.9.1 compatibiity
 * fire 'remove' event from remove()
