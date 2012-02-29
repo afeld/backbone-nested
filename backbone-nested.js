@@ -6,10 +6,12 @@
  * Copyright (c) 2011-2012 Aidan Feldman
  * MIT Licensed (LICENSE)
  */
+/*global Backbone, _ */
 Backbone.NestedModel = Backbone.Model.extend({
 
   get: function(attrStrOrPath, opts){
-    opts || (opts = {});
+    'use strict';
+    opts = opts || {};
 
     var attrPath = Backbone.NestedModel.attrPath(attrStrOrPath),
       childAttr = attrPath[0],
@@ -35,12 +37,14 @@ Backbone.NestedModel = Backbone.Model.extend({
   },
 
   has: function(attr){
+    'use strict';
     // for some reason this is not how Backbone.Model is implemented - it accesses the attributes object directly
     var result = this.get(attr, {silent: true});
     return !(result === null || _.isUndefined(result));
   },
 
   set: function(key, value, opts){
+    'use strict';
     var attrs;
     if (_.isObject(key) || key == null) {
       attrs = key;
@@ -51,11 +55,12 @@ Backbone.NestedModel = Backbone.Model.extend({
     }
     opts = opts || {};
 
-    var newAttrs = _.deepClone(this.attributes);
+    var newAttrs = _.deepClone(this.attributes),
+      attrVal, attrPath, attrObj;
     
     for (var attrStr in attrs){
-      var attrPath = Backbone.NestedModel.attrPath(attrStr),
-        attrObj = Backbone.NestedModel.createAttrObj(attrPath, attrs[attrStr]);
+      attrPath = Backbone.NestedModel.attrPath(attrStr);
+      attrObj = Backbone.NestedModel.createAttrObj(attrPath, attrs[attrStr]);
 
       this._mergeAttrs(newAttrs, attrObj, opts);
     }
@@ -64,6 +69,7 @@ Backbone.NestedModel = Backbone.Model.extend({
   },
 
   unset: function(attrStr, opts){
+    'use strict';
     opts = _.extend({}, opts, {unset: true});
     this.set(attrStr, null, opts);
 
@@ -71,11 +77,13 @@ Backbone.NestedModel = Backbone.Model.extend({
   },
 
   add: function(attrStr, value, opts){
+    'use strict';
     var current = this.get(attrStr, {silent: true});
     this.set(attrStr + '[' + current.length + ']', value, opts);
   },
 
   remove: function(attrStr, opts){
+    'use strict';
     opts = opts || {};
 
     var attrPath = Backbone.NestedModel.attrPath(attrStr),
@@ -103,6 +111,7 @@ Backbone.NestedModel = Backbone.Model.extend({
   },
 
   toJSON: function(){
+    'use strict';
     var json = Backbone.NestedModel.__super__.toJSON.apply(this);
     return _.deepClone(json);
   },
@@ -111,7 +120,8 @@ Backbone.NestedModel = Backbone.Model.extend({
   // private
 
   _mergeAttrs: function(dest, source, opts, stack){
-    stack || (stack = []);
+    'use strict';
+    stack = stack || [];
 
     _.each(source, function(sourceVal, prop){
       if (prop === '-1'){
@@ -162,6 +172,7 @@ Backbone.NestedModel = Backbone.Model.extend({
   // class methods
 
   attrPath: function(attrStrOrPath){
+    'use strict';
     var path;
     
     if (_.isString(attrStrOrPath)){
@@ -171,7 +182,7 @@ Backbone.NestedModel = Backbone.Model.extend({
       path = (attrStrOrPath === '') ? [''] : attrStrOrPath.match(/[^\.\[\]]+/g);
       path = _.map(path, function(val){
         // convert array accessors to numbers
-        return val.match(/^\d+$/) ? parseInt(val) : val;
+        return val.match(/^\d+$/) ? parseInt(val, 10) : val;
       });
     } else {
       path = attrStrOrPath;
@@ -181,13 +192,13 @@ Backbone.NestedModel = Backbone.Model.extend({
   },
 
   createAttrObj: function(attrStrOrPath, val){
+    'use strict';
     var attrPath = this.attrPath(attrStrOrPath),
       newVal;
 
     switch (attrPath.length){
       case 0:
         throw "no valid attributes: '" + attrStrOrPath + "'";
-        break;
       
       case 1: // leaf
         newVal = val;
@@ -207,6 +218,7 @@ Backbone.NestedModel = Backbone.Model.extend({
   },
 
   createAttrStr: function(attrPath){
+    'use strict';
     var attrStr = attrPath[0];
     _.each(_.rest(attrPath), function(attr){
       attrStr += _.isNumber(attr) ? ('[' + attr + ']') : ('.' + attr);
@@ -221,6 +233,7 @@ Backbone.NestedModel = Backbone.Model.extend({
 _.mixin({
 
   deepClone: function(obj){
+    'use strict';
     var result = _.clone(obj); // shallow clone
     if (_.isObject(obj)){
       _.each(obj, function(val, key){
