@@ -1,44 +1,34 @@
 $(document).ready(function() {
 
-  module("Backbone.NestedModel");
+  var klass = Backbone.NestedModel.extend(),
+    doc;
 
-  // Variable to catch the last request.
-  window.lastRequest = null;
-
-  // window.originalSync = Backbone.sync;
-
-  // // Stub out Backbone.request...
-  // Backbone.sync = function() {
-  //   lastRequest = _.toArray(arguments);
-  // };
-
-  var proxy = Backbone.NestedModel.extend();
-
-  function createModel(){
-    var doc = new proxy({
-      gender: 'M',
-      name: {
-        first: "Aidan",
-        middle: {
-          initial: 'L',
-          full: 'Lee'
+  module("Backbone.NestedModel", {
+    setup: function(){
+      // create fresh model instance
+      doc = new klass({
+        gender: 'M',
+        name: {
+          first: "Aidan",
+          middle: {
+            initial: 'L',
+            full: 'Lee'
+          },
+          last: "Feldman"
         },
-        last: "Feldman"
-      },
-      addresses: [
-        {
-          city: "Brooklyn",
-          state: "NY"
-        },
-        {
-          city: "Oak Park",
-          state: "IL"
-        }
-      ]
-    });
-
-    return doc;
-  }
+        addresses: [
+          {
+            city: "Brooklyn",
+            state: "NY"
+          },
+          {
+            city: "Oak Park",
+            state: "IL"
+          }
+        ]
+      });
+    }
+  });
 
 
   // ----- ATTR_PATH --------
@@ -95,8 +85,7 @@ $(document).ready(function() {
   // ----- GET --------
 
   test("#get() 1-1 returns attributes object", function() {
-    var doc = createModel(),
-      name = doc.get('name');
+    var name = doc.get('name');
     
     deepEqual(name, {
       first: 'Aidan',
@@ -109,14 +98,12 @@ $(document).ready(function() {
   });
 
   test("#get() 1-1", function() {
-    var doc = createModel();
     equals(doc.get('name.first'), 'Aidan');
     equals(doc.get('name.middle.initial'), 'L');
     equals(doc.get('name.last'), 'Feldman');
   });
 
   test("#get() 1-N dot notation", function() {
-    var doc = createModel();
     equals(doc.get('addresses.0.city'), 'Brooklyn');
     equals(doc.get('addresses.0.state'), 'NY');
     equals(doc.get('addresses.1.city'), 'Oak Park');
@@ -124,7 +111,6 @@ $(document).ready(function() {
   });
 
   test("#get() 1-N square bracket notation", function() {
-    var doc = createModel();
     equals(doc.get('addresses[0].city'), 'Brooklyn');
     equals(doc.get('addresses[0].state'), 'NY');
     equals(doc.get('addresses[1].city'), 'Oak Park');
@@ -132,8 +118,6 @@ $(document).ready(function() {
   });
 
   test("#get() 1-N returns attributes object", function() {
-    var doc = createModel();
-
     deepEqual(doc.get('addresses[0]'), {
       city: 'Brooklyn',
       state: 'NY'
@@ -149,8 +133,6 @@ $(document).ready(function() {
   // ----- HAS --------
 
   test("#get() 1-1", function() {
-    var doc = createModel();
-
     ok(doc.has('name.first'));
     ok(doc.has('name.middle.initial'));
     ok(doc.has('name.last'));
@@ -158,8 +140,6 @@ $(document).ready(function() {
   });
 
   test("#get() 1-N dot notation", function() {
-    var doc = createModel();
-    
     ok(doc.has('addresses.0'));
     ok(doc.has('addresses.0.city'));
     ok(doc.has('addresses.0.state'));
@@ -170,8 +150,6 @@ $(document).ready(function() {
   });
 
   test("#get() 1-N square bracket notation", function() {
-    var doc = createModel();
-
     ok(doc.has('addresses[0]'));
     ok(doc.has('addresses[0].city'));
     ok(doc.has('addresses[0].state'));
@@ -185,7 +163,6 @@ $(document).ready(function() {
   // ----- SET --------
 
   test("#set() 1-1 on leaves", function() {
-    var doc = createModel();
     equals(doc.get('name.first'), 'Aidan');
     equals(doc.get('name.last'), 'Feldman');
 
@@ -197,8 +174,6 @@ $(document).ready(function() {
   });
 
   test("#set() 1-1 with object", function() {
-    var doc = createModel();
-
     doc.set({
       name: {
         first: 'Jeremy',
@@ -211,7 +186,6 @@ $(document).ready(function() {
   });
 
   test("#set() 1-N dot notation on leaves", function() {
-    var doc = createModel();
     equals(doc.get('addresses.0.city'), 'Brooklyn');
     equals(doc.get('addresses.0.state'), 'NY');
     equals(doc.get('addresses.1.city'), 'Oak Park');
@@ -229,7 +203,6 @@ $(document).ready(function() {
   });
 
   test("#set() 1-N square bracket notation on leaves", function() {
-    var doc = createModel();
     equals(doc.get('addresses[0].city'), 'Brooklyn');
     equals(doc.get('addresses[0].state'), 'NY');
     equals(doc.get('addresses[1].city'), 'Oak Park');
@@ -245,8 +218,6 @@ $(document).ready(function() {
   });
 
   test("#set() 1-N with an object", function() {
-    var doc = createModel();
-
     doc.set({
       'addresses[0]': {
         city: 'Seattle',
@@ -267,8 +238,6 @@ $(document).ready(function() {
   });
 
   test("#set() 1-N append to existing array", function() {
-    var doc = createModel();
-
     doc.set({
       'addresses[]': {
         city: 'Seattle',
@@ -289,8 +258,6 @@ $(document).ready(function() {
   });
 
   test("#set() 1-N append to non-existent attribute", function() {
-    var doc = createModel();
-
     doc.set({
       'bikes[]': {
         brand: 'Gary Fisher'
@@ -304,9 +271,7 @@ $(document).ready(function() {
   // ----- TO_JSON --------
 
   test("#toJSON()", function() {
-    var doc = createModel(),
-      json = doc.toJSON();
-    
+    var json = doc.toJSON();
     deepEqual(json, doc.attributes);
   });
 
@@ -314,7 +279,6 @@ $(document).ready(function() {
   // ----- CHANGE EVENTS --------
 
   test("change event on top-level attribute", function() {
-    var doc = createModel();
     doc.bind('change', function(){ ok(true); });
     doc.bind('change:gender', function(){ ok(true); });
 
@@ -323,8 +287,7 @@ $(document).ready(function() {
   });
 
   test("change event on nested attribute", function() {
-    var doc = createModel(),
-      callbacksFired = [0, 0, 0];
+    var callbacksFired = [0, 0, 0];
     
     doc.bind('change', function(){ callbacksFired[0] += 1 });
     doc.bind('change:name', function(){ callbacksFired[1] += 1 });
@@ -341,8 +304,6 @@ $(document).ready(function() {
   });
 
   test("change event doesn't fire on silent", function() {
-    var doc = createModel();
-    
     doc.bind('change', function(){ ok(false, "'change' should not fire"); });
     doc.bind('change:name', function(){ ok(false, "'change:name' should not fire"); });
     doc.bind('change:name.first', function(){ ok(false, "'change:name.first' should not fire"); });
@@ -351,8 +312,6 @@ $(document).ready(function() {
   });
 
   test("attribute change event receives new value", function() {
-    var doc = createModel();
-    
     doc.bind('change:name', function(model, newVal){
       deepEqual(newVal, {
         'first': 'Bob',
@@ -371,8 +330,7 @@ $(document).ready(function() {
   });
 
   test("change event on deeply nested attribute", function() {
-    var doc = createModel(),
-      callbacksFired = [false, false, false, false];
+    var callbacksFired = [false, false, false, false];
     
     doc.bind('change', function(){ callbacksFired[0] = true });
     doc.bind('change:name', function(){ callbacksFired[1] = true });
@@ -391,8 +349,7 @@ $(document).ready(function() {
   });
 
   test("change event on deeply nested attribute with object", function() {
-    var doc = createModel(),
-      callbacksFired = [false, false, false, false, false];
+    var callbacksFired = [false, false, false, false, false];
     
     doc.bind('change', function(){ callbacksFired[0] = true });
     doc.bind('change:name', function(){ callbacksFired[1] = true });
@@ -415,8 +372,7 @@ $(document).ready(function() {
   });
 
   test("change event on nested array", function() {
-    var doc = createModel(),
-      callbacksFired = [false, false, false, false];
+    var callbacksFired = [false, false, false, false];
     
     doc.bind('change', function(){ callbacksFired[0] = true });
     doc.bind('change:addresses', function(){ callbacksFired[1] = true });
@@ -435,8 +391,7 @@ $(document).ready(function() {
   });
 
   test("change+add when adding to array", function() {
-    var doc = createModel(),
-      callbacksFired = [false, false, false];
+    var callbacksFired = [false, false, false];
     
     doc.bind('change', function(){ callbacksFired[0] = true });
     doc.bind('change:addresses', function(){ callbacksFired[1] = true });
@@ -455,8 +410,7 @@ $(document).ready(function() {
   });
 
   test("change+remove when unsetting on array", function() {
-    var doc = createModel(),
-      callbacksFired = [false, false, false];
+    var callbacksFired = [false, false, false];
     
     doc.bind('change', function(){ callbacksFired[0] = true });
     doc.bind('change:addresses', function(){ callbacksFired[1] = true });
@@ -470,8 +424,7 @@ $(document).ready(function() {
   });
 
   test("change+add event on append", function() {
-    var doc = createModel(),
-      callbacksFired = [false, false, false];
+    var callbacksFired = [false, false, false];
     
     doc.bind('change', function(){ callbacksFired[0] = true });
     doc.bind('change:addresses', function(){ callbacksFired[1] = true });
@@ -493,7 +446,6 @@ $(document).ready(function() {
   // ----- UNSET --------
 
   test("#unset() nested attribute", function() {
-    var doc = createModel();
     doc.unset('name.first');
     ok(_.isUndefined(doc.get('name.first')));
   });
@@ -502,11 +454,10 @@ $(document).ready(function() {
   // ----- ADD --------
 
   test("#add() on nested array succeeds", function() {
-    var doc = createModel(),
-      attrs = {
-        city: 'Lincoln',
-        state: 'NE'
-      };
+    var attrs = {
+      city: 'Lincoln',
+      state: 'NE'
+    };
 
     doc.add('addresses', attrs);
 
@@ -514,8 +465,7 @@ $(document).ready(function() {
   });
 
   test("#add() on nested array should trigger 'add' event", function() {
-    var doc = createModel(),
-      callbackFired = false;
+    var callbackFired = false;
 
     doc.bind('add:addresses', function(){
       callbackFired = true;
@@ -532,7 +482,6 @@ $(document).ready(function() {
   // ----- REMOVE --------
 
   test("#remove() on nested array succeeds", function() {
-    var doc = createModel();
     doc.remove('addresses[0]');
 
     ok(doc.get('addresses[0]'));
@@ -540,8 +489,7 @@ $(document).ready(function() {
   });
 
   test("#remove() on nested array should trigger 'remove' event", function() {
-    var doc = createModel(),
-      callbackFired = false;
+    var callbackFired = false;
 
     doc.bind('remove:addresses', function(){
       callbackFired = true;
@@ -552,8 +500,7 @@ $(document).ready(function() {
   });
 
   test("#remove() on non-array should raise error", function() {
-    var doc = createModel(),
-      errorRaised = false;
+    var errorRaised = false;
 
     try {
       doc.remove('missingthings[0]');
@@ -563,8 +510,5 @@ $(document).ready(function() {
 
     ok(errorRaised, "error wasn't raised");
   });
-
-
-  // Backbone.sync = window.originalSync;
 
 });
