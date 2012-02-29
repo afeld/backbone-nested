@@ -14,6 +14,13 @@ $(document).ready(function() {
   var ajax = $.ajax;
   var urlRoot = null;
 
+  var proxy = Backbone.Model.extend();
+  var klass = Backbone.Collection.extend({
+    url : function() { return '/collection'; }
+  });
+
+  var attrs, doc, collection;
+
   module("Backbone.Model", {
 
     setup: function() {
@@ -24,6 +31,16 @@ $(document).ready(function() {
       $.ajax = function(params) { ajaxParams = params; };
       urlRoot = Backbone.Model.prototype.urlRoot;
       Backbone.Model.prototype.urlRoot = '/';
+
+      attrs = {
+        id     : '1-the-tempest',
+        title  : "The Tempest",
+        author : "Bill Shakespeare",
+        length : 123
+      };
+      doc = new proxy(attrs);
+      collection = new klass();
+      collection.add(doc);
     },
 
     teardown: function() {
@@ -34,22 +51,6 @@ $(document).ready(function() {
 
   });
 
-  var attrs = {
-    id     : '1-the-tempest',
-    title  : "The Tempest",
-    author : "Bill Shakespeare",
-    length : 123
-  };
-
-  var proxy = Backbone.Model.extend();
-  var doc = new proxy(attrs);
-
-  var klass = Backbone.Collection.extend({
-    url : function() { return '/collection'; }
-  });
-
-  var collection = new klass();
-  collection.add(doc);
 
   test("Model: initialize", function() {
     var Model = Backbone.Model.extend({
