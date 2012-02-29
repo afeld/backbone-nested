@@ -72,7 +72,7 @@ Backbone.NestedModel = Backbone.Model.extend({
 
   remove: function(attrStr, opts){
     var attrPath = Backbone.NestedModel.attrPath(attrStr),
-      val = this.get(_.initial(attrPath)),
+      val = this.get(_.initial(attrPath), {silent: true}),
       i = _.last(attrPath);
 
     if (!_.isArray(val)){
