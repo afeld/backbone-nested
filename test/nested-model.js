@@ -85,7 +85,7 @@ $(document).ready(function() {
   // ----- GET --------
 
   test("#get() 1-1 returns attributes object", function() {
-    var name = doc.get('name');
+    var name = doc.get('name', {silent: true});
     
     deepEqual(name, {
       first: 'Aidan',
@@ -118,12 +118,12 @@ $(document).ready(function() {
   });
 
   test("#get() 1-N returns attributes object", function() {
-    deepEqual(doc.get('addresses[0]'), {
+    deepEqual(doc.get('addresses[0]', {silent: true}), {
       city: 'Brooklyn',
       state: 'NY'
     });
 
-    deepEqual(doc.get('addresses[1]'), {
+    deepEqual(doc.get('addresses[1]', {silent: true}), {
       city: 'Oak Park',
       state: 'IL'
     });
@@ -461,7 +461,7 @@ $(document).ready(function() {
 
     doc.add('addresses', attrs);
 
-    deepEqual(doc.get('addresses[2]'), attrs);
+    deepEqual(doc.get('addresses[2]', {silent: true}), attrs);
   });
 
   test("#add() on nested array should trigger 'add' event", function() {
@@ -484,7 +484,7 @@ $(document).ready(function() {
   test("#remove() on nested array succeeds", function() {
     doc.remove('addresses[0]');
 
-    ok(doc.get('addresses[0]'));
+    ok(doc.get('addresses[0]', {silent: true}));
     equals(doc.get('addresses[1]'), void 0);
   });
 
