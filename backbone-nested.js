@@ -55,7 +55,7 @@
       }
       opts = opts || {};
 
-      var newAttrs = this._deepClone(this.attributes),
+      var newAttrs = Backbone.NestedModel.deepClone(this.attributes),
         attrVal, attrPath, attrObj;
       
       for (var attrStr in attrs){
@@ -109,7 +109,7 @@
 
     toJSON: function(){
       var json = Backbone.NestedModel.__super__.toJSON.apply(this);
-      return this._deepClone(json);
+      return Backbone.NestedModel.deepClone(json);
     },
 
 
@@ -161,10 +161,6 @@
       }, this);
 
       return dest;
-    },
-
-    _deepClone: function(obj){
-      return $.extend(true, {}, obj);
     }
 
   }, {
@@ -221,6 +217,10 @@
       });
 
       return attrStr;
+    },
+
+    deepClone: function(obj){
+      return $.extend(true, {}, obj);
     }
 
   });
