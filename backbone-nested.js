@@ -71,17 +71,28 @@ Backbone.NestedModel = Backbone.Model.extend({
   },
 
   remove: function(attrStr, opts){
+    opts = opts || {};
+
     var attrPath = Backbone.NestedModel.attrPath(attrStr),
-      val = this.get(_.initial(attrPath), {silent: true}),
+      aryPath = _.initial(attrPath),
+      val = this.get(aryPath, {silent: true}),
       i = _.last(attrPath);
 
     if (!_.isArray(val)){
       throw new Error("remove() must be called on a nested array");
     }
 
+    // only trigger if an element is actually being removed
+    var trigger = !opts.silent && (val.length > i + 1),
+      oldEl = val[i];
+
     // remove the element from the array
     val.splice(i, 1);
     this.set(attrStr, val, opts);
+
+    if (trigger){
+      this.trigger('remove:' + Backbone.NestedModel.createAttrStr(aryPath), this, oldEl);
+    }
 
     return this;
   },

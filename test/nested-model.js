@@ -501,12 +501,37 @@ $(document).ready(function() {
 
   // ----- REMOVE --------
 
-  test("#remove() on nested array", function() {
+  test("#remove() on nested array succeeds", function() {
     var doc = createModel();
     doc.remove('addresses[0]');
 
     ok(doc.get('addresses[0]'));
     equals(doc.get('addresses[1]'), void 0);
+  });
+
+  test("#remove() on nested array should trigger 'remove' event", function() {
+    var doc = createModel(),
+      callbackFired = false;
+
+    doc.bind('remove:addresses', function(){
+      callbackFired = true;
+    });
+    doc.remove('addresses[0]');
+
+    ok(callbackFired, "callback wasn't fired");
+  });
+
+  test("#remove() on non-array should raise error", function() {
+    var doc = createModel(),
+      errorRaised = false;
+
+    try {
+      doc.remove('missingthings[0]');
+    } catch(e){
+      errorRaised = true;
+    }
+
+    ok(errorRaised, "error wasn't raised");
   });
 
 

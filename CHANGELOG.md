@@ -1,3 +1,10 @@
+## HEAD
+
+[commits](https://github.com/afeld/backbone-nested/compare/v1.0.3...master)
+
+* Backbone 0.9.1 compatibiity
+* 'remove' event on nested arrays
+
 ## 1.0.3
 
 [commits](https://github.com/afeld/backbone-nested/compare/v1.0.2...v1.0.3)
