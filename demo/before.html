@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="../vendor/underscore.js"></script>
+    <script type="text/javascript" src="../vendor/backbone.js"></script>
+    <script>
+      var person = new Backbone.Model({
+        name: {
+          first: 'Aidan',
+          last: 'Feldman'
+        }
+      });
+
+      person.bind('change:name', function(){
+        alert("this never gets hit :-(");
+      });
+      
+      person.get('name').name = 'Bob';
+      alert("fail");
+    </script>
+  </head>
+  <body>(see script tag in &lt;head&gt;)</body>
+</html>

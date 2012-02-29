@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="../vendor/underscore.js"></script>
+    <script type="text/javascript" src="../vendor/backbone.js"></script>
+    <script type="text/javascript" src="../backbone-nested.js"></script>
+    <script>
+      var person = new Backbone.NestedModel({
+        name: {
+          first: 'Aidan',
+          last: 'Feldman'
+        }
+      });
+
+      person.bind('change:name', function(){
+        alert("hooray!");
+      });
+      
+      person.set('name.first', 'Bob');
+    </script>
+  </head>
+  <body>(see script tag in &lt;head&gt;)</body>
+</html>

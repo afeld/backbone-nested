@@ -5,6 +5,7 @@
 * Backbone 0.9.1 compatibiity
 * fire 'remove' event from remove()
 * added add() method
+* added [demo pages](https://github.com/afeld/backbone-nested/tree/master/demo)
 
 ## 1.0.3
 

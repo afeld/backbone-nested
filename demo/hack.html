@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="../vendor/underscore.js"></script>
+    <script type="text/javascript" src="../vendor/backbone.js"></script>
+    <script>
+      var person = new Backbone.Model({
+        name: {
+          first: 'Aidan',
+          last: 'Feldman'
+        }
+      });
+
+      person.bind('change:name', function(){
+        alert("callback hit");
+      });
+      
+      var name = person.get('name');
+      // need to create separate object - eew
+      name = _.extend({}, name, {
+        first: 'Bob'
+      });
+
+      person.set('name', name);
+    </script>
+  </head>
+  <body>(see script tag in &lt;head&gt;)</body>
+</html>
