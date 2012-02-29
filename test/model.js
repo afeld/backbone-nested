@@ -1,6 +1,11 @@
 // yanked from Backbone 0.9.1 test suite
 $(document).ready(function() {
 
+  // test Backbone.NestedModel instead of Backbone.Model - reset at end of function
+  var oldModel = Backbone.Model;
+  Backbone.Model = Backbone.NestedModel;
+
+
   // Variable to catch the last request.
   var lastRequest = null;
   // Variable to catch ajax params.
@@ -678,4 +683,8 @@ $(document).ready(function() {
     model.set({x: true});
   });
 
+
+  // reset the Model
+  Backbone.Model = oldModel;
+  
 });
