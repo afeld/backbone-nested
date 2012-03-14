@@ -46,6 +46,7 @@
 
     set: function(key, value, opts){
       var attrs;
+      // check that it's an object, or null/undefined
       if (_.isObject(key) || key == null) {
         attrs = key;
         opts = value;
@@ -108,8 +109,7 @@
     },
 
     toJSON: function(){
-      var json = Backbone.NestedModel.__super__.toJSON.apply(this);
-      return Backbone.NestedModel.deepClone(json);
+      return Backbone.NestedModel.deepClone(this.attributes);
     },
 
 
