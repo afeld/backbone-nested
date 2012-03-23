@@ -45,31 +45,25 @@
     },
 
     set: function(key, value, opts){
-      // if it's an attribute path, convert back to string
+      var newAttrs = Backbone.NestedModel.deepClone(this.attributes);
+
+      if (_.isString(key)) {
+        // Backbone 0.9.0+ syntax: `model.set(key, val)` - convert the key to an attribute path
+        key = Backbone.NestedModel.attrPath(key);
+      }
+
       if (_.isArray(key)) {
-        key = Backbone.NestedModel.createAttrStr(key);
-      }
-
-      var attrs;
-      // check that it's an object, or null/undefined
-      if (_.isObject(key) || key == null) {
-        attrs = key;
+        // attribute path
+        this._mergeAttr(newAttrs, key, value, opts);
+      } else { // it's an Object
         opts = value;
-      } else {
-        // Backbone 0.9.0+ syntax - `model.set(key, val)`
-        attrs = {};
-        attrs[key] = value;
-      }
-      opts = opts || {};
+        var attrs = key,
+          attrPath;
 
-      var newAttrs = Backbone.NestedModel.deepClone(this.attributes),
-        attrVal, attrPath, attrObj;
-      
-      for (var attrStr in attrs){
-        attrPath = Backbone.NestedModel.attrPath(attrStr);
-        attrObj = Backbone.NestedModel.createAttrObj(attrPath, attrs[attrStr]);
-
-        this._mergeAttrs(newAttrs, attrObj, opts);
+        for (var attrStr in attrs){
+          attrPath = Backbone.NestedModel.attrPath(attrStr);
+          this._mergeAttr(newAttrs, attrPath, attrs[attrStr], opts);
+        }
       }
 
       return Backbone.NestedModel.__super__.set.call(this, newAttrs, opts);
@@ -121,7 +115,15 @@
 
     // private
 
+    // note: modifies `newAttrs`
+    _mergeAttr: function(newAttrs, attrPath, value, opts){
+      var attrObj = Backbone.NestedModel.createAttrObj(attrPath, value);
+      this._mergeAttrs(newAttrs, attrObj, opts);
+    },
+
+    // note: modifies `dest`
     _mergeAttrs: function(dest, source, opts, stack){
+      opts = opts || {};
       stack = stack || [];
 
       _.each(source, function(sourceVal, prop){
