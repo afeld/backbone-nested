@@ -162,6 +162,15 @@ $(document).ready(function() {
 
   // ----- SET --------
 
+  test("#set() should accept an attribute path array", function() {
+    var attrPath = Backbone.NestedModel.attrPath('name.first');
+    equals(doc.get(attrPath), 'Aidan');
+
+    doc.set(attrPath, 'Jeremy');
+
+    equals(doc.get(attrPath), 'Jeremy');
+  });
+
   test("#set() 1-1 on leaves", function() {
     equals(doc.get('name.first'), 'Aidan');
     equals(doc.get('name.last'), 'Feldman');
@@ -484,7 +493,10 @@ $(document).ready(function() {
   test("#remove() on nested array succeeds", function() {
     doc.remove('addresses[0]');
 
-    ok(doc.get('addresses[0]', {silent: true}));
+    deepEqual(doc.get('addresses[0]', {silent: true}), {
+      city: "Oak Park",
+      state: "IL"
+    });
     equals(doc.get('addresses[1]'), void 0);
   });
 

@@ -45,12 +45,18 @@
     },
 
     set: function(key, value, opts){
+      // if it's an attribute path, convert back to string
+      if (_.isArray(key)) {
+        key = Backbone.NestedModel.createAttrStr(key);
+      }
+
       var attrs;
       // check that it's an object, or null/undefined
       if (_.isObject(key) || key == null) {
         attrs = key;
         opts = value;
       } else {
+        // Backbone 0.9.0+ syntax - `model.set(key, val)`
         attrs = {};
         attrs[key] = value;
       }
@@ -99,7 +105,7 @@
 
       // remove the element from the array
       val.splice(i, 1);
-      this.set(attrStr, val, opts);
+      this.set(aryPath, val, opts);
 
       if (trigger){
         this.trigger('remove:' + Backbone.NestedModel.createAttrStr(aryPath), this, oldEl);
