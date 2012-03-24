@@ -1,12 +1,12 @@
 /**
- * Backbone-Nested 1.1.0 - An extension of Backbone.js that keeps track of nested attributes
+ * Backbone-Nested 1.1.1 - An extension of Backbone.js that keeps track of nested attributes
  *
  * http://afeld.github.com/backbone-nested/
  *
  * Copyright (c) 2011-2012 Aidan Feldman
  * MIT Licensed (LICENSE)
  */
-/*global Backbone, _, $ */
+/*global window, $, _, Backbone */
 (function(){
   'use strict';
 
@@ -31,7 +31,7 @@
 
       // check if the result is an Object, Array, etc.
       if (!opts.silent && _.isObject(result) && window.console){
-        window.console.log("Backbone-Nested syntax is preferred for accesing values of attribute '" + attrStrOrPath + "'.");
+        window.console.warn("Backbone-Nested syntax is preferred for accesing values of attribute '" + attrStrOrPath + "'.");
       }
       // else it's a leaf
 

@@ -168,6 +168,11 @@ user.get('addresses[0]', {silent:true}); // (silent)
 
 ## Changelog
 
+#### 1.1.1 ([diff](https://github.com/afeld/backbone-nested/compare/v1.1.0...v1.1.1?w=1))
+
+* fixed `remove()` to not insert array back into itself
+* upgraded test suite to Backbone 0.9.2
+
 #### 1.1.0 ([diff](https://github.com/afeld/backbone-nested/compare/v1.0.3...v1.1.0?w=1))
 
 * Backbone 0.9.1 compatibiity
