@@ -1,5 +1,5 @@
 /**
- * Backbone-Nested 1.1.1 - An extension of Backbone.js that keeps track of nested attributes
+ * Backbone-Nested 1.1.2 - An extension of Backbone.js that keeps track of nested attributes
  *
  * http://afeld.github.com/backbone-nested/
  *
