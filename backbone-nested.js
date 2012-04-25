@@ -143,12 +143,15 @@
         });
 
         if (isChildAry && !_.isArray(destVal)){
+          // assigning an array to a previously non-array value
           destVal = dest[prop] = [];
         }
 
         if (prop in dest && _.isObject(sourceVal) && _.isObject(destVal)){
+          // both new and original are objects/arrays, and thus need to be merged
           destVal = dest[prop] = this._mergeAttrs(destVal, sourceVal, opts, newStack);
         } else {
+          // new value is a primitive
           var oldVal = destVal;
 
           destVal = dest[prop] = sourceVal;
@@ -168,6 +171,7 @@
         if (!opts.silent && newStack.length > 1){
           attrStr = Backbone.NestedModel.createAttrStr(newStack);
           this.trigger('change:' + attrStr, this, destVal);
+          this.changed[attrStr] = destVal;
         }
       }, this);
 

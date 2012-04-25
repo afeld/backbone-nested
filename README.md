@@ -180,6 +180,7 @@ Person = Backbone.NestedModel.extend({
 #### HEAD ([diff](https://github.com/afeld/backbone-nested/compare/v1.1.1...master?w=1))
 
 * don't expect `window` to be present (e.g. for Node)
+* `changedAttributes()` should include the nested attribute paths
 
 #### 1.1.1 ([diff](https://github.com/afeld/backbone-nested/compare/v1.1.0...v1.1.1?w=1))
 

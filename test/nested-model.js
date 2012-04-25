@@ -9,21 +9,21 @@ $(document).ready(function() {
       doc = new klass({
         gender: 'M',
         name: {
-          first: "Aidan",
+          first: 'Aidan',
           middle: {
             initial: 'L',
             full: 'Lee'
           },
-          last: "Feldman"
+          last: 'Feldman'
         },
         addresses: [
           {
-            city: "Brooklyn",
-            state: "NY"
+            city: 'Brooklyn',
+            state: 'NY'
           },
           {
-            city: "Oak Park",
-            state: "IL"
+            city: 'Oak Park',
+            state: 'IL'
           }
         ]
       });
@@ -496,6 +496,51 @@ $(document).ready(function() {
     ok(callbacksFired[0], "'change' should fire");
     ok(callbacksFired[1], "'change:addresses' should fire");
     ok(callbacksFired[2], "'add:addresses' should fire");
+  });
+
+
+  // ----- CHANGED_ATTRIBUTES --------
+
+  test("#changedAttributes() should return the attributes for the full path and all sub-paths", function() {
+    doc.bind('change', function(){
+      deepEqual(this.changedAttributes(), {
+        name: {
+          first: 'Aidan',
+          middle: {
+            initial: 'L',
+            full: 'Limburger'
+          },
+          last: 'Feldman'
+        },
+        'name.middle': {
+          initial: 'L',
+          full: 'Limburger'
+        },
+        'name.middle.full': 'Limburger'
+      });
+    });
+    
+    doc.set({'name.middle.full': 'Limburger'});
+  });
+
+  test("#changedAttributes() should clear the nested attributes between change events", function() {
+    doc.set({'name.first': 'Bob'});
+
+    doc.bind('change', function(){
+      deepEqual(this.changedAttributes(), {
+        name: {
+          first: 'Bob',
+          middle: {
+            initial: 'L',
+            full: 'Lee'
+          },
+          last: 'Dylan'
+        },
+        'name.last': 'Dylan'
+      });
+    });
+
+    doc.set({'name.last': 'Dylan'});
   });
 
 
