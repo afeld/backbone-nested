@@ -6,18 +6,13 @@
  * Copyright (c) 2011-2012 Aidan Feldman
  * MIT Licensed (LICENSE)
  */
-/*global console, $, _, Backbone */
+/*global $, _, Backbone */
 (function(){
   'use strict';
 
   Backbone.NestedModel = Backbone.Model.extend({
 
-    // configuration flag for ignoring warnings when accessing nested objects
-    _supressWarnings: false,
-
-    get: function(attrStrOrPath, opts){
-      opts = opts || {};
-
+    get: function(attrStrOrPath){
       var attrPath = Backbone.NestedModel.attrPath(attrStrOrPath),
         childAttr = attrPath[0],
         result = Backbone.NestedModel.__super__.get.call(this, childAttr);
@@ -32,18 +27,12 @@
         result = result[childAttr];
       }
 
-      // check if the result is an Object, Array, etc.
-      if (!(opts.silent || this._supressWarnings) && _.isObject(result) && typeof console !== 'undefined' ){
-        console.warn("Backbone-Nested syntax is preferred for accesing values of attribute '" + attrStrOrPath + "'.");
-      }
-      // else it's a leaf
-
       return result;
     },
 
     has: function(attr){
       // for some reason this is not how Backbone.Model is implemented - it accesses the attributes object directly
-      var result = this.get(attr, {silent: true});
+      var result = this.get(attr);
       return !(result === null || _.isUndefined(result));
     },
 
@@ -80,7 +69,7 @@
     },
 
     add: function(attrStr, value, opts){
-      var current = this.get(attrStr, {silent: true});
+      var current = this.get(attrStr);
       this.set(attrStr + '[' + current.length + ']', value, opts);
     },
 
@@ -89,7 +78,7 @@
 
       var attrPath = Backbone.NestedModel.attrPath(attrStr),
         aryPath = _.initial(attrPath),
-        val = this.get(aryPath, {silent: true}),
+        val = this.get(aryPath),
         i = _.last(attrPath);
 
       if (!_.isArray(val)){

@@ -157,30 +157,12 @@ user.remove('addresses[0]');
 user.get('addresses').length; //=> 1
 ```
 
-## Warnings
-
-Accessing a nested attribute will throw a warning in your console, because it's safer to use the getter syntax above.  To silence these warnings, add an argument of `{silent: true}` to `get()`:
-
-```javascript
-user.get('addresses[0]'); // gives a warning in your console
-user.get('addresses[0]', {silent:true}); // (silent)
-```
-
-Alternatively, you can set `_supressWarnings` when defining your class:
-
-```javascript
-Person = Backbone.NestedModel.extend({
-  _supressWarnings: true,
-  ...
-});
-```
-
 ## Changelog
 
 #### HEAD ([diff](https://github.com/afeld/backbone-nested/compare/v1.1.1...master?w=1))
 
-* don't expect `window` to be present (e.g. for Node)
 * `changedAttributes()` should include the nested attribute paths
+* remove warnings when retrieving nested objects - more of a nuisance than a convenience
 
 #### 1.1.1 ([diff](https://github.com/afeld/backbone-nested/compare/v1.1.0...v1.1.1?w=1))
 

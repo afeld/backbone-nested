@@ -85,7 +85,7 @@ $(document).ready(function() {
   // ----- GET --------
 
   test("#get() 1-1 returns attributes object", function() {
-    var name = doc.get('name', {silent: true});
+    var name = doc.get('name');
     
     deepEqual(name, {
       first: 'Aidan',
@@ -118,62 +118,15 @@ $(document).ready(function() {
   });
 
   test("#get() 1-N returns attributes object", function() {
-    deepEqual(doc.get('addresses[0]', {silent: true}), {
+    deepEqual(doc.get('addresses[0]'), {
       city: 'Brooklyn',
       state: 'NY'
     });
 
-    deepEqual(doc.get('addresses[1]', {silent: true}), {
+    deepEqual(doc.get('addresses[1]'), {
       city: 'Oak Park',
       state: 'IL'
     });
-  });
-
-  test("#get() should give a warning when retrieving a nested object", function() {
-    var origWarn = console.warn,
-      warnCalled = false;
-
-    console.warn = function(){
-      warnCalled = true;
-    };
-
-    doc.get('name');
-    
-    ok(warnCalled, "console.warn should have been called");
-    console.warn = origWarn; // reset
-  });
-
-  test("#get() shouldn't give a warning when `slient` is passed", function() {
-    var origWarn = console.warn;
-    console.warn = function(){
-      ok(false, "console.warn shouldn't have been called");
-    };
-
-    doc.get('name', {silent: true});
-
-    console.warn = origWarn; // reset
-  });
-
-  test("#get() shouldn't give a warning when `slient` is passed", function() {
-    var SilentKlass = Backbone.NestedModel.extend({
-      _supressWarnings: true
-    });
-
-    var silentDoc = new SilentKlass({
-      name: {
-        first: "Aidan",
-        last: "Feldman"
-      }
-    });
-
-    var origWarn = console.warn;
-    console.warn = function(){
-      ok(false, "console.warn shouldn't have been called");
-    };
-
-    silentDoc.get('name');
-    
-    console.warn = origWarn; // reset
   });
 
 
@@ -562,7 +515,7 @@ $(document).ready(function() {
 
     doc.add('addresses', attrs);
 
-    deepEqual(doc.get('addresses[2]', {silent: true}), attrs);
+    deepEqual(doc.get('addresses[2]'), attrs);
   });
 
   test("#add() on nested array should trigger 'add' event", function() {
@@ -585,7 +538,7 @@ $(document).ready(function() {
   test("#remove() on nested array succeeds", function() {
     doc.remove('addresses[0]');
 
-    deepEqual(doc.get('addresses[0]', {silent: true}), {
+    deepEqual(doc.get('addresses[0]'), {
       city: "Oak Park",
       state: "IL"
     });
