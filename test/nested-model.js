@@ -144,16 +144,13 @@ $(document).ready(function() {
   });
 
   test("#get() shouldn't give a warning when `slient` is passed", function() {
-    var origWarn = console.warn,
-      warnCalled = false;
-
+    var origWarn = console.warn;
     console.warn = function(){
-      warnCalled = true;
+      ok(false, "console.warn shouldn't have been called");
     };
 
     doc.get('name', {silent: true});
-    
-    ok(!warnCalled, "console.warn shouldn't have been called");
+
     console.warn = origWarn; // reset
   });
 
@@ -169,16 +166,13 @@ $(document).ready(function() {
       }
     });
 
-    var origWarn = console.warn,
-      warnCalled = false;
-
+    var origWarn = console.warn;
     console.warn = function(){
-      warnCalled = true;
+      ok(false, "console.warn shouldn't have been called");
     };
 
     silentDoc.get('name');
     
-    ok(!warnCalled, "console.warn shouldn't have been called");
     console.warn = origWarn; // reset
   });
 
@@ -351,9 +345,9 @@ $(document).ready(function() {
   test("change event on nested attribute", function() {
     var callbacksFired = [0, 0, 0];
     
-    doc.bind('change', function(){ callbacksFired[0] += 1 });
-    doc.bind('change:name', function(){ callbacksFired[1] += 1 });
-    doc.bind('change:name.first', function(){ callbacksFired[2] += 1 });
+    doc.bind('change', function(){ callbacksFired[0] += 1; });
+    doc.bind('change:name', function(){ callbacksFired[1] += 1; });
+    doc.bind('change:name.first', function(){ callbacksFired[2] += 1; });
 
     doc.bind('change:name.last', function(){ ok(false, "'change:name.last' should not fire"); });
     doc.bind('change:gender', function(){ ok(false, "'change:gender' should not fire"); });
@@ -394,10 +388,10 @@ $(document).ready(function() {
   test("change event on deeply nested attribute", function() {
     var callbacksFired = [false, false, false, false];
     
-    doc.bind('change', function(){ callbacksFired[0] = true });
-    doc.bind('change:name', function(){ callbacksFired[1] = true });
-    doc.bind('change:name.middle', function(){ callbacksFired[2] = true });
-    doc.bind('change:name.middle.full', function(){ callbacksFired[3] = true });
+    doc.bind('change', function(){ callbacksFired[0] = true; });
+    doc.bind('change:name', function(){ callbacksFired[1] = true; });
+    doc.bind('change:name.middle', function(){ callbacksFired[2] = true; });
+    doc.bind('change:name.middle.full', function(){ callbacksFired[3] = true; });
 
     doc.bind('change:name.middle.initial', function(){ ok(false, "'change:name.middle.initial' should not fire"); });
     doc.bind('change:name.first', function(){ ok(false, "'change:name.first' should not fire"); });
@@ -413,11 +407,11 @@ $(document).ready(function() {
   test("change event on deeply nested attribute with object", function() {
     var callbacksFired = [false, false, false, false, false];
     
-    doc.bind('change', function(){ callbacksFired[0] = true });
-    doc.bind('change:name', function(){ callbacksFired[1] = true });
-    doc.bind('change:name.middle', function(){ callbacksFired[2] = true });
-    doc.bind('change:name.middle.initial', function(){ callbacksFired[3] = true });
-    doc.bind('change:name.middle.full', function(){ callbacksFired[4] = true });
+    doc.bind('change', function(){ callbacksFired[0] = true; });
+    doc.bind('change:name', function(){ callbacksFired[1] = true; });
+    doc.bind('change:name.middle', function(){ callbacksFired[2] = true; });
+    doc.bind('change:name.middle.initial', function(){ callbacksFired[3] = true; });
+    doc.bind('change:name.middle.full', function(){ callbacksFired[4] = true; });
 
     doc.bind('change:name.first', function(){ ok(false, "'change:name.first' should not fire"); });
 
@@ -436,10 +430,10 @@ $(document).ready(function() {
   test("change event on nested array", function() {
     var callbacksFired = [false, false, false, false];
     
-    doc.bind('change', function(){ callbacksFired[0] = true });
-    doc.bind('change:addresses', function(){ callbacksFired[1] = true });
-    doc.bind('change:addresses[0]', function(){ callbacksFired[2] = true });
-    doc.bind('change:addresses[0].city', function(){ callbacksFired[3] = true });
+    doc.bind('change', function(){ callbacksFired[0] = true; });
+    doc.bind('change:addresses', function(){ callbacksFired[1] = true; });
+    doc.bind('change:addresses[0]', function(){ callbacksFired[2] = true; });
+    doc.bind('change:addresses[0].city', function(){ callbacksFired[3] = true; });
     
     doc.bind('change:addresses[0].state', function(){ ok(false, "'change:addresses[0].state' should not fire"); });
     doc.bind('change:addresses[1]', function(){ ok(false, "'change:addresses[1]' should not fire"); });
@@ -455,9 +449,9 @@ $(document).ready(function() {
   test("change+add when adding to array", function() {
     var callbacksFired = [false, false, false];
     
-    doc.bind('change', function(){ callbacksFired[0] = true });
-    doc.bind('change:addresses', function(){ callbacksFired[1] = true });
-    doc.bind('add:addresses', function(){ callbacksFired[2] = true });
+    doc.bind('change', function(){ callbacksFired[0] = true; });
+    doc.bind('change:addresses', function(){ callbacksFired[1] = true; });
+    doc.bind('add:addresses', function(){ callbacksFired[2] = true; });
 
     doc.set({
       'addresses[2]': {
@@ -474,9 +468,9 @@ $(document).ready(function() {
   test("change+remove when unsetting on array", function() {
     var callbacksFired = [false, false, false];
     
-    doc.bind('change', function(){ callbacksFired[0] = true });
-    doc.bind('change:addresses', function(){ callbacksFired[1] = true });
-    doc.bind('remove:addresses', function(){ callbacksFired[2] = true });
+    doc.bind('change', function(){ callbacksFired[0] = true; });
+    doc.bind('change:addresses', function(){ callbacksFired[1] = true; });
+    doc.bind('remove:addresses', function(){ callbacksFired[2] = true; });
 
     doc.unset('addresses[1]');
 
@@ -488,9 +482,9 @@ $(document).ready(function() {
   test("change+add event on append", function() {
     var callbacksFired = [false, false, false];
     
-    doc.bind('change', function(){ callbacksFired[0] = true });
-    doc.bind('change:addresses', function(){ callbacksFired[1] = true });
-    doc.bind('add:addresses', function(){ callbacksFired[2] = true });
+    doc.bind('change', function(){ callbacksFired[0] = true; });
+    doc.bind('change:addresses', function(){ callbacksFired[1] = true; });
+    doc.bind('add:addresses', function(){ callbacksFired[2] = true; });
 
     doc.set({
       'addresses[]': {
