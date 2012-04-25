@@ -12,6 +12,9 @@
 
   Backbone.NestedModel = Backbone.Model.extend({
 
+    // configuration flag for ignoring warnings when accessing nested objects
+    _supressWarnings: false,
+
     get: function(attrStrOrPath, opts){
       opts = opts || {};
 
@@ -30,7 +33,7 @@
       }
 
       // check if the result is an Object, Array, etc.
-      if (!opts.silent && _.isObject(result) && typeof console !== 'undefined' ){
+      if (!(opts.silent || this._supressWarnings) && _.isObject(result) && typeof console !== 'undefined' ){
         console.warn("Backbone-Nested syntax is preferred for accesing values of attribute '" + attrStrOrPath + "'.");
       }
       // else it's a leaf

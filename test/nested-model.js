@@ -129,6 +129,59 @@ $(document).ready(function() {
     });
   });
 
+  test("#get() should give a warning when retrieving a nested object", function() {
+    var origWarn = console.warn,
+      warnCalled = false;
+
+    console.warn = function(){
+      warnCalled = true;
+    };
+
+    doc.get('name');
+    
+    ok(warnCalled, "console.warn should have been called");
+    console.warn = origWarn; // reset
+  });
+
+  test("#get() shouldn't give a warning when `slient` is passed", function() {
+    var origWarn = console.warn,
+      warnCalled = false;
+
+    console.warn = function(){
+      warnCalled = true;
+    };
+
+    doc.get('name', {silent: true});
+    
+    ok(!warnCalled, "console.warn shouldn't have been called");
+    console.warn = origWarn; // reset
+  });
+
+  test("#get() shouldn't give a warning when `slient` is passed", function() {
+    var SilentKlass = Backbone.NestedModel.extend({
+      _supressWarnings: true
+    });
+
+    var silentDoc = new SilentKlass({
+      name: {
+        first: "Aidan",
+        last: "Feldman"
+      }
+    });
+
+    var origWarn = console.warn,
+      warnCalled = false;
+
+    console.warn = function(){
+      warnCalled = true;
+    };
+
+    silentDoc.get('name');
+    
+    ok(!warnCalled, "console.warn shouldn't have been called");
+    console.warn = origWarn; // reset
+  });
+
 
   // ----- HAS --------
 

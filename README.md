@@ -166,6 +166,15 @@ user.get('addresses[0]'); // gives a warning in your console
 user.get('addresses[0]', {silent:true}); // (silent)
 ```
 
+Alternatively, you can set `_supressWarnings` when defining your class:
+
+```javascript
+Person = Backbone.NestedModel.extend({
+  _supressWarnings: true,
+  ...
+});
+```
+
 ## Changelog
 
 #### HEAD ([diff](https://github.com/afeld/backbone-nested/compare/v1.1.1...master?w=1))
