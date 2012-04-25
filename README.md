@@ -159,7 +159,7 @@ user.get('addresses').length; //=> 1
 
 ## Changelog
 
-#### HEAD ([diff](https://github.com/afeld/backbone-nested/compare/v1.1.1...master?w=1))
+#### 1.1.2 ([diff](https://github.com/afeld/backbone-nested/compare/v1.1.1...v1.1.2?w=1))
 
 * `changedAttributes()` should include the nested attribute paths
 * remove warnings when retrieving nested objects - more of a nuisance than a convenience
