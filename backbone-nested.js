@@ -6,7 +6,7 @@
  * Copyright (c) 2011-2012 Aidan Feldman
  * MIT Licensed (LICENSE)
  */
-/*global window, $, _, Backbone */
+/*global console, $, _, Backbone */
 (function(){
   'use strict';
 
@@ -30,8 +30,8 @@
       }
 
       // check if the result is an Object, Array, etc.
-      if (!opts.silent && _.isObject(result) && window.console){
-        window.console.warn("Backbone-Nested syntax is preferred for accesing values of attribute '" + attrStrOrPath + "'.");
+      if (!opts.silent && _.isObject(result) && typeof console !== 'undefined' ){
+        console.warn("Backbone-Nested syntax is preferred for accesing values of attribute '" + attrStrOrPath + "'.");
       }
       // else it's a leaf
 

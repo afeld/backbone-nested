@@ -168,6 +168,10 @@ user.get('addresses[0]', {silent:true}); // (silent)
 
 ## Changelog
 
+#### HEAD ([diff](https://github.com/afeld/backbone-nested/compare/v1.1.1...master?w=1))
+
+* don't expect `window` to be present (e.g. for Node)
+
 #### 1.1.1 ([diff](https://github.com/afeld/backbone-nested/compare/v1.1.0...v1.1.1?w=1))
 
 * fixed `remove()` to not insert array back into itself
