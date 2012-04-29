@@ -69,8 +69,7 @@
     },
 
     add: function(attrStr, value, opts){
-      var current = this.get(attrStr);
-      this.set(attrStr + '[' + current.length + ']', value, opts);
+      this.set(attrStr + '[]', value, opts);
     },
 
     remove: function(attrStr, opts){
