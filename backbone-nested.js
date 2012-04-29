@@ -86,7 +86,7 @@
       }
 
       // only trigger if an element is actually being removed
-      var trigger = !opts.silent && (val.length > i + 1),
+      var trigger = !opts.silent && (val.length >= i + 1),
         oldEl = val[i];
 
       // remove the element from the array

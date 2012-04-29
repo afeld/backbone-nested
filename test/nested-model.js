@@ -535,25 +535,30 @@ $(document).ready(function() {
 
   // ----- REMOVE --------
 
-  test("#remove() on nested array succeeds", function() {
+  test("#remove() on nested array should remove the element from the array", function() {
+    var addr0 = doc.get('addresses[0]'),
+      addr1 = doc.get('addresses[1]');
+
     doc.remove('addresses[0]');
 
-    deepEqual(doc.get('addresses[0]'), {
-      city: "Oak Park",
-      state: "IL"
-    });
-    equals(doc.get('addresses[1]'), void 0);
+    equal(doc.get('addresses').length, 1);
+    deepEqual(doc.get('addresses[0]'), addr1);
   });
 
   test("#remove() on nested array should trigger 'remove' event", function() {
-    var callbackFired = false;
+    var callbackFired = 0;
 
     doc.bind('remove:addresses', function(){
-      callbackFired = true;
+      callbackFired++;
     });
-    doc.remove('addresses[0]');
 
-    ok(callbackFired, "callback wasn't fired");
+    doc.remove('addresses[0]');
+    equal(callbackFired, 1, "callback should have fired once");
+    equal(doc.get('addresses').length, 1);
+
+    doc.remove('addresses[0]');
+    equal(callbackFired, 2, "callback should have fired twice");
+    equal(doc.get('addresses').length, 0);
   });
 
   test("#remove() on non-array should raise error", function() {
