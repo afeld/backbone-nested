@@ -69,7 +69,8 @@
     },
 
     add: function(attrStr, value, opts){
-      this.set(attrStr + '[]', value, opts);
+      var current = this.get(attrStr);
+      this.set(attrStr + '[' + current.length + ']', value, opts);
     },
 
     remove: function(attrStr, opts){
@@ -118,17 +119,10 @@
       stack = stack || [];
 
       _.each(source, function(sourceVal, prop){
-        if (prop === '-1'){
-          prop = dest.length;
-        }
-
         var destVal = dest[prop],
           newStack = stack.concat([prop]),
+          isChildAry = _.isObject(sourceVal) && _.any(sourceVal, function(val, attr){ _.isNumber(attr); }),
           attrStr;
-
-        var isChildAry = _.isObject(sourceVal) && _.any(sourceVal, function(val, attr){
-          return attr === '-1' || _.isNumber(attr);
-        });
 
         if (isChildAry && !_.isArray(destVal)){
           // assigning an array to a previously non-array value
@@ -173,8 +167,6 @@
       var path;
       
       if (_.isString(attrStrOrPath)){
-        // change all appends to '-1'
-        attrStrOrPath = attrStrOrPath.replace(/\[\]/g, '[-1]');
         // TODO this parsing can probably be more efficient
         path = (attrStrOrPath === '') ? [''] : attrStrOrPath.match(/[^\.\[\]]+/g);
         path = _.map(path, function(val){

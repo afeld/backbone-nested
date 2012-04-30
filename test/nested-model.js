@@ -40,8 +40,6 @@ $(document).ready(function() {
     deepEqual(Backbone.NestedModel.attrPath('foo.bar'), ['foo', 'bar']);
     deepEqual(Backbone.NestedModel.attrPath('foo[0]'), ['foo', 0]);
     deepEqual(Backbone.NestedModel.attrPath('foo[0].bar'), ['foo', 0, 'bar']);
-    deepEqual(Backbone.NestedModel.attrPath('foo[]'), ['foo', '-1']);
-    deepEqual(Backbone.NestedModel.attrPath('foo[].bar'), ['foo', '-1', 'bar']);
   });
 
 
@@ -246,36 +244,6 @@ $(document).ready(function() {
     equals(doc.get('addresses[1].state'), 'MN');
   });
 
-  test("#set() 1-N append to existing array", function() {
-    doc.set({
-      'addresses[]': {
-        city: 'Seattle',
-        state: 'WA'
-      }
-    });
-    doc.set({
-      'addresses[]': {
-        city: 'Minneapolis',
-        state: 'MN'
-      }
-    });
-
-    equals(doc.get('addresses[2].city'), 'Seattle');
-    equals(doc.get('addresses[2].state'), 'WA');
-    equals(doc.get('addresses[3].city'), 'Minneapolis');
-    equals(doc.get('addresses[3].state'), 'MN');
-  });
-
-  test("#set() 1-N append to non-existent attribute", function() {
-    doc.set({
-      'bikes[]': {
-        brand: 'Gary Fisher'
-      }
-    });
-
-    equals(doc.get('bikes[0].brand'), 'Gary Fisher');
-  });
-
 
   // ----- TO_JSON --------
 
@@ -430,25 +398,6 @@ $(document).ready(function() {
     ok(callbacksFired[0], "'change' should fire");
     ok(callbacksFired[1], "'change:addresses' should fire");
     ok(callbacksFired[2], "'remove:addresses' should fire");
-  });
-
-  test("change+add event on append", function() {
-    var callbacksFired = [false, false, false];
-    
-    doc.bind('change', function(){ callbacksFired[0] = true; });
-    doc.bind('change:addresses', function(){ callbacksFired[1] = true; });
-    doc.bind('add:addresses', function(){ callbacksFired[2] = true; });
-
-    doc.set({
-      'addresses[]': {
-        city: 'Seattle',
-        state: 'WA'
-      }
-    });
-
-    ok(callbacksFired[0], "'change' should fire");
-    ok(callbacksFired[1], "'change:addresses' should fire");
-    ok(callbacksFired[2], "'add:addresses' should fire");
   });
 
 
