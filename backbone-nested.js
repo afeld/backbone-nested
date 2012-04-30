@@ -70,6 +70,7 @@
 
     add: function(attrStr, value, opts){
       var current = this.get(attrStr);
+      if (!_.isArray(current)) throw new Error('current value is not an array');
       this.set(attrStr + '[' + current.length + ']', value, opts);
     },
 
@@ -186,7 +187,7 @@
 
       switch (attrPath.length){
         case 0:
-          throw "no valid attributes: '" + attrStrOrPath + "'";
+          throw new Error("no valid attributes: '" + attrStrOrPath + "'");
         
         case 1: // leaf
           newVal = val;

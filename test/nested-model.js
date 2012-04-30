@@ -467,6 +467,18 @@ $(document).ready(function() {
     deepEqual(doc.get('addresses[2]'), attrs);
   });
 
+  test("#add() should complain if existing value isn't an array", function() {
+    var errorThrown = false;
+
+    try {
+      doc.add('name', 'foo');
+    } catch (e) {
+      errorThrown = true;
+    }
+
+    ok(errorThrown, "error should have been thrown");
+  });
+
   test("#add() on nested array should trigger 'add' event", function() {
     var callbackFired = false;
 
