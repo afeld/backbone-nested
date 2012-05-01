@@ -122,10 +122,9 @@
       _.each(source, function(sourceVal, prop){
         var destVal = dest[prop],
           newStack = stack.concat([prop]),
-          isChildAry = _.isObject(sourceVal) && _.any(sourceVal, function(val, attr){ _.isNumber(attr); }),
           attrStr;
 
-        if (isChildAry && !_.isArray(destVal)){
+        if (_.isArray(sourceVal) && !_.isArray(destVal)){
           // assigning an array to a previously non-array value
           destVal = dest[prop] = [];
         }
