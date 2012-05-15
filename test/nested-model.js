@@ -493,6 +493,23 @@ $(document).ready(function() {
     ok(callbackFired, "callback wasn't fired");
   });
 
+  test("#add() on nested array should trigger 'add' event after model is updated", function() {
+    var callbackFired = false;
+    var initialLength = doc.get('addresses').length;
+    var newLength;
+
+    doc.bind('add:addresses', function(model, newAddr){
+      newLength = doc.get('addresses').length;
+      callbackFired = true;
+    });
+    doc.add('addresses', {
+      city: 'Lincoln',
+      state: 'NE'
+    });
+
+    ok(callbackFired, "callback wasn't fired");
+    equal(newLength, initialLength + 1, "array length should be incremented prior to 'add' event firing");
+  });
 
   // ----- REMOVE --------
 
