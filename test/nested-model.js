@@ -539,6 +539,25 @@ $(document).ready(function() {
     equal(doc.get('addresses').length, 0);
   });
 
+  test("#remove() on nested array should trigger 'remove' event after model is updated", function() {
+    var callbackFired = 0;
+    var initialLength = doc.get('addresses').length;
+    var newLength;
+
+    doc.bind('remove:addresses', function(){
+      newLength = doc.get('addresses').length;
+      callbackFired++;
+    });
+
+    doc.remove('addresses[0]');
+    equal(callbackFired, 1, "callback should have fired once");
+    equal(newLength, initialLength - 1, "array length should be decremented prior to 'remove' event firing");
+
+    doc.remove('addresses[0]');
+    equal(callbackFired, 2, "callback should have fired twice");
+    equal(newLength, initialLength - 2, "array length should be decremented prior to 'remove' event firing");
+  });
+
   test("#remove() on non-array should raise error", function() {
     var errorRaised = false;
 
