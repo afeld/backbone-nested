@@ -10,6 +10,8 @@
 (function(){
   'use strict';
 
+  var _delayedTriggers = [];
+
   Backbone.NestedModel = Backbone.Model.extend({
 
     get: function(attrStrOrPath){
@@ -58,7 +60,9 @@
         }
       }
 
-      return Backbone.NestedModel.__super__.set.call(this, newAttrs, opts);
+      var setReturn = Backbone.NestedModel.__super__.set.call(this, newAttrs, opts);
+      this._runDelayedTriggers();
+      return setReturn;
     },
 
     unset: function(attrStr, opts){
@@ -107,6 +111,13 @@
 
 
     // private
+    _runDelayedTriggers: function(){
+      if (_delayedTriggers && _.isArray(_delayedTriggers) && _delayedTriggers.length) {
+        while (_delayedTriggers.length > 0) {
+            (_delayedTriggers.shift())();   
+        }
+      }
+    },
 
     // note: modifies `newAttrs`
     _mergeAttr: function(newAttrs, attrPath, value, opts){
@@ -143,7 +154,9 @@
             attrStr = Backbone.NestedModel.createAttrStr(stack);
 
             if (!oldVal && destVal){
-              this.trigger('add:' + attrStr, this, destVal);
+              var model = this;
+              var attrKey = attrStr;
+              _delayedTriggers.push(function(){model.trigger('add:' + attrKey, model, destVal)});
             } else if (oldVal && !destVal){
               this.trigger('remove:' + attrStr, this, oldVal);
             }
