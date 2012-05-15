@@ -244,6 +244,46 @@ $(document).ready(function() {
     equals(doc.get('addresses[1].state'), 'MN');
   });
 
+  test("#set() 1-N with an object containing an array", function() {
+    doc.set({
+      'addresses[0]': {
+        city: 'Seattle',
+        state: 'WA',
+        areaCodes: ['001', '002', '003']
+      }
+    });
+    doc.set({
+      'addresses[1]': {
+        city: 'Minneapolis',
+        state: 'MN',
+        areaCodes: ['101', '102', '103']
+      }
+    });
+
+    deepEqual(doc.get('addresses[0].areaCodes'), ['001', '002', '003']);
+    deepEqual(doc.get('addresses[1].areaCodes'), ['101', '102', '103']);
+  });
+
+  test("#set() 1-N with an object containing an array where array values are being removed", function() {
+    doc.set({
+      'addresses[0]': {
+        city: 'Seattle',
+        state: 'WA',
+        areaCodes: ['001', '002', '003']
+      }
+    });
+    doc.set({
+      'addresses[0]': {
+        city: 'Minneapolis',
+        state: 'MN',
+        areaCodes: ['101']
+      }
+    });
+
+    deepEqual(doc.get('addresses[0].areaCodes'), ['101']);
+  });
+
+
 
   // ----- TO_JSON --------
 
