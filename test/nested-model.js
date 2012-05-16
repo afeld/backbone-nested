@@ -493,6 +493,23 @@ $(document).ready(function() {
     ok(callbackFired, "callback wasn't fired");
   });
 
+  test("#add() on nested array should trigger 'add' event after model is updated", function() {
+    var callbackFired = false;
+    var initialLength = doc.get('addresses').length;
+    var newLength;
+
+    doc.bind('add:addresses', function(model, newAddr){
+      newLength = doc.get('addresses').length;
+      callbackFired = true;
+    });
+    doc.add('addresses', {
+      city: 'Lincoln',
+      state: 'NE'
+    });
+
+    ok(callbackFired, "callback wasn't fired");
+    equal(newLength, initialLength + 1, "array length should be incremented prior to 'add' event firing");
+  });
 
   // ----- REMOVE --------
 
@@ -520,6 +537,25 @@ $(document).ready(function() {
     doc.remove('addresses[0]');
     equal(callbackFired, 2, "callback should have fired twice");
     equal(doc.get('addresses').length, 0);
+  });
+
+  test("#remove() on nested array should trigger 'remove' event after model is updated", function() {
+    var callbackFired = 0;
+    var initialLength = doc.get('addresses').length;
+    var newLength;
+
+    doc.bind('remove:addresses', function(){
+      newLength = doc.get('addresses').length;
+      callbackFired++;
+    });
+
+    doc.remove('addresses[0]');
+    equal(callbackFired, 1, "callback should have fired once");
+    equal(newLength, initialLength - 1, "array length should be decremented prior to 'remove' event firing");
+
+    doc.remove('addresses[0]');
+    equal(callbackFired, 2, "callback should have fired twice");
+    equal(newLength, initialLength - 2, "array length should be decremented prior to 'remove' event firing");
   });
 
   test("#remove() on non-array should raise error", function() {
