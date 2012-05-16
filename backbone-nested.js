@@ -108,6 +108,16 @@
 
     // private
 
+    _isPrimitiveArray: function(obj){
+      if (!_.isArray(obj)) { return false; }
+      for (var i = 0; i < obj.length; i++) {
+        if (!_.isNumber(obj[i]) && !_.isString(obj[i])){
+          return false;
+        };
+      };
+      return true;
+    },
+
     // note: modifies `newAttrs`
     _mergeAttr: function(newAttrs, attrPath, value, opts){
       var attrObj = Backbone.NestedModel.createAttrObj(attrPath, value);
@@ -130,7 +140,7 @@
           destVal = dest[prop] = [];
         }
 
-        if (prop in dest && _.isObject(sourceVal) && _.isObject(destVal)){
+        if (prop in dest && _.isObject(sourceVal) && _.isObject(destVal) && !this._isPrimitiveArray(sourceVal) && !this._isPrimitiveArray(destVal)) {
           // both new and original are objects/arrays, and thus need to be merged
           destVal = dest[prop] = this._mergeAttrs(destVal, sourceVal, opts, newStack);
         } else {
