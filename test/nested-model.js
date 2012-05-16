@@ -276,13 +276,31 @@ $(document).ready(function() {
       'addresses[0]': {
         city: 'Minneapolis',
         state: 'MN',
-        areaCodes: ['101']
+        areaCodes: ['101', '102']
       }
     });
 
-    deepEqual(doc.get('addresses[0].areaCodes'), ['101']);
+    deepEqual(doc.get('addresses[0].areaCodes'), ['101', '102']);
   });
 
+  test("#set() 1-N with an object containing an array where array has been cleared", function() {
+    doc.set({
+      'addresses[0]': {
+        city: 'Seattle',
+        state: 'WA',
+        areaCodes: ['001', '002', '003']
+      }
+    });
+    doc.set({
+      'addresses[0]': {
+        city: 'Minneapolis',
+        state: 'MN',
+        areaCodes: []
+      }
+    });
+
+    deepEqual(doc.get('addresses[0].areaCodes'), []);
+  });
 
 
   // ----- TO_JSON --------
