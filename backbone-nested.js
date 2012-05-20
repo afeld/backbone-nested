@@ -71,7 +71,7 @@
     add: function(attrStr, value, opts){
       var current = this.get(attrStr);
       if (!_.isArray(current)) throw new Error('current value is not an array');
-      this.set(attrStr + '[' + current.length + ']', value, opts);
+      return this.set(attrStr + '[' + current.length + ']', value, opts);
     },
 
     remove: function(attrStr, opts){
