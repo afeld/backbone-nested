@@ -511,6 +511,23 @@ $(document).ready(function() {
     equal(newLength, initialLength + 1, "array length should be incremented prior to 'add' event firing");
   });
 
+  test("#add() should return the model to mimic set() functionality", function() {
+    var callbackFired = false;
+    var model;
+
+    model = doc.set('addresses.0.city', 'Boston');
+
+    equal(model, doc);
+
+    model = doc.add('addresses', {
+      city: 'Lincoln',
+      state: 'NE'
+    });
+
+    equal(model, doc);
+  });
+
+
   // ----- REMOVE --------
 
   test("#remove() on nested array should remove the element from the array", function() {
@@ -568,6 +585,19 @@ $(document).ready(function() {
     }
 
     ok(errorRaised, "error wasn't raised");
+  });
+
+  test("#remove() should return the model to mimic set() functionality", function() {
+    var callbackFired = false;
+    var model;
+
+    model = doc.set('addresses.0.city', 'Boston');
+
+    equal(model, doc);
+
+    model = doc.remove('addresses[0]');
+
+    equal(model, doc);
   });
 
 });

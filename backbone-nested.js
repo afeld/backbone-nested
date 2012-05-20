@@ -75,7 +75,7 @@
     add: function(attrStr, value, opts){
       var current = this.get(attrStr);
       if (!_.isArray(current)) throw new Error('current value is not an array');
-      this.set(attrStr + '[' + current.length + ']', value, opts);
+      return this.set(attrStr + '[' + current.length + ']', value, opts);
     },
 
     remove: function(attrStr, opts){
@@ -133,10 +133,9 @@
       _.each(source, function(sourceVal, prop){
         var destVal = dest[prop],
           newStack = stack.concat([prop]),
-          isChildAry = _.isObject(sourceVal) && _.any(sourceVal, function(val, attr){ _.isNumber(attr); }),
           attrStr;
 
-        if (isChildAry && !_.isArray(destVal)){
+        if (_.isArray(sourceVal) && !_.isArray(destVal)){
           // assigning an array to a previously non-array value
           destVal = dest[prop] = [];
         }
