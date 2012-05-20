@@ -244,6 +244,16 @@ $(document).ready(function() {
     equals(doc.get('addresses[1].state'), 'MN');
   });
 
+  test("#set() should override existing array", function() {
+    doc.set('addresses', []);
+    equals(doc.get('addresses').length, 0);
+  });
+
+  test("#set() should override existing object", function() {
+    doc.set('name', {});
+    ok(_.isEmpty(doc.get('name')), 'should return an empty object');
+  });
+
 
   // ----- TO_JSON --------
 
