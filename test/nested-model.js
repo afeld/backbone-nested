@@ -493,6 +493,22 @@ $(document).ready(function() {
     ok(callbackFired, "callback wasn't fired");
   });
 
+  test("#add() should return the model to mimic set() functionality", function() {
+    var callbackFired = false;
+    var model;
+
+    model = doc.set('addresses.0.city', 'Boston');
+
+    equal(model, doc);
+
+    model = doc.add('addresses', {
+      city: 'Lincoln',
+      state: 'NE'
+    });
+
+    equal(model, doc);
+  });
+
 
   // ----- REMOVE --------
 
@@ -532,6 +548,19 @@ $(document).ready(function() {
     }
 
     ok(errorRaised, "error wasn't raised");
+  });
+
+  test("#remove() should return the model to mimic set() functionality", function() {
+    var callbackFired = false;
+    var model;
+
+    model = doc.set('addresses.0.city', 'Boston');
+
+    equal(model, doc);
+
+    model = doc.remove('addresses[0]');
+
+    equal(model, doc);
   });
 
 });
