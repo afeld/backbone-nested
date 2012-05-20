@@ -16,18 +16,13 @@
 
     get: function(attrStrOrPath){
       var attrPath = Backbone.NestedModel.attrPath(attrStrOrPath),
-        childAttr = attrPath[0],
-        result = Backbone.NestedModel.__super__.get.call(this, childAttr);
-      
-      // walk through the child attributes
-      for (var i = 1; i < attrPath.length; i++){
-        if (!result){
-          // value not present
-          break;
+        result;
+
+      Backbone.NestedModel.walkPath(this.attributes, attrPath, function(val, path){
+        if (path.length === attrPath.length){
+          result = val;
         }
-        childAttr = attrPath[i];
-        result = result[childAttr];
-      }
+      });
 
       return result;
     },
@@ -230,6 +225,21 @@
 
     deepClone: function(obj){
       return $.extend(true, {}, obj);
+    },
+
+    walkPath: function(obj, attrPath, callback, scope){
+      var val = obj,
+        childAttr;
+
+      // walk through the child attributes
+      for (var i = 0; i < attrPath.length; i++){
+        childAttr = attrPath[i];
+        val = val[childAttr];
+
+        callback.call(scope || this, val, attrPath.slice(0, i + 1));
+
+        if (!val) break; // at the leaf
+      }
     }
 
   });
