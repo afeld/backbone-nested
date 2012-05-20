@@ -41,12 +41,12 @@
     set: function(key, value, opts){
       var newAttrs = Backbone.NestedModel.deepClone(this.attributes);
 
-      if (_.isString(key)) {
+      if (_.isString(key)){
         // Backbone 0.9.0+ syntax: `model.set(key, val)` - convert the key to an attribute path
         key = Backbone.NestedModel.attrPath(key);
       }
 
-      if (_.isArray(key)) {
+      if (_.isArray(key)){
         // attribute path
         this._mergeAttr(newAttrs, key, value, opts);
       } else { // it's an Object
@@ -111,11 +111,13 @@
 
 
     // private
+    _delayedTrigger: function(/* the trigger args */){
+      _delayedTriggers.push(arguments);
+    },
+
     _runDelayedTriggers: function(){
-      if (_delayedTriggers && _.isArray(_delayedTriggers) && _delayedTriggers.length) {
-        while (_delayedTriggers.length > 0) {
-            (_delayedTriggers.shift())();   
-        }
+      while (_delayedTriggers.length > 0){
+        this.trigger.apply(this, _delayedTriggers.shift());
       }
     },
 
@@ -153,9 +155,8 @@
             attrStr = Backbone.NestedModel.createAttrStr(stack);
 
             if (!oldVal && destVal){
-              var model = this;
               var attrKey = attrStr;
-              _delayedTriggers.push(function(){model.trigger('add:' + attrKey, model, destVal)});
+              this._delayedTrigger('add:' + attrKey, this, destVal);
             } else if (oldVal && !destVal){
               this.trigger('remove:' + attrStr, this, oldVal);
             }
