@@ -445,6 +445,31 @@ $(document).ready(function() {
     doc.set({'name.last': 'Dylan'});
   });
 
+  test("#changedAttributes() should clear the nested attributes between change events with validation", function() {
+    doc.validate = function(attributes) {
+		if (attributes.name.first.length > 15) {
+			return "First name is too long";
+		}
+	};
+	
+	doc.set({'name.first': 'TooLongFirstName'});
+
+    doc.bind('change', function(){
+      deepEqual(this.changedAttributes(), {
+        name: {
+          first: 'Aidan',
+          middle: {
+            initial: 'L',
+            full: 'Lee'
+          },
+          last: 'Dylan'
+        },
+        'name.last': 'Dylan'
+      });
+    });
+
+    doc.set({'name.last': 'Dylan'});
+  });
 
   // ----- UNSET --------
 
