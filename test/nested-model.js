@@ -43,43 +43,6 @@ $(document).ready(function() {
   });
 
 
-  // ----- CREATE_ATTR_OBJ --------
-
-  test(".createAttrObj() value object", function() {
-    var result = Backbone.NestedModel.createAttrObj('foo', {bar: 'baz'});
-    deepEqual(result, {
-      foo: {
-        bar: 'baz'
-      }
-    });
-  });
-
-  test(".createAttrObj() nested attribute", function() {
-    var result = Backbone.NestedModel.createAttrObj('foo.bar', 'baz');
-
-    deepEqual(result, {
-      foo: {
-        bar: 'baz'
-      }
-    });
-  });
-
-  test(".createAttrObj() respects arrays", function() {
-    var result = Backbone.NestedModel.createAttrObj('foo', {bar: ['baz', 'boop']});
-
-    deepEqual(result, {
-      foo: {
-        bar: ['baz', 'boop']
-      }
-    });
-  });
-
-  test(".createAttrObj() respects array accessors", function() {
-    var result = Backbone.NestedModel.createAttrObj('foo[0]', 'bar');
-    deepEqual(result, {foo: ['bar']});
-  });
-
-
   // ----- GET --------
 
   test("#get() 1-1 returns attributes object", function() {

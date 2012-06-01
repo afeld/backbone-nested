@@ -44,15 +44,17 @@
 
       if (_.isArray(key)){
         // attribute path
-        this._mergeAttr(newAttrs, key, value, opts);
+        this._setAttr(newAttrs, key, value, opts);
       } else { // it's an Object
         opts = value;
         var attrs = key,
           attrPath;
 
         for (var attrStr in attrs){
-          attrPath = Backbone.NestedModel.attrPath(attrStr);
-          this._mergeAttr(newAttrs, attrPath, attrs[attrStr], opts);
+          if (attrs.hasOwnProperty(attrStr)){
+            attrPath = Backbone.NestedModel.attrPath(attrStr);
+            this._setAttr(newAttrs, attrPath, attrs[attrStr], opts);
+          }
         }
       }
 
@@ -118,7 +120,7 @@
     },
 
     // note: modifies `newAttrs`
-    _mergeAttr: function(newAttrs, attrPath, value, opts){
+    _setAttr: function(newAttrs, attrPath, value, opts){
       opts = opts || {};
 
       var fullPathLength = attrPath.length;
@@ -152,53 +154,6 @@
           // }
         }
       });
-    },
-
-    // note: modifies `dest`
-    _mergeAttrs: function(dest, source, opts, stack){
-      opts = opts || {};
-      stack = stack || [];
-
-      _.each(source, function(sourceVal, prop){
-        var destVal = dest[prop],
-          newStack = stack.concat([prop]),
-          attrStr;
-
-        if (_.isArray(sourceVal) && !_.isArray(destVal)){
-          // assigning an array to a previously non-array value
-          destVal = dest[prop] = [];
-        }
-
-        if (prop in dest && _.isObject(sourceVal) && _.isObject(destVal)){
-          // both new and original are objects/arrays, and thus need to be merged
-          destVal = dest[prop] = this._mergeAttrs(destVal, sourceVal, opts, newStack);
-        } else {
-          // new value is a primitive
-          var oldVal = destVal;
-
-          destVal = dest[prop] = sourceVal;
-
-          if (_.isArray(dest) && !opts.silent){
-            attrStr = Backbone.NestedModel.createAttrStr(stack);
-
-            if (!oldVal && destVal){
-              var attrKey = attrStr;
-              this._delayedTrigger('add:' + attrKey, this, destVal);
-            } else if (oldVal && !destVal){
-              this.trigger('remove:' + attrStr, this, oldVal);
-            }
-          }
-        }
-        
-        // let the superclass handle change events for top-level attributes
-        if (!opts.silent && newStack.length > 1){
-          attrStr = Backbone.NestedModel.createAttrStr(newStack);
-          this.trigger('change:' + attrStr, this, destVal);
-          this.changed[attrStr] = destVal;
-        }
-      }, this);
-
-      return dest;
     }
 
   }, {
@@ -221,31 +176,6 @@
       return path;
     },
 
-    createAttrObj: function(attrStrOrPath, val){
-      var attrPath = this.attrPath(attrStrOrPath),
-        newVal;
-
-      switch (attrPath.length){
-        case 0:
-          throw new Error("no valid attributes: '" + attrStrOrPath + "'");
-        
-        case 1: // leaf
-          newVal = val;
-          break;
-        
-        default: // nested attributes
-          var otherAttrs = _.rest(attrPath);
-          newVal = this.createAttrObj(otherAttrs, val);
-          break;
-      }
-
-      var childAttr = attrPath[0],
-        result = _.isNumber(childAttr) ? [] : {};
-      
-      result[childAttr] = newVal;
-      return result;
-    },
-
     createAttrStr: function(attrPath){
       var attrStr = attrPath[0];
       _.each(_.rest(attrPath), function(attr){
@@ -265,11 +195,10 @@
 
       // walk through the child attributes
       for (var i = 0; i < attrPath.length; i++){
+        callback.call(scope || this, val, attrPath.slice(0, i));
+
         childAttr = attrPath[i];
         val = val[childAttr];
-
-        callback.call(scope || this, val, attrPath.slice(0, i + 1));
-
         if (!val) break; // at the leaf
       }
     }
