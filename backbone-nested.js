@@ -20,6 +20,7 @@
 
       Backbone.NestedModel.walkPath(this.attributes, attrPath, function(val, path){
         if (path.length === attrPath.length){
+          // attribute found
           result = val;
         }
       });
@@ -118,8 +119,39 @@
 
     // note: modifies `newAttrs`
     _mergeAttr: function(newAttrs, attrPath, value, opts){
-      var attrObj = Backbone.NestedModel.createAttrObj(attrPath, value);
-      this._mergeAttrs(newAttrs, attrObj, opts);
+      opts = opts || {};
+
+      var fullPathLength = attrPath.length;
+
+      Backbone.NestedModel.walkPath(newAttrs, attrPath, function(val, path){
+        var attr = _.last(path);
+        if (path.length === fullPathLength - 1){
+          // reached the attribute to be set
+          // TODO if object/array, change events on diff
+          val[attr] = value;
+
+        } else if (!val[attr]){
+          if (_.isNumber(attr)){
+            val[attr] = [];
+          } else {
+            val[attr] = {};
+          }
+        }
+        
+        if (!opts.silent){
+          var attrStr = Backbone.NestedModel.createAttrStr(path);
+
+          // let the superclass handle change events for top-level attributes
+          if (path.length){
+            this._delayedTrigger('change:' + attrStr, this, val);
+            this.changed[attrStr] = value;
+          }
+
+          // if (_.isArray(dest[attr])){
+          //   this._delayedTrigger('add:' + attrStr, this, dest[attr]);
+          // }
+        }
+      });
     },
 
     // note: modifies `dest`
