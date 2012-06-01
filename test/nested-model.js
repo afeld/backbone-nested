@@ -155,6 +155,16 @@ $(document).ready(function() {
     equals(doc.get('name.last'), 'Ashkenas');
   });
 
+  test("#set() 1-1 should override existing array", function() {
+    doc.set('addresses', []);
+    equals(doc.get('addresses').length, 0);
+  });
+
+  test("#set() 1-1 should override existing object", function() {
+    doc.set('name', {});
+    ok(_.isEmpty(doc.get('name')), 'should return an empty object');
+  });
+
   test("#set() 1-N dot notation on leaves", function() {
     equals(doc.get('addresses.0.city'), 'Brooklyn');
     equals(doc.get('addresses.0.state'), 'NY');
@@ -207,14 +217,50 @@ $(document).ready(function() {
     equals(doc.get('addresses[1].state'), 'MN');
   });
 
-  test("#set() should override existing array", function() {
-    doc.set('addresses', []);
-    equals(doc.get('addresses').length, 0);
+  test("#set() 1-N with an object containing an array", function() {
+    doc.set('addresses[0]', {
+      city: 'Seattle',
+      state: 'WA',
+      areaCodes: ['001', '002', '003']
+    });
+    doc.set('addresses[1]', {
+      city: 'Minneapolis',
+      state: 'MN',
+      areaCodes: ['101', '102', '103']
+    });
+
+    deepEqual(doc.get('addresses[0].areaCodes'), ['001', '002', '003']);
+    deepEqual(doc.get('addresses[1].areaCodes'), ['101', '102', '103']);
   });
 
-  test("#set() should override existing object", function() {
-    doc.set('name', {});
-    ok(_.isEmpty(doc.get('name')), 'should return an empty object');
+  test("#set() 1-N with an object containing an array where array values are being removed", function() {
+    doc.set('addresses[0]', {
+      city: 'Seattle',
+      state: 'WA',
+      areaCodes: ['001', '002', '003']
+    });
+    doc.set('addresses[0]', {
+      city: 'Minneapolis',
+      state: 'MN',
+      areaCodes: ['101', '102']
+    });
+
+    deepEqual(doc.get('addresses[0].areaCodes'), ['101', '102']);
+  });
+
+  test("#set() 1-N with an object containing an array where array has been cleared", function() {
+    doc.set('addresses[0]', {
+      city: 'Seattle',
+      state: 'WA',
+      areaCodes: ['001', '002', '003']
+    });
+    doc.set('addresses[0]', {
+      city: 'Minneapolis',
+      state: 'MN',
+      areaCodes: []
+    });
+
+    deepEqual(doc.get('addresses[0].areaCodes'), []);
   });
 
 
