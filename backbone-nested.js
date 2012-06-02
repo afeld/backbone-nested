@@ -98,7 +98,14 @@
       this.set(aryPath, val, opts);
 
       if (trigger){
-        this.trigger('remove:' + Backbone.NestedModel.createAttrStr(aryPath), this, oldEl);
+        var attrStr = Backbone.NestedModel.createAttrStr(aryPath);
+        this.trigger('remove:' + attrStr, this, oldEl);
+        this.trigger('change:' + attrStr, this, oldEl);
+        for (var aryCount = aryPath.length - 1; aryCount >= 0; aryCount--) {
+          attrStr = Backbone.NestedModel.createAttrStr(_.first(aryPath, aryCount));
+          this.trigger('change:' + attrStr, this, oldEl);
+        };
+        this.trigger('change', this, oldEl);
       }
 
       return this;
@@ -152,7 +159,7 @@
           
           // Trigger Remove Event if array being set to null
           if (value === null){
-            var parentPath = _.initial(attrPath).join('.');
+            var parentPath = Backbone.NestedModel.createAttrStr(_.initial(attrPath));
             model._delayedTrigger('remove:' + parentPath, model, val[attr]);
           }
 

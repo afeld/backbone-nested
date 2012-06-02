@@ -452,6 +452,44 @@ $(document).ready(function() {
     ok(callbacksFired[2], "'remove:addresses' should fire");
   });
 
+  test("change+remove when removing from array", function() {
+    var callbacksFired = [false, false, false];
+    
+    doc.bind('change', function(){ callbacksFired[0] = true; });
+    doc.bind('change:addresses', function(){ callbacksFired[1] = true; });
+    doc.bind('remove:addresses', function(){ callbacksFired[2] = true; });
+
+    doc.remove('addresses[1]');
+
+    ok(callbacksFired[0], "'change' should fire");
+    ok(callbacksFired[1], "'change:addresses' should fire");
+    ok(callbacksFired[2], "'remove:addresses' should fire");
+  });
+
+  test("change+remove when removing from deep array", function() {
+    var callbacksFired = [false, false, false, false, false];
+
+    doc.set('name.middle', {
+      initial: 'L',
+      full: 'Limburger',
+      fullAlternates: ['Danger', 'Funny', 'Responsible']
+    });
+    
+    doc.bind('change', function(){ callbacksFired[0] = true; });
+    doc.bind('change:name', function(){ callbacksFired[1] = true; });
+    doc.bind('change:name.middle', function(){ callbacksFired[2] = true; });
+    doc.bind('change:name.middle.fullAlternates', function(){ callbacksFired[3] = true; });
+    doc.bind('remove:name.middle.fullAlternates', function(){ callbacksFired[4] = true; });
+
+    doc.remove('name.middle.fullAlternates[1]');
+
+    ok(callbacksFired[0], "'change' should fire");
+    ok(callbacksFired[1], "'change:name' should fire");
+    ok(callbacksFired[2], "'change:name.middle' should fire");
+    ok(callbacksFired[3], "'change:name.middle.fullAlternates' should fire");
+    ok(callbacksFired[4], "'remove:name.middle.fullAlternates' should fire");
+  });
+
 
   // ----- CHANGED_ATTRIBUTES --------
 
