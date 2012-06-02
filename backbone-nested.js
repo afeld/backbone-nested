@@ -131,6 +131,9 @@
         var attr = _.last(path);
         var attrStr = Backbone.NestedModel.createAttrStr(path);
 
+        // See if this is a new value being set
+        var isNewValue = !_.isEqual(val[attr], value);
+
         if (path.length === fullPathLength){
           // reached the attribute to be set
           
@@ -138,7 +141,7 @@
           val[attr] = value;
 
           // Trigger Change Event if new values are being set
-          if (_.isObject(value)){
+          if (_.isObject(value) && isNewValue){
             for (var a in value){
               if (value.hasOwnProperty(a)){
                 model._delayedTrigger('change:' + attrStr + '.' + a, model, val[attr]);
@@ -164,7 +167,7 @@
         if (!opts.silent){
 
           // let the superclass handle change events for top-level attributes
-          if (path.length > 1){
+          if (path.length > 1 && isNewValue){
             model._delayedTrigger('change:' + attrStr, model, val[attr]);
             model.changed[attrStr] = val[attr];
           }

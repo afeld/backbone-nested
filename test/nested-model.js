@@ -315,6 +315,31 @@ $(document).ready(function() {
     doc.set({'name.first': 'Bob'}, {silent: true});
   });
 
+  test("change event doesn't fire if new value matches old value", function() {
+    equal(doc.get('name.first'), 'Aidan');
+
+    doc.bind('change', function(){ ok(false, "'change' should not fire"); });
+    doc.bind('change:name', function(){ ok(false, "'change:name' should not fire"); });
+    doc.bind('change:name.first', function(){ ok(false, "'change:name.first' should not fire"); });
+
+    doc.set({'name.first': 'Aidan'});
+  });
+
+  test("change event doesn't fire if new value matches old value with objects", function() {
+    equal(doc.get('name.middle.initial'), 'L');
+    equal(doc.get('name.middle.full'), 'Lee');
+
+    doc.bind('change', function(){ ok(false, "'change' should not fire"); });
+    doc.bind('change:name', function(){ ok(false, "'change:name' should not fire"); });
+    doc.bind('change:name.middle', function(){ ok(false, "'change:name.middle' should not fire"); });
+    doc.bind('change:name.middle.initial', function(){ ok(false, "'change:name.middle.initial' should not fire"); });
+
+    doc.set({'name.middle': {
+      initial: 'L',
+      full: 'Lee'
+    }});
+  });
+
   test("attribute change event receives new value", function() {
     doc.bind('change:name', function(model, newVal){
       deepEqual(newVal, {
