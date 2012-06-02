@@ -143,6 +143,14 @@ $(document).ready(function() {
     equals(doc.get('name.last'), 'Ashkenas');
   });
 
+  test("#set() 1-1 on deeply nested object", function() {
+    equals(doc.get('name.middle.initial'), 'L');
+
+    doc.set({'name.middle.initial': 'D'});
+
+    equals(doc.get('name.middle.initial'), 'D');
+  });
+
   test("#set() 1-1 with object", function() {
     doc.set({
       name: {
