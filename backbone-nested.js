@@ -19,9 +19,10 @@
         result;
 
       Backbone.NestedModel.walkPath(this.attributes, attrPath, function(val, path){
+        var attr = _.last(path);
         if (path.length === attrPath.length){
           // attribute found
-          result = val;
+          result = val[attr];
         }
       });
 
@@ -97,7 +98,14 @@
       this.set(aryPath, val, opts);
 
       if (trigger){
-        this.trigger('remove:' + Backbone.NestedModel.createAttrStr(aryPath), this, oldEl);
+        var attrStr = Backbone.NestedModel.createAttrStr(aryPath);
+        this.trigger('remove:' + attrStr, this, oldEl);
+        this.trigger('change:' + attrStr, this, oldEl);
+        for (var aryCount = aryPath.length - 1; aryCount >= 0; aryCount--) {
+          attrStr = Backbone.NestedModel.createAttrStr(_.first(aryPath, aryCount));
+          this.trigger('change:' + attrStr, this, oldEl);
+        };
+        this.trigger('change', this, oldEl);
       }
 
       return this;
@@ -124,13 +132,36 @@
       opts = opts || {};
 
       var fullPathLength = attrPath.length;
+      var model = this;
 
       Backbone.NestedModel.walkPath(newAttrs, attrPath, function(val, path){
         var attr = _.last(path);
-        if (path.length === fullPathLength - 1){
+        var attrStr = Backbone.NestedModel.createAttrStr(path);
+
+        // See if this is a new value being set
+        var isNewValue = !_.isEqual(val[attr], value);
+
+        if (path.length === fullPathLength){
           // reached the attribute to be set
-          // TODO if object/array, change events on diff
+          
+          // Set the new value
           val[attr] = value;
+
+          // Trigger Change Event if new values are being set
+          if (_.isObject(value) && isNewValue){
+            for (var a in value){
+              if (value.hasOwnProperty(a)){
+                model._delayedTrigger('change:' + attrStr + '.' + a, model, val[attr]);
+                model.changed[attrStr] = value;
+              }
+            }
+          }
+          
+          // Trigger Remove Event if array being set to null
+          if (value === null){
+            var parentPath = Backbone.NestedModel.createAttrStr(_.initial(attrPath));
+            model._delayedTrigger('remove:' + parentPath, model, val[attr]);
+          }
 
         } else if (!val[attr]){
           if (_.isNumber(attr)){
@@ -141,17 +172,16 @@
         }
         
         if (!opts.silent){
-          var attrStr = Backbone.NestedModel.createAttrStr(path);
 
           // let the superclass handle change events for top-level attributes
-          if (path.length){
-            this._delayedTrigger('change:' + attrStr, this, val);
-            this.changed[attrStr] = value;
+          if (path.length > 1 && isNewValue){
+            model._delayedTrigger('change:' + attrStr, model, val[attr]);
+            model.changed[attrStr] = val[attr];
           }
 
-          // if (_.isArray(dest[attr])){
-          //   this._delayedTrigger('add:' + attrStr, this, dest[attr]);
-          // }
+          if (_.isArray(val[attr])){
+            model._delayedTrigger('add:' + attrStr, model, val[attr]);
+          }
         }
       });
     }
@@ -195,7 +225,7 @@
 
       // walk through the child attributes
       for (var i = 0; i < attrPath.length; i++){
-        callback.call(scope || this, val, attrPath.slice(0, i));
+        callback.call(scope || this, val, attrPath.slice(0, i + 1));
 
         childAttr = attrPath[i];
         val = val[childAttr];
