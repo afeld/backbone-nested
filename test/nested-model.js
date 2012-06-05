@@ -359,22 +359,33 @@ $(document).ready(function() {
   });
 
   test("change event on deeply nested attribute", function() {
-    var callbacksFired = [false, false, false, false];
-    
-    doc.bind('change', function(){ callbacksFired[0] = true; });
-    doc.bind('change:name', function(){ callbacksFired[1] = true; });
-    doc.bind('change:name.middle', function(){ callbacksFired[2] = true; });
-    doc.bind('change:name.middle.full', function(){ callbacksFired[3] = true; });
+    var change = sinon.spy();
+    var changeName = sinon.spy();
+    var changeNameMiddle = sinon.spy();
+    var changeNameMiddleFull = sinon.spy();
+    var changeNameMiddleInitial = sinon.spy();
+    var changeNameFirst = sinon.spy();
 
-    doc.bind('change:name.middle.initial', function(){ ok(false, "'change:name.middle.initial' should not fire"); });
-    doc.bind('change:name.first', function(){ ok(false, "'change:name.first' should not fire"); });
+    doc.bind('change', change);
+    doc.bind('change:name', changeName);
+    doc.bind('change:name.middle', changeNameMiddle);
+    doc.bind('change:name.middle.full', changeNameMiddleFull);
+
+    doc.bind('change:name.middle.initial', changeNameMiddleInitial);
+    doc.bind('change:name.first', changeNameFirst);
 
     doc.set({'name.middle.full': 'Leonard'});
 
-    ok(callbacksFired[0], "'change' should fire");
-    ok(callbacksFired[1], "'change:name' should fire");
-    ok(callbacksFired[2], "'change:name.middle' should fire");
-    ok(callbacksFired[3], "'change:name.middle.full' should fire");
+    // Confirm all triggers fire once that should
+    sinon.assert.calledOnce(change);
+    sinon.assert.calledOnce(changeName);
+    sinon.assert.calledOnce(changeNameMiddle);
+    sinon.assert.calledOnce(changeNameMiddleFull);
+
+    // Confirm other triggers do not fire
+    sinon.assert.notCalled(changeNameMiddleInitial);
+    sinon.assert.notCalled(changeNameFirst);
+
   });
 
   test("change event on deeply nested attribute with object", function() {
