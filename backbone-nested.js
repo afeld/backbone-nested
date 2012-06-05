@@ -98,13 +98,13 @@
       this.set(aryPath, val, opts);
 
       if (trigger){
-        var attrStr = Backbone.NestedModel.createAttrStr(aryPath);
+        attrStr = Backbone.NestedModel.createAttrStr(aryPath);
         this.trigger('remove:' + attrStr, this, oldEl);
         this.trigger('change:' + attrStr, this, oldEl);
         for (var aryCount = aryPath.length - 1; aryCount >= 0; aryCount--) {
           attrStr = Backbone.NestedModel.createAttrStr(_.first(aryPath, aryCount));
           this.trigger('change:' + attrStr, this, oldEl);
-        };
+        }
         this.trigger('change', this, oldEl);
       }
 
