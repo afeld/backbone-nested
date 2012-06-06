@@ -43,43 +43,6 @@ $(document).ready(function() {
   });
 
 
-  // ----- CREATE_ATTR_OBJ --------
-
-  test(".createAttrObj() value object", function() {
-    var result = Backbone.NestedModel.createAttrObj('foo', {bar: 'baz'});
-    deepEqual(result, {
-      foo: {
-        bar: 'baz'
-      }
-    });
-  });
-
-  test(".createAttrObj() nested attribute", function() {
-    var result = Backbone.NestedModel.createAttrObj('foo.bar', 'baz');
-
-    deepEqual(result, {
-      foo: {
-        bar: 'baz'
-      }
-    });
-  });
-
-  test(".createAttrObj() respects arrays", function() {
-    var result = Backbone.NestedModel.createAttrObj('foo', {bar: ['baz', 'boop']});
-
-    deepEqual(result, {
-      foo: {
-        bar: ['baz', 'boop']
-      }
-    });
-  });
-
-  test(".createAttrObj() respects array accessors", function() {
-    var result = Backbone.NestedModel.createAttrObj('foo[0]', 'bar');
-    deepEqual(result, {foo: ['bar']});
-  });
-
-
   // ----- GET --------
 
   test("#get() 1-1 returns attributes object", function() {
@@ -180,6 +143,14 @@ $(document).ready(function() {
     equals(doc.get('name.last'), 'Ashkenas');
   });
 
+  test("#set() 1-1 on deeply nested object", function() {
+    equals(doc.get('name.middle.initial'), 'L');
+
+    doc.set({'name.middle.initial': 'D'});
+
+    equals(doc.get('name.middle.initial'), 'D');
+  });
+
   test("#set() 1-1 with object", function() {
     doc.set({
       name: {
@@ -190,6 +161,16 @@ $(document).ready(function() {
 
     equals(doc.get('name.first'), 'Jeremy');
     equals(doc.get('name.last'), 'Ashkenas');
+  });
+
+  test("#set() 1-1 should override existing array", function() {
+    doc.set('addresses', []);
+    equals(doc.get('addresses').length, 0);
+  });
+
+  test("#set() 1-1 should override existing object", function() {
+    doc.set('name', {});
+    ok(_.isEmpty(doc.get('name')), 'should return an empty object');
   });
 
   test("#set() 1-N dot notation on leaves", function() {
@@ -244,6 +225,52 @@ $(document).ready(function() {
     equals(doc.get('addresses[1].state'), 'MN');
   });
 
+  test("#set() 1-N with an object containing an array", function() {
+    doc.set('addresses[0]', {
+      city: 'Seattle',
+      state: 'WA',
+      areaCodes: ['001', '002', '003']
+    });
+    doc.set('addresses[1]', {
+      city: 'Minneapolis',
+      state: 'MN',
+      areaCodes: ['101', '102', '103']
+    });
+
+    deepEqual(doc.get('addresses[0].areaCodes'), ['001', '002', '003']);
+    deepEqual(doc.get('addresses[1].areaCodes'), ['101', '102', '103']);
+  });
+
+  test("#set() 1-N with an object containing an array where array values are being removed", function() {
+    doc.set('addresses[0]', {
+      city: 'Seattle',
+      state: 'WA',
+      areaCodes: ['001', '002', '003']
+    });
+    doc.set('addresses[0]', {
+      city: 'Minneapolis',
+      state: 'MN',
+      areaCodes: ['101', '102']
+    });
+
+    deepEqual(doc.get('addresses[0].areaCodes'), ['101', '102']);
+  });
+
+  test("#set() 1-N with an object containing an array where array has been cleared", function() {
+    doc.set('addresses[0]', {
+      city: 'Seattle',
+      state: 'WA',
+      areaCodes: ['001', '002', '003']
+    });
+    doc.set('addresses[0]', {
+      city: 'Minneapolis',
+      state: 'MN',
+      areaCodes: []
+    });
+
+    deepEqual(doc.get('addresses[0].areaCodes'), []);
+  });
+
 
   // ----- TO_JSON --------
 
@@ -286,6 +313,31 @@ $(document).ready(function() {
     doc.bind('change:name.first', function(){ ok(false, "'change:name.first' should not fire"); });
 
     doc.set({'name.first': 'Bob'}, {silent: true});
+  });
+
+  test("change event doesn't fire if new value matches old value", function() {
+    equal(doc.get('name.first'), 'Aidan');
+
+    doc.bind('change', function(){ ok(false, "'change' should not fire"); });
+    doc.bind('change:name', function(){ ok(false, "'change:name' should not fire"); });
+    doc.bind('change:name.first', function(){ ok(false, "'change:name.first' should not fire"); });
+
+    doc.set({'name.first': 'Aidan'});
+  });
+
+  test("change event doesn't fire if new value matches old value with objects", function() {
+    equal(doc.get('name.middle.initial'), 'L');
+    equal(doc.get('name.middle.full'), 'Lee');
+
+    doc.bind('change', function(){ ok(false, "'change' should not fire"); });
+    doc.bind('change:name', function(){ ok(false, "'change:name' should not fire"); });
+    doc.bind('change:name.middle', function(){ ok(false, "'change:name.middle' should not fire"); });
+    doc.bind('change:name.middle.initial', function(){ ok(false, "'change:name.middle.initial' should not fire"); });
+
+    doc.set({'name.middle': {
+      initial: 'L',
+      full: 'Lee'
+    }});
   });
 
   test("attribute change event receives new value", function() {
@@ -398,6 +450,44 @@ $(document).ready(function() {
     ok(callbacksFired[0], "'change' should fire");
     ok(callbacksFired[1], "'change:addresses' should fire");
     ok(callbacksFired[2], "'remove:addresses' should fire");
+  });
+
+  test("change+remove when removing from array", function() {
+    var callbacksFired = [false, false, false];
+    
+    doc.bind('change', function(){ callbacksFired[0] = true; });
+    doc.bind('change:addresses', function(){ callbacksFired[1] = true; });
+    doc.bind('remove:addresses', function(){ callbacksFired[2] = true; });
+
+    doc.remove('addresses[1]');
+
+    ok(callbacksFired[0], "'change' should fire");
+    ok(callbacksFired[1], "'change:addresses' should fire");
+    ok(callbacksFired[2], "'remove:addresses' should fire");
+  });
+
+  test("change+remove when removing from deep array", function() {
+    var callbacksFired = [false, false, false, false, false];
+
+    doc.set('name.middle', {
+      initial: 'L',
+      full: 'Limburger',
+      fullAlternates: ['Danger', 'Funny', 'Responsible']
+    });
+    
+    doc.bind('change', function(){ callbacksFired[0] = true; });
+    doc.bind('change:name', function(){ callbacksFired[1] = true; });
+    doc.bind('change:name.middle', function(){ callbacksFired[2] = true; });
+    doc.bind('change:name.middle.fullAlternates', function(){ callbacksFired[3] = true; });
+    doc.bind('remove:name.middle.fullAlternates', function(){ callbacksFired[4] = true; });
+
+    doc.remove('name.middle.fullAlternates[1]');
+
+    ok(callbacksFired[0], "'change' should fire");
+    ok(callbacksFired[1], "'change:name' should fire");
+    ok(callbacksFired[2], "'change:name.middle' should fire");
+    ok(callbacksFired[3], "'change:name.middle.fullAlternates' should fire");
+    ok(callbacksFired[4], "'remove:name.middle.fullAlternates' should fire");
   });
 
 
