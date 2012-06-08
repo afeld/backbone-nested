@@ -283,61 +283,99 @@ $(document).ready(function() {
   // ----- CHANGE EVENTS --------
 
   test("change event on top-level attribute", function() {
-    doc.bind('change', function(){ ok(true); });
-    doc.bind('change:gender', function(){ ok(true); });
+    var change = sinon.spy();
+    var changeGender = sinon.spy();
 
-    expect(2);
+    doc.bind('change', change);
+    doc.bind('change:gender', changeGender);
+
     doc.set({'gender': 'F'});
+
+    sinon.assert.calledOnce(change);
+    sinon.assert.calledOnce(changeGender);
   });
 
   test("change event on nested attribute", function() {
-    var callbacksFired = [0, 0, 0];
+    var change = sinon.spy();
+    var changeName = sinon.spy();
+    var changeNameFirst = sinon.spy();
+    var changeNameLast = sinon.spy();
+    var changeGender = sinon.spy();
     
-    doc.bind('change', function(){ callbacksFired[0] += 1; });
-    doc.bind('change:name', function(){ callbacksFired[1] += 1; });
-    doc.bind('change:name.first', function(){ callbacksFired[2] += 1; });
+    doc.bind('change', change);
+    doc.bind('change:name', changeName);
+    doc.bind('change:name.first', changeNameFirst);
 
-    doc.bind('change:name.last', function(){ ok(false, "'change:name.last' should not fire"); });
-    doc.bind('change:gender', function(){ ok(false, "'change:gender' should not fire"); });
+    doc.bind('change:name.last', changeNameLast);
+    doc.bind('change:gender', changeGender);
 
     doc.set({'name.first': 'Bob'});
 
-    equal(callbacksFired[0], 1, "'change' should fire once");
-    equal(callbacksFired[1], 1, "'change:name' should fire once");
-    equal(callbacksFired[2], 1, "'change:name.first' should fire once");
+    sinon.assert.calledOnce(change);
+    sinon.assert.calledOnce(changeName);
+    sinon.assert.calledOnce(changeNameFirst);
+
+    sinon.assert.notCalled(changeNameLast);
+    sinon.assert.notCalled(changeGender);
   });
 
   test("change event doesn't fire on silent", function() {
-    doc.bind('change', function(){ ok(false, "'change' should not fire"); });
-    doc.bind('change:name', function(){ ok(false, "'change:name' should not fire"); });
-    doc.bind('change:name.first', function(){ ok(false, "'change:name.first' should not fire"); });
+    var change = sinon.spy();
+    var changeName = sinon.spy();
+    var changeNameFirst = sinon.spy();
+
+    doc.bind('change', change);
+    doc.bind('change:name', changeName);
+    doc.bind('change:name.first', changeNameFirst);
 
     doc.set({'name.first': 'Bob'}, {silent: true});
+
+    sinon.assert.notCalled(change);
+    sinon.assert.notCalled(changeName);
+    sinon.assert.notCalled(changeNameFirst);
   });
 
   test("change event doesn't fire if new value matches old value", function() {
+    var change = sinon.spy();
+    var changeName = sinon.spy();
+    var changeNameFirst = sinon.spy();
+
     equal(doc.get('name.first'), 'Aidan');
 
-    doc.bind('change', function(){ ok(false, "'change' should not fire"); });
-    doc.bind('change:name', function(){ ok(false, "'change:name' should not fire"); });
-    doc.bind('change:name.first', function(){ ok(false, "'change:name.first' should not fire"); });
+    doc.bind('change', change);
+    doc.bind('change:name', changeName);
+    doc.bind('change:name.first', changeNameFirst);
 
     doc.set({'name.first': 'Aidan'});
+
+    sinon.assert.notCalled(change);
+    sinon.assert.notCalled(changeName);
+    sinon.assert.notCalled(changeNameFirst);
   });
 
   test("change event doesn't fire if new value matches old value with objects", function() {
+    var change = sinon.spy();
+    var changeName = sinon.spy();
+    var changeNameMiddle = sinon.spy();
+    var changeNameMiddleInitial = sinon.spy();
+
     equal(doc.get('name.middle.initial'), 'L');
     equal(doc.get('name.middle.full'), 'Lee');
 
-    doc.bind('change', function(){ ok(false, "'change' should not fire"); });
-    doc.bind('change:name', function(){ ok(false, "'change:name' should not fire"); });
-    doc.bind('change:name.middle', function(){ ok(false, "'change:name.middle' should not fire"); });
-    doc.bind('change:name.middle.initial', function(){ ok(false, "'change:name.middle.initial' should not fire"); });
+    doc.bind('change', change);
+    doc.bind('change:name', changeName);
+    doc.bind('change:name.middle', changeNameMiddle);
+    doc.bind('change:name.middle.initial', changeNameMiddleInitial);
 
     doc.set({'name.middle': {
       initial: 'L',
       full: 'Lee'
     }});
+
+    sinon.assert.notCalled(change);
+    sinon.assert.notCalled(changeName);
+    sinon.assert.notCalled(changeNameMiddle);
+    sinon.assert.notCalled(changeNameMiddleInitial);
   });
 
   test("attribute change event receives new value", function() {
@@ -359,72 +397,105 @@ $(document).ready(function() {
   });
 
   test("change event on deeply nested attribute", function() {
-    var callbacksFired = [false, false, false, false];
-    
-    doc.bind('change', function(){ callbacksFired[0] = true; });
-    doc.bind('change:name', function(){ callbacksFired[1] = true; });
-    doc.bind('change:name.middle', function(){ callbacksFired[2] = true; });
-    doc.bind('change:name.middle.full', function(){ callbacksFired[3] = true; });
+    var change = sinon.spy();
+    var changeName = sinon.spy();
+    var changeNameMiddle = sinon.spy();
+    var changeNameMiddleFull = sinon.spy();
+    var changeNameMiddleInitial = sinon.spy();
+    var changeNameFirst = sinon.spy();
 
-    doc.bind('change:name.middle.initial', function(){ ok(false, "'change:name.middle.initial' should not fire"); });
-    doc.bind('change:name.first', function(){ ok(false, "'change:name.first' should not fire"); });
+    doc.bind('change', change);
+    doc.bind('change:name', changeName);
+    doc.bind('change:name.middle', changeNameMiddle);
+    doc.bind('change:name.middle.full', changeNameMiddleFull);
+
+    doc.bind('change:name.middle.initial', changeNameMiddleInitial);
+    doc.bind('change:name.first', changeNameFirst);
 
     doc.set({'name.middle.full': 'Leonard'});
 
-    ok(callbacksFired[0], "'change' should fire");
-    ok(callbacksFired[1], "'change:name' should fire");
-    ok(callbacksFired[2], "'change:name.middle' should fire");
-    ok(callbacksFired[3], "'change:name.middle.full' should fire");
+    // Confirm all triggers fire once that should
+    sinon.assert.calledOnce(change);
+    sinon.assert.calledOnce(changeName);
+    sinon.assert.calledOnce(changeNameMiddle);
+    sinon.assert.calledOnce(changeNameMiddleFull);
+
+    // Confirm other triggers do not fire
+    sinon.assert.notCalled(changeNameMiddleInitial);
+    sinon.assert.notCalled(changeNameFirst);
+
   });
 
   test("change event on deeply nested attribute with object", function() {
-    var callbacksFired = [false, false, false, false, false];
+    var change = sinon.spy();
+    var changeName = sinon.spy();
+    var changeNameMiddle = sinon.spy();
+    var changeNameMiddleInitial = sinon.spy();
+    var changeNameMiddleFull = sinon.spy();
+    var changeNameFirst = sinon.spy();
     
-    doc.bind('change', function(){ callbacksFired[0] = true; });
-    doc.bind('change:name', function(){ callbacksFired[1] = true; });
-    doc.bind('change:name.middle', function(){ callbacksFired[2] = true; });
-    doc.bind('change:name.middle.initial', function(){ callbacksFired[3] = true; });
-    doc.bind('change:name.middle.full', function(){ callbacksFired[4] = true; });
+    doc.bind('change', change);
+    doc.bind('change:name', changeName);
+    doc.bind('change:name.middle', changeNameMiddle);
+    doc.bind('change:name.middle.initial', changeNameMiddleInitial);
+    doc.bind('change:name.middle.full', changeNameMiddleFull);
 
-    doc.bind('change:name.first', function(){ ok(false, "'change:name.first' should not fire"); });
+    doc.bind('change:name.first', changeNameFirst);
 
     doc.set({'name.middle': {
       initial: 'F',
       full: 'Frankenfurter'
     }});
 
-    ok(callbacksFired[0], "'change' should fire");
-    ok(callbacksFired[1], "'change:name' should fire");
-    ok(callbacksFired[2], "'change:name.middle' should fire");
-    ok(callbacksFired[3], "'change:name.middle.initial' should fire");
-    ok(callbacksFired[4], "'change:name.middle.full' should fire");
+    // Confirm all triggers fire once that should
+    sinon.assert.calledOnce(change);
+    sinon.assert.calledOnce(changeName);
+    sinon.assert.calledOnce(changeNameMiddle);
+    sinon.assert.calledOnce(changeNameMiddleInitial);
+    sinon.assert.calledOnce(changeNameMiddleFull);
+
+    // Confirm other triggers do not fire
+    sinon.assert.notCalled(changeNameFirst);
   });
 
   test("change event on nested array", function() {
-    var callbacksFired = [false, false, false, false];
+    var change = sinon.spy();
+    var changeAddresses = sinon.spy();
+    var changeAddresses0 = sinon.spy();
+    var changeAddresses0City = sinon.spy();
+    var changeAddresses0State = sinon.spy();
+    var changeAddresses1 = sinon.spy();
     
-    doc.bind('change', function(){ callbacksFired[0] = true; });
-    doc.bind('change:addresses', function(){ callbacksFired[1] = true; });
-    doc.bind('change:addresses[0]', function(){ callbacksFired[2] = true; });
-    doc.bind('change:addresses[0].city', function(){ callbacksFired[3] = true; });
+    doc.bind('change', change);
+    doc.bind('change:addresses', changeAddresses);
+    doc.bind('change:addresses[0]', changeAddresses0);
+    doc.bind('change:addresses[0].city', changeAddresses0City);
     
-    doc.bind('change:addresses[0].state', function(){ ok(false, "'change:addresses[0].state' should not fire"); });
-    doc.bind('change:addresses[1]', function(){ ok(false, "'change:addresses[1]' should not fire"); });
+    doc.bind('change:addresses[0].state', changeAddresses0State);
+    doc.bind('change:addresses[1]', changeAddresses1);
 
     doc.set({'addresses[0].city': 'New York'});
 
-    ok(callbacksFired[0], "'change' should fire");
-    ok(callbacksFired[1], "'change:addresses' should fire");
-    ok(callbacksFired[2], "'change:addresses[0]' should fire");
-    ok(callbacksFired[3], "'change:addresses[0].city' should fire");
+    // Confirm all triggers fire once that should
+    sinon.assert.calledOnce(change);
+    sinon.assert.calledOnce(changeAddresses);
+    sinon.assert.calledOnce(changeAddresses0);
+    sinon.assert.calledOnce(changeAddresses0City);
+
+    // Confirm other triggers do not fire
+    sinon.assert.notCalled(changeAddresses0State);
+    sinon.assert.notCalled(changeAddresses1);
+
   });
 
   test("change+add when adding to array", function() {
-    var callbacksFired = [false, false, false];
+    var change = sinon.spy();
+    var changeAddresses = sinon.spy();
+    var addAddresses = sinon.spy();
     
-    doc.bind('change', function(){ callbacksFired[0] = true; });
-    doc.bind('change:addresses', function(){ callbacksFired[1] = true; });
-    doc.bind('add:addresses', function(){ callbacksFired[2] = true; });
+    doc.bind('change', change);
+    doc.bind('change:addresses', changeAddresses);
+    doc.bind('add:addresses', addAddresses);
 
     doc.set({
       'addresses[2]': {
@@ -433,41 +504,50 @@ $(document).ready(function() {
       }
     });
 
-    ok(callbacksFired[0], "'change' should fire");
-    ok(callbacksFired[1], "'change:addresses' should fire");
-    ok(callbacksFired[2], "'add:addresses' should fire");
+    sinon.assert.calledOnce(change);
+    sinon.assert.calledOnce(changeAddresses);
+    sinon.assert.calledOnce(addAddresses);
+
   });
 
   test("change+remove when unsetting on array", function() {
-    var callbacksFired = [false, false, false];
+    var change = sinon.spy();
+    var changeAddresses = sinon.spy();
+    var removeAddresses = sinon.spy();
     
-    doc.bind('change', function(){ callbacksFired[0] = true; });
-    doc.bind('change:addresses', function(){ callbacksFired[1] = true; });
-    doc.bind('remove:addresses', function(){ callbacksFired[2] = true; });
+    doc.bind('change', change);
+    doc.bind('change:addresses', changeAddresses);
+    doc.bind('remove:addresses', removeAddresses);
 
     doc.unset('addresses[1]');
 
-    ok(callbacksFired[0], "'change' should fire");
-    ok(callbacksFired[1], "'change:addresses' should fire");
-    ok(callbacksFired[2], "'remove:addresses' should fire");
+    sinon.assert.calledOnce(change);
+    sinon.assert.calledOnce(changeAddresses);
+    sinon.assert.calledOnce(removeAddresses);
   });
 
   test("change+remove when removing from array", function() {
-    var callbacksFired = [false, false, false];
+    var change = sinon.spy();
+    var changeAddresses = sinon.spy();
+    var removeAddresses = sinon.spy();
     
-    doc.bind('change', function(){ callbacksFired[0] = true; });
-    doc.bind('change:addresses', function(){ callbacksFired[1] = true; });
-    doc.bind('remove:addresses', function(){ callbacksFired[2] = true; });
+    doc.bind('change', change);
+    doc.bind('change:addresses', changeAddresses);
+    doc.bind('remove:addresses', removeAddresses);
 
     doc.remove('addresses[1]');
 
-    ok(callbacksFired[0], "'change' should fire");
-    ok(callbacksFired[1], "'change:addresses' should fire");
-    ok(callbacksFired[2], "'remove:addresses' should fire");
+    sinon.assert.calledOnce(change);
+    sinon.assert.calledOnce(changeAddresses);
+    sinon.assert.calledOnce(removeAddresses);
   });
 
   test("change+remove when removing from deep array", function() {
-    var callbacksFired = [false, false, false, false, false];
+    var change = sinon.spy();
+    var changeName = sinon.spy();
+    var changeNameMiddle = sinon.spy();
+    var changeNameMiddleFullAlternates = sinon.spy();
+    var removeNameMiddleFullAlternates = sinon.spy();
 
     doc.set('name.middle', {
       initial: 'L',
@@ -475,19 +555,19 @@ $(document).ready(function() {
       fullAlternates: ['Danger', 'Funny', 'Responsible']
     });
     
-    doc.bind('change', function(){ callbacksFired[0] = true; });
-    doc.bind('change:name', function(){ callbacksFired[1] = true; });
-    doc.bind('change:name.middle', function(){ callbacksFired[2] = true; });
-    doc.bind('change:name.middle.fullAlternates', function(){ callbacksFired[3] = true; });
-    doc.bind('remove:name.middle.fullAlternates', function(){ callbacksFired[4] = true; });
+    doc.bind('change', change);
+    doc.bind('change:name', changeName);
+    doc.bind('change:name.middle', changeNameMiddle);
+    doc.bind('change:name.middle.fullAlternates', changeNameMiddleFullAlternates);
+    doc.bind('remove:name.middle.fullAlternates', removeNameMiddleFullAlternates);
 
     doc.remove('name.middle.fullAlternates[1]');
 
-    ok(callbacksFired[0], "'change' should fire");
-    ok(callbacksFired[1], "'change:name' should fire");
-    ok(callbacksFired[2], "'change:name.middle' should fire");
-    ok(callbacksFired[3], "'change:name.middle.fullAlternates' should fire");
-    ok(callbacksFired[4], "'remove:name.middle.fullAlternates' should fire");
+    sinon.assert.calledOnce(change);
+    sinon.assert.calledOnce(changeName);
+    sinon.assert.calledOnce(changeNameMiddle);
+    sinon.assert.calledOnce(changeNameMiddleFullAlternates);
+    sinon.assert.calledOnce(removeNameMiddleFullAlternates);
   });
 
 
@@ -570,17 +650,16 @@ $(document).ready(function() {
   });
 
   test("#add() on nested array should trigger 'add' event", function() {
-    var callbackFired = false;
+    var addAddresses = sinon.spy();
 
-    doc.bind('add:addresses', function(){
-      callbackFired = true;
-    });
+    doc.bind('add:addresses', addAddresses);
+
     doc.add('addresses', {
       city: 'Lincoln',
       state: 'NE'
     });
 
-    ok(callbackFired, "callback wasn't fired");
+    sinon.assert.calledOnce(addAddresses);
   });
 
   test("#add() on nested array should trigger 'add' event after model is updated", function() {
@@ -602,7 +681,6 @@ $(document).ready(function() {
   });
 
   test("#add() should return the model to mimic set() functionality", function() {
-    var callbackFired = false;
     var model;
 
     model = doc.set('addresses.0.city', 'Boston');
@@ -631,18 +709,18 @@ $(document).ready(function() {
   });
 
   test("#remove() on nested array should trigger 'remove' event", function() {
-    var callbackFired = 0;
+    var removeAddresses = sinon.spy();
 
-    doc.bind('remove:addresses', function(){
-      callbackFired++;
-    });
+    doc.bind('remove:addresses', removeAddresses);
 
     doc.remove('addresses[0]');
-    equal(callbackFired, 1, "callback should have fired once");
+    
+    sinon.assert.calledOnce(removeAddresses);
     equal(doc.get('addresses').length, 1);
 
     doc.remove('addresses[0]');
-    equal(callbackFired, 2, "callback should have fired twice");
+
+    sinon.assert.calledTwice(removeAddresses);
     equal(doc.get('addresses').length, 0);
   });
 
@@ -678,7 +756,6 @@ $(document).ready(function() {
   });
 
   test("#remove() should return the model to mimic set() functionality", function() {
-    var callbackFired = false;
     var model;
 
     model = doc.set('addresses.0.city', 'Boston');
