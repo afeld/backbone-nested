@@ -36,8 +36,9 @@
     },
 
     set: function(key, value, opts){
-      var newAttrs = Backbone.NestedModel.deepClone(this.attributes);
-
+      var newAttrs = Backbone.NestedModel.deepClone(this.attributes),
+	    chgs = {};
+	  
       if (_.isString(key)){
         // Backbone 0.9.0+ syntax: `model.set(key, val)` - convert the key to an attribute path
         key = Backbone.NestedModel.attrPath(key);
@@ -45,7 +46,7 @@
 
       if (_.isArray(key)){
         // attribute path
-        this._setAttr(newAttrs, key, value, opts);
+        this._setAttr(newAttrs, key, value, chgs, opts);
       } else { // it's an Object
         opts = value;
         var attrs = key,
@@ -54,11 +55,19 @@
         for (var attrStr in attrs){
           if (attrs.hasOwnProperty(attrStr)){
             attrPath = Backbone.NestedModel.attrPath(attrStr);
-            this._setAttr(newAttrs, attrPath, attrs[attrStr], opts);
+            this._setAttr(newAttrs, attrPath, attrs[attrStr], chgs, opts);
           }
         }
       }
 
+	  opts || (opts = {});
+	  if (!this._validate(newAttrs, opts)) return false;
+	  
+	  for (var attrStr in chgs) {
+	    this.trigger('change:' + attrStr, this, chgs[attrStr]);
+        this.changed[attrStr] = chgs[attrStr];
+	  }
+	  
       var setReturn = Backbone.NestedModel.__super__.set.call(this, newAttrs, opts);
       this._runDelayedTriggers();
       return setReturn;
@@ -128,7 +137,7 @@
     },
 
     // note: modifies `newAttrs`
-    _setAttr: function(newAttrs, attrPath, value, opts){
+    _setAttr: function(newAttrs, attrPath, value, chgs, opts){
       opts = opts || {};
 
       var fullPathLength = attrPath.length;
@@ -175,8 +184,7 @@
 
           // let the superclass handle change events for top-level attributes
           if (path.length > 1 && isNewValue){
-            model._delayedTrigger('change:' + attrStr, model, val[attr]);
-            model.changed[attrStr] = val[attr];
+            chgs[attrStr] = val[attr];
           }
 
           if (_.isArray(val[attr])){
