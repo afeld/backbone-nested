@@ -65,9 +65,7 @@
     },
 
     unset: function(attrStr, opts){
-      opts = _.extend({}, opts, {unset: true});
-      this.set(attrStr, null, opts);
-
+      this.set(attrStr, undefined, opts);
       return this;
     },
 
@@ -158,7 +156,7 @@
           }
           
           // Trigger Remove Event if array being set to null
-          if (value === null){
+          if (_.isNull(value) || _.isUndefined(value)){
             var parentPath = Backbone.NestedModel.createAttrStr(_.initial(attrPath));
             model._delayedTrigger('remove:' + parentPath, model, val[attr]);
           }
