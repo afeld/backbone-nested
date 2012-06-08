@@ -648,6 +648,14 @@ $(document).ready(function() {
     ok(_.isUndefined(doc.get('name.first')));
   });
 
+  test("#unset() nested attribute does not affect other attributes", function() {
+    equal(doc.get('gender'), 'M');
+
+    doc.unset('name.first');
+
+    equal(doc.get('gender'), 'M', 'Gender field should not be affected by unsetting first name');
+  });
+
 
   // ----- ADD --------
 
