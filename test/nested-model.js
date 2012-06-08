@@ -617,12 +617,12 @@ $(document).ready(function() {
 
   test("#changedAttributes() should clear the nested attributes between change events with validation", function() {
     doc.validate = function(attributes) {
-		if (attributes.name.first.length > 15) {
-			return "First name is too long";
-		}
-	};
-	
-	doc.set({'name.first': 'TooLongFirstName'});
+    if (attributes.name.first.length > 15) {
+      return "First name is too long";
+    }
+  };
+  
+  doc.set({'name.first': 'TooLongFirstName'});
 
     doc.bind('change', function(){
       deepEqual(this.changedAttributes(), {

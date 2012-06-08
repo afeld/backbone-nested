@@ -37,8 +37,8 @@
 
     set: function(key, value, opts){
       var newAttrs = Backbone.NestedModel.deepClone(this.attributes),
-	    chgs = {};
-	  
+        chgs = {};
+    
       if (_.isString(key)){
         // Backbone 0.9.0+ syntax: `model.set(key, val)` - convert the key to an attribute path
         key = Backbone.NestedModel.attrPath(key);
@@ -60,14 +60,14 @@
         }
       }
 
-	  opts || (opts = {});
-	  if (!this._validate(newAttrs, opts)) return false;
-	  
-	  for (var attrStr in chgs) {
-	    this.trigger('change:' + attrStr, this, chgs[attrStr]);
-        this.changed[attrStr] = chgs[attrStr];
-	  }
-	  
+      opts = opts || {};
+      if (!this._validate(newAttrs, opts)) return false;
+      
+      for (var changedAttr in chgs) {
+        this.trigger('change:' + changedAttr, this, chgs[changedAttr]);
+        this.changed[changedAttr] = chgs[changedAttr];
+      }
+    
       var setReturn = Backbone.NestedModel.__super__.set.call(this, newAttrs, opts);
       this._runDelayedTriggers();
       return setReturn;
