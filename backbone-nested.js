@@ -37,21 +37,23 @@
 
     set: function(key, value, opts){
       var newAttrs = Backbone.NestedModel.deepClone(this.attributes),
-        chgs = {};
+        chgs = {},
+        attrPath;
     
       if (_.isString(key)){
         // Backbone 0.9.0+ syntax: `model.set(key, val)` - convert the key to an attribute path
-        key = Backbone.NestedModel.attrPath(key);
+        attrPath = Backbone.NestedModel.attrPath(key);
+      } else if (_.isArray(key)){
+        // attribute path
+        attrPath = key;
       }
 
-      if (_.isArray(key)){
-        // attribute path
-        this._setAttr(newAttrs, key, value, chgs, opts);
+      if (attrPath){
+        opts = opts || {};
+        this._setAttr(newAttrs, attrPath, value, chgs, opts);
       } else { // it's an Object
-        opts = value;
-        var attrs = key,
-          attrPath;
-
+        opts = value || {};
+        var attrs = key;
         for (var attrStr in attrs){
           if (attrs.hasOwnProperty(attrStr)){
             attrPath = Backbone.NestedModel.attrPath(attrStr);
@@ -60,15 +62,30 @@
         }
       }
 
-      opts = opts || {};
       if (!this._validate(newAttrs, opts)) return false;
       
       for (var changedAttr in chgs) {
         this.trigger('change:' + changedAttr, this, chgs[changedAttr]);
         this.changed[changedAttr] = chgs[changedAttr];
       }
-    
-      var setReturn = Backbone.NestedModel.__super__.set.call(this, newAttrs, opts);
+
+      var setReturn;
+      if (opts.unset && attrPath.length === 1){ // assume it is a singular attribute being unset
+        // unsetting top-level attribute
+        var unsetObj = {};
+        unsetObj[key] = null;
+        setReturn = Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
+      } else {
+        // normal set(), or an unset of nested attribute
+        if (opts.unset){
+          // make sure Backbone.Model won't unset the top-level attribute
+          opts = _.extend({}, opts);
+          delete opts.unset;
+        }
+        
+        setReturn = Backbone.NestedModel.__super__.set.call(this, newAttrs, opts);
+      }
+      
       this._runDelayedTriggers();
       return setReturn;
     },
@@ -153,8 +170,14 @@
         if (path.length === fullPathLength){
           // reached the attribute to be set
           
-          // Set the new value
-          val[attr] = value;
+          if (opts.unset){
+            // unset the value
+            delete val[attr];
+            delete model._escapedAttributes[attrStr];
+          } else {
+            // Set the new value
+            val[attr] = value;
+          }
 
           // Trigger Change Event if new values are being set
           if (_.isObject(value) && isNewValue){
@@ -181,7 +204,6 @@
         }
         
         if (!opts.silent){
-
           // let the superclass handle change events for top-level attributes
           if (path.length > 1 && isNewValue){
             chgs[attrStr] = val[attr];

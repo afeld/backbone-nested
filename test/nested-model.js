@@ -643,9 +643,22 @@ $(document).ready(function() {
 
   // ----- UNSET --------
 
+  test("#unset() top-level attribute", function() {
+    doc.unset('name');
+    equal(doc.get('name'), undefined);
+    equal(doc.get('gender'), 'M', "it shouldn't unset other attributes");
+  });
+
   test("#unset() nested attribute", function() {
     doc.unset('name.first');
-    ok(_.isUndefined(doc.get('name.first')));
+    deepEqual(doc.get('name'), {
+      middle: {
+        initial: 'L',
+        full: 'Lee'
+      },
+      last: 'Feldman'
+    });
+    equal(doc.get('gender'), 'M', "it shouldn't unset other attributes");
   });
 
 
