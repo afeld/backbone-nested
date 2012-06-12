@@ -595,6 +595,49 @@ $(document).ready(function() {
     doc.set({'name.middle.full': 'Limburger'});
   });
 
+  test("#changedAttributes() should return the attributes for the full path and all sub-paths for conventional set", function() {
+    doc.bind('change', function(){
+      deepEqual(this.changedAttributes(), {
+        name: {
+          first: 'Aidan',
+          middle: {
+            initial: 'L',
+            full: 'Limburger'
+          },
+          last: 'Feldman'
+        },
+        'name.middle': {
+          initial: 'L',
+          full: 'Limburger'
+        },
+        'name.middle.full': 'Limburger'
+      });
+    });
+    
+    //Set using conventional JSON - emulates a model fetch
+    doc.set({
+      gender: 'M',
+      name: {
+        first: 'Aidan',
+        middle: {
+          initial: 'L',
+          full: 'Limburger'
+        },
+        last: 'Feldman'
+      },
+      addresses: [
+        {
+          city: 'Brooklyn',
+          state: 'NY'
+        },
+        {
+          city: 'Oak Park',
+          state: 'IL'
+        }
+      ]
+    });
+  });
+  
   test("#changedAttributes() should clear the nested attributes between change events", function() {
     doc.set({'name.first': 'Bob'});
 
@@ -617,12 +660,12 @@ $(document).ready(function() {
 
   test("#changedAttributes() should clear the nested attributes between change events with validation", function() {
     doc.validate = function(attributes) {
-    if (attributes.name.first.length > 15) {
-      return "First name is too long";
-    }
-  };
+      if (attributes.name.first.length > 15) {
+        return "First name is too long";
+      }
+    };
   
-  doc.set({'name.first': 'TooLongFirstName'});
+    doc.set({'name.first': 'TooLongFirstName'});
 
     doc.bind('change', function(){
       deepEqual(this.changedAttributes(), {
