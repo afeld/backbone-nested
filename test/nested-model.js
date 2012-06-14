@@ -378,6 +378,56 @@ $(document).ready(function() {
     sinon.assert.notCalled(changeNameMiddleInitial);
   });
 
+  test("change event doesn't fire if validation fails on top level attribute", function() {
+    var change = sinon.spy();
+    var changeName = sinon.spy();
+    var changeNameFirst = sinon.spy();
+
+    doc.validate = function(attributes) {
+      if (attributes.gender.length > 1) {
+        return "Gender should be 'M' or 'F'";
+      }
+    };
+
+    doc.bind('change', change);
+    doc.bind('change:name', changeName);
+    doc.bind('change:name.first', changeNameFirst);
+
+    doc.set({'gender': 'Unknown'});
+
+    sinon.assert.notCalled(change);
+    sinon.assert.notCalled(changeName);
+    sinon.assert.notCalled(changeNameFirst);
+  });
+
+  test("change event doesn't fire if validation fails on deeply nested attribute", function() {
+    var change = sinon.spy();
+    var changeName = sinon.spy();
+    var changeNameMiddle = sinon.spy();
+    var changeNameMiddleInitial = sinon.spy();
+
+    doc.validate = function(attributes) {
+      if (attributes.name.middle.initial.length > 1) {
+        return "Middle initial is too long";
+      }
+    };
+
+    doc.bind('change', change);
+    doc.bind('change:name', changeName);
+    doc.bind('change:name.middle', changeNameMiddle);
+    doc.bind('change:name.middle.initial', changeNameMiddleInitial);
+
+    doc.set({'name.middle': {
+      initial: 'ThisIsTooLong',
+      full: 'Lee'
+    }});
+
+    sinon.assert.notCalled(change);
+    sinon.assert.notCalled(changeName);
+    sinon.assert.notCalled(changeNameMiddle);
+    sinon.assert.notCalled(changeNameMiddleInitial);
+  });
+
   test("attribute change event receives new value", function() {
     doc.bind('change:name', function(model, newVal){
       deepEqual(newVal, {
@@ -617,12 +667,12 @@ $(document).ready(function() {
 
   test("#changedAttributes() should clear the nested attributes between change events with validation", function() {
     doc.validate = function(attributes) {
-    if (attributes.name.first.length > 15) {
-      return "First name is too long";
-    }
-  };
+      if (attributes.name.first.length > 15) {
+        return "First name is too long";
+      }
+    };
   
-  doc.set({'name.first': 'TooLongFirstName'});
+    doc.set({'name.first': 'TooLongFirstName'});
 
     doc.bind('change', function(){
       deepEqual(this.changedAttributes(), {
@@ -640,6 +690,7 @@ $(document).ready(function() {
 
     doc.set({'name.last': 'Dylan'});
   });
+
 
   // ----- UNSET --------
 
@@ -731,6 +782,32 @@ $(document).ready(function() {
     });
 
     equal(model, doc);
+  });
+
+  test("#add() on nested array fails if validation fails", function() {
+    var addAddresses = sinon.spy();
+
+    equal(doc.get('addresses').length, 2);
+
+    doc.bind('add:addresses', addAddresses);
+
+    doc.validate = function(attributes) {
+      for (var i = attributes.addresses.length - 1; i >= 0; i--) {
+        if (attributes.addresses[i].state.length > 2) {
+          return "Must use 2 letter state abbreviation";
+        }
+      }
+    };
+
+    var attrs = {
+      city: 'Lincoln',
+      state: 'Nebraska' // Longer than 2 letters, validation should fail
+    };
+
+    doc.add('addresses', attrs);
+
+    sinon.assert.notCalled(addAddresses);
+    equal(doc.get('addresses[2]'), undefined);
   });
 
 
