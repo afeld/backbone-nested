@@ -398,8 +398,6 @@ $(document).ready(function() {
     sinon.assert.notCalled(change);
     sinon.assert.notCalled(changeName);
     sinon.assert.notCalled(changeNameFirst);
-
-    doc.validate = undefined;
   });
 
   test("change event doesn't fire if validation fails on deeply nested attribute", function() {
@@ -428,8 +426,6 @@ $(document).ready(function() {
     sinon.assert.notCalled(changeName);
     sinon.assert.notCalled(changeNameMiddle);
     sinon.assert.notCalled(changeNameMiddleInitial);
-
-    doc.validate = undefined;
   });
 
   test("attribute change event receives new value", function() {
@@ -693,9 +689,8 @@ $(document).ready(function() {
     });
 
     doc.set({'name.last': 'Dylan'});
-
-    doc.validate = undefined;
   });
+
 
   // ----- UNSET --------
 
@@ -801,7 +796,7 @@ $(document).ready(function() {
         if (attributes.addresses[i].state.length > 2) {
           return "Must use 2 letter state abbreviation";
         }
-      };
+      }
     };
 
     var attrs = {
@@ -813,9 +808,8 @@ $(document).ready(function() {
 
     sinon.assert.notCalled(addAddresses);
     equal(doc.get('addresses[2]'), undefined);
-
-    doc.validate = undefined;
   });
+
 
   // ----- REMOVE --------
 

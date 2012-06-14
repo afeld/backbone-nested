@@ -198,4 +198,4 @@ Initial release!
 
 ## Contributing
 
-Pull requests are more than welcome - please add tests, which can be run by opening test/index.html.
+Pull requests are more than welcome - please add tests, which can be run by opening test/index.html.  Please make sure the modifications pass [JSHint](http://jshint.com/).
