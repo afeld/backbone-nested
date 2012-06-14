@@ -789,6 +789,34 @@ $(document).ready(function() {
     equal(model, doc);
   });
 
+  test("#add() on nested array fails if validation fails", function() {
+    var addAddresses = sinon.spy();
+
+    equal(doc.get('addresses').length, 2);
+
+    doc.bind('add:addresses', addAddresses);
+
+    doc.validate = function(attributes) {
+      for (var i = attributes.addresses.length - 1; i >= 0; i--) {
+        if (attributes.addresses[i].state.length > 2) {
+          return "Must use 2 letter state abbreviation";
+        }
+      };
+    };
+
+    var attrs = {
+      city: 'Lincoln',
+      state: 'Nebraska' // Longer than 2 letters, validation should fail
+    };
+
+    doc.add('addresses', attrs);
+
+    sinon.assert.notCalled(addAddresses);
+    equal(doc.get('addresses[2]'), undefined);
+
+    doc.validate = undefined;
+  });
+
   // ----- REMOVE --------
 
   test("#remove() on nested array should remove the element from the array", function() {
