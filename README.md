@@ -198,4 +198,8 @@ Initial release!
 
 ## Contributing
 
-Pull requests are more than welcome - please add tests, which can be run by opening test/index.html.
+Pull requests are more than welcome - please add tests, which can be run by opening test/index.html.  They can also be run from the command-line (requires [PhantomJS](http://phantomjs.org/)):
+
+    $ ./run_tests.sh
+
+Please make sure the modifications pass [JSHint](http://jshint.com/).
