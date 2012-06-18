@@ -295,6 +295,26 @@ $(document).ready(function() {
     sinon.assert.calledOnce(changeGender);
   });
 
+  test("change event should fire after attribute is set", function() {
+    var callback = function(model){
+      equal(model.get('name.first'), 'Bob');
+    };
+
+    var change = sinon.spy(callback),
+      changeName = sinon.spy(callback),
+      changeFirstName = sinon.spy(callback);
+
+    doc.bind('change', change);
+    doc.bind('change:name', changeName);
+    doc.bind('change:name.first', changeFirstName);
+
+    doc.set('name.first', 'Bob');
+
+    sinon.assert.calledOnce(change);
+    sinon.assert.calledOnce(changeName);
+    sinon.assert.calledOnce(changeFirstName);
+  });
+
   test("change event on nested attribute", function() {
     var change = sinon.spy();
     var changeName = sinon.spy();
