@@ -65,7 +65,7 @@
       if (!this._validate(newAttrs, opts)) return false;
       
       for (var changedAttr in chgs) {
-        this.trigger('change:' + changedAttr, this, chgs[changedAttr]);
+        this._delayedTrigger('change:' + changedAttr, this, chgs[changedAttr]);
         this.changed[changedAttr] = chgs[changedAttr];
       }
 
