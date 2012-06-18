@@ -30,10 +30,10 @@ user.bind('change:name.first', function(){ ... });
 
 ## Usage
 
-1. Download the latest version [here](https://github.com/afeld/backbone-nested/tags), and add `backbone-nested.js` to your HTML `<head>`, **after** `backbone.js` is included ([tested](http://afeld.github.com/backbone-nested/test/) against [jQuery](http://jquery.com/) v1.7.1, [Underscore](http://documentcloud.github.com/underscore/) v1.3.3 and [Backbone](http://documentcloud.github.com/backbone/) v0.9.2).
+1. Download the latest version [here](https://github.com/afeld/backbone-nested/tags), and add `backbone-nested.js` to your HTML `<head>`, **after** `backbone.js` is included ([tested](http://afeld.github.com/backbone-nested/test/) against [jQuery](http://jquery.com/) v1.7.2, [Underscore](http://documentcloud.github.com/underscore/) v1.3.3 and [Backbone](http://documentcloud.github.com/backbone/) v0.9.2).
 
     ```html
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
     <script type="text/javascript" src="underscore.js"></script>
     <script type="text/javascript" src="backbone.js"></script>
     <script type="text/javascript" src="backbone-nested.js"></script>
