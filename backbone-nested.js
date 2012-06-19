@@ -157,7 +157,7 @@
     },
 
     // note: modifies `newAttrs`
-    _setAttr: function(newAttrs, attrPath, value, opts){
+    _setAttr: function(newAttrs, attrPath, newValue, opts){
       opts = opts || {};
 
       var fullPathLength = attrPath.length;
@@ -168,7 +168,7 @@
         var attrStr = Backbone.NestedModel.createAttrStr(path);
 
         // See if this is a new value being set
-        var isNewValue = !_.isEqual(val[attr], value);
+        var isNewValue = !_.isEqual(val[attr], newValue);
 
         if (path.length === fullPathLength){
           // reached the attribute to be set
@@ -179,20 +179,26 @@
             delete model._escapedAttributes[attrStr];
           } else {
             // Set the new value
-            val[attr] = value;
+            val[attr] = newValue;
           }
 
           // Trigger Change Event if new values are being set
-          if (_.isObject(value) && isNewValue){
-            for (var a in value){
-              if (value.hasOwnProperty(a)){
-                model._delayedChange(attrStr + '.' + a, val[attr]);
+          if (_.isObject(newValue) && isNewValue){
+            // TODO need deep compare
+            var nestedAttr, nestedVal;
+            for (var a in newValue){
+              if (newValue.hasOwnProperty(a)){
+                nestedAttr = attrStr + '.' + a;
+                nestedVal = newValue[a];
+                if (!_.isEqual(model.get(nestedAttr), nestedVal)){
+                  model._delayedChange(nestedAttr, nestedVal);
+                }
               }
             }
           }
           
           // Trigger Remove Event if array being set to null
-          if (value === null){
+          if (newValue === null){
             var parentPath = Backbone.NestedModel.createAttrStr(_.initial(attrPath));
             model._delayedTrigger('remove:' + parentPath, model, val[attr]);
           }
