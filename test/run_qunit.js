@@ -74,9 +74,10 @@ page.open(phantom.args[0], function(status){
                 console.log("\nTest name (failed, passed, total)\n");
                 for(var i in tests){
                     var text = tests[i].innerText;
-                    if(text !== undefined){
-                        if(/Rerun$/.test(text)) text = text.substring(0, text.length - 5);
-                        console.log(text + "\n");    
+                    // only print failed tests
+                    if(text && !/\(0,/.test(text)){
+                        text = text.replace(/Rerun$/m, '');
+                        console.log(text + "\n");
                     }
                 }
  
