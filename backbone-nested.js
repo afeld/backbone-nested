@@ -37,7 +37,6 @@
 
     set: function(key, value, opts){
       var newAttrs = Backbone.NestedModel.deepClone(this.attributes),
-        chgs = {},
         attrPath;
     
       if (_.isString(key)){
@@ -50,23 +49,22 @@
 
       if (attrPath){
         opts = opts || {};
-        this._setAttr(newAttrs, attrPath, value, chgs, opts);
+        this._setAttr(newAttrs, attrPath, value, opts);
       } else { // it's an Object
         opts = value || {};
         var attrs = key;
         for (var attrStr in attrs){
           if (attrs.hasOwnProperty(attrStr)){
             attrPath = Backbone.NestedModel.attrPath(attrStr);
-            this._setAttr(newAttrs, attrPath, attrs[attrStr], chgs, opts);
+            this._setAttr(newAttrs, attrPath, attrs[attrStr], opts);
           }
         }
       }
 
-      if (!this._validate(newAttrs, opts)) return false;
-      
-      for (var changedAttr in chgs) {
-        this._delayedTrigger('change:' + changedAttr, this, chgs[changedAttr]);
-        this.changed[changedAttr] = chgs[changedAttr];
+      if (!this._validate(newAttrs, opts)){
+        // reset changed attributes
+        this.changed = {};
+        return false;
       }
 
       var setReturn;
@@ -147,6 +145,11 @@
       _delayedTriggers.push(arguments);
     },
 
+    _delayedChange: function(attrStr, newVal){
+      this._delayedTrigger('change:' + attrStr, this, newVal);
+      this.changed[attrStr] = newVal;
+    },
+
     _runDelayedTriggers: function(){
       while (_delayedTriggers.length > 0){
         this.trigger.apply(this, _delayedTriggers.shift());
@@ -154,7 +157,7 @@
     },
 
     // note: modifies `newAttrs`
-    _setAttr: function(newAttrs, attrPath, value, chgs, opts){
+    _setAttr: function(newAttrs, attrPath, value, opts){
       opts = opts || {};
 
       var fullPathLength = attrPath.length;
@@ -183,8 +186,7 @@
           if (_.isObject(value) && isNewValue){
             for (var a in value){
               if (value.hasOwnProperty(a)){
-                model._delayedTrigger('change:' + attrStr + '.' + a, model, val[attr]);
-                model.changed[attrStr] = value;
+                model._delayedChange(attrStr + '.' + a, val[attr]);
               }
             }
           }
@@ -206,7 +208,7 @@
         if (!opts.silent){
           // let the superclass handle change events for top-level attributes
           if (path.length > 1 && isNewValue){
-            chgs[attrStr] = val[attr];
+            model._delayedChange(attrStr, val[attr]);
           }
 
           if (_.isArray(val[attr])){
