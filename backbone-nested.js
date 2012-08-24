@@ -91,12 +91,12 @@
     clear: function(options) {
       // Mostly taken from Backbone.Model.set, modified to work for NestedModel.
       options = options || {};
-      var attrs = Backbone.NestedModel.deepClone(this.attributes);
-      for (var attr in attrs) attrs[attr] = void 0;
-      if (!this._validate(attrs, options)) return false;
+      if (!options.silent && this.validate && !this.validate({}, options)) {
+        return false; // Should maybe return this instead?
+      }
 
       var escaped = this._escapedAttributes;
-      var changes = this.changed = {};
+      var changed = this.changed = {};
       var model = this;
 
       var clearAttrs = function(obj, prefix) {
@@ -110,7 +110,8 @@
             }
             if (!options.silent) model._delayedChange(attr, null);
             delete obj[a];
-            model.changed[attr] = null;
+            delete escaped[a];
+            changed[attr] = null;
           }
         }
       };
