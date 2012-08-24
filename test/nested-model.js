@@ -754,6 +754,13 @@ $(document).ready(function() {
     doc.set({'name.last': 'Dylan'});
   });
 
+  // ----- CLEAR --------
+
+  test("#clear()", function() {
+    doc.clear();
+    deepEqual(doc.attributes, {}, 'it should clear all attributes');
+  });
+
 
   // ----- UNSET --------
 
