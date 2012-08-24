@@ -88,12 +88,6 @@
       return this;
     },
 
-    unset: function(attrStr, opts){
-      opts = _.extend({}, opts, {unset: true});
-      this.set(attrStr, null, opts);
-      return this;
-    },
-
     clear: function(options) {
       options = options || {};
       var attrs = Backbone.NestedModel.deepClone(this.attributes);
