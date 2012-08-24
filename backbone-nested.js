@@ -38,7 +38,7 @@
     set: function(key, value, opts){
       var newAttrs = Backbone.NestedModel.deepClone(this.attributes),
         attrPath;
-    
+
       if (_.isString(key)){
         // Backbone 0.9.0+ syntax: `model.set(key, val)` - convert the key to an attribute path
         attrPath = Backbone.NestedModel.attrPath(key);
@@ -53,10 +53,12 @@
       } else { // it's an Object
         opts = value || {};
         var attrs = key;
-        for (var attrStr in attrs){
-          if (attrs.hasOwnProperty(attrStr)){
-            attrPath = Backbone.NestedModel.attrPath(attrStr);
-            this._setAttr(newAttrs, attrPath, attrs[attrStr], opts);
+        for (var _attrStr in attrs) {
+          if (attrs.hasOwnProperty(_attrStr)) {
+            this._setAttr(newAttrs,
+                          Backbone.NestedModel.attrPath(_attrStr),
+                          opts.unset ? null : attrs[_attrStr],
+                          opts);
           }
         }
       }
@@ -67,32 +69,52 @@
         return false;
       }
 
-      var setReturn;
-      if (opts.unset && attrPath.length === 1){ // assume it is a singular attribute being unset
+      if (opts.unset && attrPath && attrPath.length === 1){ // assume it is a singular attribute being unset
         // unsetting top-level attribute
         var unsetObj = {};
         unsetObj[key] = null;
-        setReturn = Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
+        Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
       } else {
         // normal set(), or an unset of nested attribute
-        if (opts.unset){
+        if (opts.unset && attrPath){
           // make sure Backbone.Model won't unset the top-level attribute
           opts = _.extend({}, opts);
           delete opts.unset;
         }
-        
-        setReturn = Backbone.NestedModel.__super__.set.call(this, newAttrs, opts);
+        Backbone.NestedModel.__super__.set.call(this, newAttrs, opts);
       }
-      
+
       this._runDelayedTriggers();
-      return setReturn;
+      return this;
     },
 
     unset: function(attrStr, opts){
       opts = _.extend({}, opts, {unset: true});
       this.set(attrStr, null, opts);
-
       return this;
+    },
+
+    clear: function(options) {
+      options = options || {};
+      var attrs = Backbone.NestedModel.deepClone(this.attributes);
+      for (attr in attrs) attrs[attr] = void 0;
+      if (!this._validate(attrs, options)) return false;
+
+      var changes = options.changes = {};
+      var now = this.attributes;
+      var escaped = this._escapedAttributes;
+      var prev = this._previousAttributes || {};
+      for (var attr in attrs) {;
+        if (_.has(now, attr)) {
+          delete escaped[attr];
+          (options.silent ? this._silent : changes)[attr] = true;
+        }
+        delete now[attr];
+        delete this.changed[attr];
+        delete this._pending[attr];
+      }
+      // Fire the `"change"` events.
+      if (!options.silent) this.change(options);
     },
 
     add: function(attrStr, value, opts){
@@ -172,7 +194,7 @@
 
         if (path.length === fullPathLength){
           // reached the attribute to be set
-          
+
           if (opts.unset){
             // unset the value
             delete val[attr];
@@ -184,19 +206,25 @@
 
           // Trigger Change Event if new values are being set
           if (_.isObject(newValue) && isNewValue){
-            // TODO need deep compare
-            var nestedAttr, nestedVal;
-            for (var a in newValue){
-              if (newValue.hasOwnProperty(a)){
-                nestedAttr = attrStr + '.' + a;
-                nestedVal = newValue[a];
-                if (!_.isEqual(model.get(nestedAttr), nestedVal)){
-                  model._delayedChange(nestedAttr, nestedVal);
+            var checkChanges = function(obj, prefix) {
+              var nestedAttr, nestedVal;
+              for (var a in obj){
+                if (obj.hasOwnProperty(a)) {
+                  nestedAttr = prefix + '.' + a;
+                  nestedVal = obj[a];
+                  if (!_.isEqual(model.get(nestedAttr), nestedVal)) {
+                    model._delayedChange(nestedAttr, nestedVal);
+                  }
+                  if (_.isObject(nestedVal)) {
+                    checkChanges(nestedVal, nestedAttr);
+                  }
                 }
               }
-            }
+            };
+            checkChanges(newValue, attrStr);
+
           }
-          
+
           // Trigger Remove Event if array being set to null
           if (newValue === null){
             var parentPath = Backbone.NestedModel.createAttrStr(_.initial(attrPath));
@@ -210,7 +238,7 @@
             val[attr] = {};
           }
         }
-        
+
         if (!opts.silent){
           // let the superclass handle change events for top-level attributes
           if (path.length > 1 && isNewValue){
@@ -229,7 +257,7 @@
 
     attrPath: function(attrStrOrPath){
       var path;
-      
+
       if (_.isString(attrStrOrPath)){
         // TODO this parsing can probably be more efficient
         path = (attrStrOrPath === '') ? [''] : attrStrOrPath.match(/[^\.\[\]]+/g);
