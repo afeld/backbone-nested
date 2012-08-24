@@ -119,6 +119,15 @@
 
       // Fire the `"change"` events.
       if (!options.silent) this._delayedTrigger('change');
+
+      // Also set the bracket style for array index:
+      _.each(_.keys(changed), function(key) {
+        if (/\.\d/.test(key)) {
+          var altKey = key.replace(/\.(\d+)?/, '[$1]');
+          changed[altKey] = changed[key];
+        }
+      });
+
       this._runDelayedTriggers();
       return this;
     },
