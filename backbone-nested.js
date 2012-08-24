@@ -89,26 +89,37 @@
     },
 
     clear: function(options) {
+      // Mostly taken from Backbone.Model.set, modified to work for NestedModel.
       options = options || {};
       var attrs = Backbone.NestedModel.deepClone(this.attributes);
-      for (attr in attrs) attrs[attr] = void 0;
+      for (var attr in attrs) attrs[attr] = void 0;
       if (!this._validate(attrs, options)) return false;
 
-      var changes = options.changes = {};
-      var now = this.attributes;
       var escaped = this._escapedAttributes;
-      var prev = this._previousAttributes || {};
-      for (var attr in attrs) {;
-        if (_.has(now, attr)) {
-          delete escaped[attr];
-          (options.silent ? this._silent : changes)[attr] = true;
+      var changes = this.changed = {};
+      var model = this;
+
+      var clearAttrs = function(obj, prefix) {
+        var attr, val;
+        for (var a in obj) {
+          if (_.has(obj, a)) {
+            attr = (prefix ? prefix + '.' : '') + a;
+            val = obj[a];
+            if (_.isObject(val)) { // clear child attrs
+              clearAttrs(val, attr);
+            }
+            if (!options.silent) model._delayedChange(attr, null);
+            delete obj[a];
+            model.changed[attr] = null;
+          }
         }
-        delete now[attr];
-        delete this.changed[attr];
-        delete this._pending[attr];
-      }
+      };
+      clearAttrs(this.attributes);
+
       // Fire the `"change"` events.
-      if (!options.silent) this.change(options);
+      if (!options.silent) this._delayedTrigger('change');
+      this._runDelayedTriggers();
+      return this;
     },
 
     add: function(attrStr, value, opts){
