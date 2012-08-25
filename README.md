@@ -159,9 +159,10 @@ user.get('addresses').length; //=> 1
 
 ## Changelog
 
-#### HEAD ([diff](https://github.com/afeld/backbone-nested/compare/v1.1.1...master?w=1))
+#### HEAD ([diff](https://github.com/afeld/backbone-nested/compare/v1.1.2...master?w=1))
 
 * fix `remove()` not firing `'remove'` event when last element of array is removed (thanks @Kmandr)
+* `'change'` events will no longer fire if new value matches the old
 
 #### 1.1.2 ([diff](https://github.com/afeld/backbone-nested/compare/v1.1.1...v1.1.2?w=1))
 
