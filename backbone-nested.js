@@ -89,26 +89,46 @@
     },
 
     clear: function(options) {
+      // Mostly taken from Backbone.Model.set, modified to work for NestedModel.
       options = options || {};
-      var attrs = Backbone.NestedModel.deepClone(this.attributes);
-      for (attr in attrs) attrs[attr] = void 0;
-      if (!this._validate(attrs, options)) return false;
-
-      var changes = options.changes = {};
-      var now = this.attributes;
-      var escaped = this._escapedAttributes;
-      var prev = this._previousAttributes || {};
-      for (var attr in attrs) {;
-        if (_.has(now, attr)) {
-          delete escaped[attr];
-          (options.silent ? this._silent : changes)[attr] = true;
-        }
-        delete now[attr];
-        delete this.changed[attr];
-        delete this._pending[attr];
+      if (!options.silent && this.validate && !this.validate({}, options)) {
+        return false; // Should maybe return this instead?
       }
+
+      var changed = this.changed = {};
+      var model = this;
+
+      var setChanged = function(obj, prefix) {
+        // obj will be an Array or an Object
+        _.each(obj, function(val, attr){
+          var changedPath = prefix;
+          if (_.isArray(obj)){
+            // assume there is a prefix
+            changedPath += '[' + attr + ']';
+          } else if (prefix){
+            changedPath += '.' + attr;
+          } else {
+            changedPath = attr;
+          }
+
+          val = obj[attr];
+          if (_.isObject(val)) { // clear child attrs
+            setChanged(val, changedPath);
+          }
+          if (!options.silent) model._delayedChange(changedPath, null);
+          changed[changedPath] = null;
+        });
+      };
+      setChanged(this.attributes, '');
+
+      this.attributes = {};
+      this._escapedAttributes = {};
+
       // Fire the `"change"` events.
-      if (!options.silent) this.change(options);
+      if (!options.silent) this._delayedTrigger('change');
+
+      this._runDelayedTriggers();
+      return this;
     },
 
     add: function(attrStr, value, opts){
