@@ -100,8 +100,18 @@
       var model = this;
 
       var clearAttrs = function(obj, prefix) {
+        prefix = prefix || '';
         _.each(obj, function(val, attr){
-          var changedPath = (prefix ? prefix + '.' : '') + attr;
+          var changedPath = prefix;
+          if (_.isArray(obj)){
+            // assume there is a prefix
+            changedPath += '[' + attr + ']';
+          } else if (prefix){
+            changedPath += '.' + attr;
+          } else {
+            changedPath = attr;
+          }
+
           val = obj[attr];
           if (_.isObject(val)) { // clear child attrs
             clearAttrs(val, changedPath);
@@ -116,16 +126,6 @@
 
       // Fire the `"change"` events.
       if (!options.silent) this._delayedTrigger('change');
-
-      // Also set the bracket style for array index:
-      _.each(_.keys(changed), function(key) {
-        if (/\.\d/.test(key)) {
-          var altKey = key.replace(/\.(\d+)?/, '[$1]');
-          changed[altKey] = changed[key];
-          // remove the changed attribute that was using dot syntax
-          delete changed[key];
-        }
-      });
 
       this._runDelayedTriggers();
       return this;
