@@ -95,12 +95,11 @@
         return false; // Should maybe return this instead?
       }
 
-      var escaped = this._escapedAttributes;
       var changed = this.changed = {};
       var model = this;
 
-      var clearAttrs = function(obj, prefix) {
-        prefix = prefix || '';
+      var setChanged = function(obj, prefix) {
+        // obj will be an Array or an Object
         _.each(obj, function(val, attr){
           var changedPath = prefix;
           if (_.isArray(obj)){
@@ -114,15 +113,16 @@
 
           val = obj[attr];
           if (_.isObject(val)) { // clear child attrs
-            clearAttrs(val, changedPath);
+            setChanged(val, changedPath);
           }
           if (!options.silent) model._delayedChange(changedPath, null);
-          delete obj[attr];
-          delete escaped[attr];
           changed[changedPath] = null;
         });
       };
-      clearAttrs(this.attributes);
+      setChanged(this.attributes, '');
+
+      this.attributes = {};
+      this._escapedAttributes = {};
 
       // Fire the `"change"` events.
       if (!options.silent) this._delayedTrigger('change');
