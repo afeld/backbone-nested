@@ -91,6 +91,7 @@
     clear: function(options) {
       options = options || {};
       var attrs = Backbone.NestedModel.deepClone(this.attributes);
+      var attr;
       for (attr in attrs) attrs[attr] = void 0;
       if (!this._validate(attrs, options)) return false;
 
@@ -98,7 +99,7 @@
       var now = this.attributes;
       var escaped = this._escapedAttributes;
       var prev = this._previousAttributes || {};
-      for (var attr in attrs) {;
+      for (attr in attrs) {
         if (_.has(now, attr)) {
           delete escaped[attr];
           (options.silent ? this._silent : changes)[attr] = true;
@@ -295,4 +296,4 @@
 
   });
 
-})();
+}());
