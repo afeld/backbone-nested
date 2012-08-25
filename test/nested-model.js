@@ -793,18 +793,6 @@ $(document).ready(function() {
         "name.middle": null,
         "name.last": null,
         "name": null,
-        "addresses.0.city": null,
-        "addresses.0.state": null,
-        "addresses.0": null,
-        "addresses[0].city": null,
-        "addresses[0].state": null,
-        "addresses[0]": null,
-        "addresses.1.city": null,
-        "addresses.1.state": null,
-        "addresses.1": null,
-        "addresses[1].city": null,
-        "addresses[1].state": null,
-        "addresses[1]": null,
         "addresses": null
       });
     });

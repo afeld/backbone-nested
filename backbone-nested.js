@@ -101,6 +101,7 @@
 
       var clearAttrs = function(obj, prefix) {
         var attr, val;
+        if (_.isArray(obj)) return;
         for (var a in obj) {
           if (_.has(obj, a)) {
             attr = (prefix ? prefix + '.' : '') + a;
