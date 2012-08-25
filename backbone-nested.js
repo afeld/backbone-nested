@@ -100,21 +100,17 @@
       var model = this;
 
       var clearAttrs = function(obj, prefix) {
-        var attr, val;
-        if (_.isArray(obj)) return;
-        for (var a in obj) {
-          if (_.has(obj, a)) {
-            attr = (prefix ? prefix + '.' : '') + a;
-            val = obj[a];
-            if (_.isObject(val)) { // clear child attrs
-              clearAttrs(val, attr);
-            }
-            if (!options.silent) model._delayedChange(attr, null);
-            delete obj[a];
-            delete escaped[a];
-            changed[attr] = null;
+        _.each(obj, function(val, attr){
+          var changedPath = (prefix ? prefix + '.' : '') + attr;
+          val = obj[attr];
+          if (_.isObject(val)) { // clear child attrs
+            clearAttrs(val, changedPath);
           }
-        }
+          if (!options.silent) model._delayedChange(changedPath, null);
+          delete obj[attr];
+          delete escaped[attr];
+          changed[changedPath] = null;
+        });
       };
       clearAttrs(this.attributes);
 
@@ -126,6 +122,8 @@
         if (/\.\d/.test(key)) {
           var altKey = key.replace(/\.(\d+)?/, '[$1]');
           changed[altKey] = changed[key];
+          // remove the changed attribute that was using dot syntax
+          delete changed[key];
         }
       });
 

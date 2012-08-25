@@ -782,18 +782,21 @@ $(document).ready(function() {
 
   test("#clear() sets correct .changedAttributes", function() {
     doc.bind('change', function(){
-      // To discuss:
-      // Are we expecting e.g. addresses.0.city or addresses[0].city or only
-      // addresses here?
       deepEqual(this.changedAttributes(), {
-        "gender": null,
-        "name.first": null,
-        "name.middle.initial": null,
-        "name.middle.full": null,
-        "name.middle": null,
-        "name.last": null,
-        "name": null,
-        "addresses": null
+        'addresses': null,
+        'addresses[0]': null,
+        'addresses[0].city': null,
+        'addresses[0].state': null,
+        'addresses[1]': null,
+        'addresses[1].city': null,
+        'addresses[1].state': null,
+        'gender': null,
+        'name': null,
+        'name.first': null,
+        'name.last': null,
+        'name.middle': null,
+        'name.middle.full': null,
+        'name.middle.initial': null
       });
     });
     doc.clear();
