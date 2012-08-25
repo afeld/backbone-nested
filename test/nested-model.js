@@ -761,6 +761,72 @@ $(document).ready(function() {
     deepEqual(doc.attributes, {}, 'it should clear all attributes');
   });
 
+  test("#clear() triggers change events", function() {
+    var change = sinon.spy();
+    var changeName = sinon.spy();
+    var changeNameFirst = sinon.spy();
+    var changeNameLast = sinon.spy();
+
+    doc.bind('change', change);
+    doc.bind('change:name', changeName);
+    doc.bind('change:name.first', changeNameFirst);
+    doc.bind('change:name.last', changeNameLast);
+
+    doc.clear();
+
+    sinon.assert.calledOnce(change);
+    sinon.assert.calledOnce(changeName);
+    sinon.assert.calledOnce(changeNameFirst);
+    sinon.assert.calledOnce(changeNameLast);
+  });
+
+  test("#clear() sets correct .changedAttributes", function() {
+    doc.bind('change', function(){
+      // To discuss:
+      // Are we expecting e.g. addresses.0.city or addresses[0].city or only
+      // addresses here?
+      deepEqual(this.changedAttributes(), {
+        "gender": null,
+        "name.first": null,
+        "name.middle.initial": null,
+        "name.middle.full": null,
+        "name.middle": null,
+        "name.last": null,
+        "name": null,
+        "addresses.0.city": null,
+        "addresses.0.state": null,
+        "addresses.0": null,
+        "addresses[0].city": null,
+        "addresses[0].state": null,
+        "addresses[0]": null,
+        "addresses.1.city": null,
+        "addresses.1.state": null,
+        "addresses.1": null,
+        "addresses[1].city": null,
+        "addresses[1].state": null,
+        "addresses[1]": null,
+        "addresses": null
+      });
+    });
+    doc.clear();
+  });
+
+  test("#clear() silent triggers no change events", function() {
+    var change = sinon.spy();
+    var changeName = sinon.spy();
+    var changeNameFirst = sinon.spy();
+
+    doc.bind('change', change);
+    doc.bind('change:name', changeName);
+    doc.bind('change:name.first', changeNameFirst);
+
+    doc.clear({silent: true});
+
+    sinon.assert.notCalled(change);
+    sinon.assert.notCalled(changeName);
+    sinon.assert.notCalled(changeNameFirst);
+  });
+
 
   // ----- UNSET --------
 
