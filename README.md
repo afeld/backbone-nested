@@ -159,10 +159,11 @@ user.get('addresses').length; //=> 1
 
 ## Changelog
 
-#### HEAD ([diff](https://github.com/afeld/backbone-nested/compare/v1.1.1...master?w=1))
+#### HEAD ([diff](https://github.com/afeld/backbone-nested/compare/v1.1.2...master?w=1))
 
 * fix `remove()` not firing `'remove'` event when last element of array is removed (thanks @Kmandr)
 * fix `clear()` and set nested attributes on `changedAttributes()` (thanks @isakb)
+* `'change'` events will no longer fire if new value matches the old
 
 #### 1.1.2 ([diff](https://github.com/afeld/backbone-nested/compare/v1.1.1...v1.1.2?w=1))
 
@@ -201,6 +202,5 @@ Initial release!
 
 Pull requests are more than welcome - please add tests, which can be run by opening test/index.html.  They can also be run from the command-line (requires [PhantomJS](http://phantomjs.org/)):
 
-    $ ./run_tests.sh
-
-Please make sure the modifications pass [JSHint](http://jshint.com/).
+    $ npm install
+    $ grunt

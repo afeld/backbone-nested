@@ -1,12 +1,13 @@
+/*global document, $, _, Backbone, sinon, module, deepEqual, test, equal, ok */
 $(document).ready(function() {
 
-  var klass = Backbone.NestedModel.extend(),
+  var Klass = Backbone.NestedModel.extend(),
     doc;
 
   module("Backbone.NestedModel", {
     setup: function(){
       // create fresh model instance
-      doc = new klass({
+      doc = new Klass({
         gender: 'M',
         name: {
           first: 'Aidan',
@@ -59,23 +60,23 @@ $(document).ready(function() {
   });
 
   test("#get() 1-1", function() {
-    equals(doc.get('name.first'), 'Aidan');
-    equals(doc.get('name.middle.initial'), 'L');
-    equals(doc.get('name.last'), 'Feldman');
+    equal(doc.get('name.first'), 'Aidan');
+    equal(doc.get('name.middle.initial'), 'L');
+    equal(doc.get('name.last'), 'Feldman');
   });
 
   test("#get() 1-N dot notation", function() {
-    equals(doc.get('addresses.0.city'), 'Brooklyn');
-    equals(doc.get('addresses.0.state'), 'NY');
-    equals(doc.get('addresses.1.city'), 'Oak Park');
-    equals(doc.get('addresses.1.state'), 'IL');
+    equal(doc.get('addresses.0.city'), 'Brooklyn');
+    equal(doc.get('addresses.0.state'), 'NY');
+    equal(doc.get('addresses.1.city'), 'Oak Park');
+    equal(doc.get('addresses.1.state'), 'IL');
   });
 
   test("#get() 1-N square bracket notation", function() {
-    equals(doc.get('addresses[0].city'), 'Brooklyn');
-    equals(doc.get('addresses[0].state'), 'NY');
-    equals(doc.get('addresses[1].city'), 'Oak Park');
-    equals(doc.get('addresses[1].state'), 'IL');
+    equal(doc.get('addresses[0].city'), 'Brooklyn');
+    equal(doc.get('addresses[0].state'), 'NY');
+    equal(doc.get('addresses[1].city'), 'Oak Park');
+    equal(doc.get('addresses[1].state'), 'IL');
   });
 
   test("#get() 1-N returns attributes object", function() {
@@ -125,30 +126,30 @@ $(document).ready(function() {
 
   test("#set() should accept an attribute path array", function() {
     var attrPath = Backbone.NestedModel.attrPath('name.first');
-    equals(doc.get(attrPath), 'Aidan');
+    equal(doc.get(attrPath), 'Aidan');
 
     doc.set(attrPath, 'Jeremy');
 
-    equals(doc.get(attrPath), 'Jeremy');
+    equal(doc.get(attrPath), 'Jeremy');
   });
 
   test("#set() 1-1 on leaves", function() {
-    equals(doc.get('name.first'), 'Aidan');
-    equals(doc.get('name.last'), 'Feldman');
+    equal(doc.get('name.first'), 'Aidan');
+    equal(doc.get('name.last'), 'Feldman');
 
     doc.set({'name.first': 'Jeremy'});
     doc.set({'name.last': 'Ashkenas'});
 
-    equals(doc.get('name.first'), 'Jeremy');
-    equals(doc.get('name.last'), 'Ashkenas');
+    equal(doc.get('name.first'), 'Jeremy');
+    equal(doc.get('name.last'), 'Ashkenas');
   });
 
   test("#set() 1-1 on deeply nested object", function() {
-    equals(doc.get('name.middle.initial'), 'L');
+    equal(doc.get('name.middle.initial'), 'L');
 
     doc.set({'name.middle.initial': 'D'});
 
-    equals(doc.get('name.middle.initial'), 'D');
+    equal(doc.get('name.middle.initial'), 'D');
   });
 
   test("#set() 1-1 with object", function() {
@@ -159,13 +160,13 @@ $(document).ready(function() {
       }
     });
 
-    equals(doc.get('name.first'), 'Jeremy');
-    equals(doc.get('name.last'), 'Ashkenas');
+    equal(doc.get('name.first'), 'Jeremy');
+    equal(doc.get('name.last'), 'Ashkenas');
   });
 
   test("#set() 1-1 should override existing array", function() {
     doc.set('addresses', []);
-    equals(doc.get('addresses').length, 0);
+    equal(doc.get('addresses').length, 0);
   });
 
   test("#set() 1-1 should override existing object", function() {
@@ -174,35 +175,35 @@ $(document).ready(function() {
   });
 
   test("#set() 1-N dot notation on leaves", function() {
-    equals(doc.get('addresses.0.city'), 'Brooklyn');
-    equals(doc.get('addresses.0.state'), 'NY');
-    equals(doc.get('addresses.1.city'), 'Oak Park');
-    equals(doc.get('addresses.1.state'), 'IL');
+    equal(doc.get('addresses.0.city'), 'Brooklyn');
+    equal(doc.get('addresses.0.state'), 'NY');
+    equal(doc.get('addresses.1.city'), 'Oak Park');
+    equal(doc.get('addresses.1.state'), 'IL');
 
     doc.set({'addresses.0.city': 'Seattle'});
     doc.set({'addresses.0.state': 'WA'});
     doc.set({'addresses.1.city': 'Minneapolis'});
     doc.set({'addresses.1.state': 'MN'});
 
-    equals(doc.get('addresses.0.city'), 'Seattle');
-    equals(doc.get('addresses.0.state'), 'WA');
-    equals(doc.get('addresses.1.city'), 'Minneapolis');
-    equals(doc.get('addresses.1.state'), 'MN');
+    equal(doc.get('addresses.0.city'), 'Seattle');
+    equal(doc.get('addresses.0.state'), 'WA');
+    equal(doc.get('addresses.1.city'), 'Minneapolis');
+    equal(doc.get('addresses.1.state'), 'MN');
   });
 
   test("#set() 1-N square bracket notation on leaves", function() {
-    equals(doc.get('addresses[0].city'), 'Brooklyn');
-    equals(doc.get('addresses[0].state'), 'NY');
-    equals(doc.get('addresses[1].city'), 'Oak Park');
-    equals(doc.get('addresses[1].state'), 'IL');
+    equal(doc.get('addresses[0].city'), 'Brooklyn');
+    equal(doc.get('addresses[0].state'), 'NY');
+    equal(doc.get('addresses[1].city'), 'Oak Park');
+    equal(doc.get('addresses[1].state'), 'IL');
 
     doc.set({'addresses[0].city': 'Manhattan'});
     doc.set({'addresses[1].city': 'Chicago'});
 
-    equals(doc.get('addresses[0].city'), 'Manhattan');
-    equals(doc.get('addresses[0].state'), 'NY');
-    equals(doc.get('addresses[1].city'), 'Chicago');
-    equals(doc.get('addresses[1].state'), 'IL');
+    equal(doc.get('addresses[0].city'), 'Manhattan');
+    equal(doc.get('addresses[0].state'), 'NY');
+    equal(doc.get('addresses[1].city'), 'Chicago');
+    equal(doc.get('addresses[1].state'), 'IL');
   });
 
   test("#set() 1-N with an object", function() {
@@ -219,10 +220,10 @@ $(document).ready(function() {
       }
     });
 
-    equals(doc.get('addresses[0].city'), 'Seattle');
-    equals(doc.get('addresses[0].state'), 'WA');
-    equals(doc.get('addresses[1].city'), 'Minneapolis');
-    equals(doc.get('addresses[1].state'), 'MN');
+    equal(doc.get('addresses[0].city'), 'Seattle');
+    equal(doc.get('addresses[0].state'), 'WA');
+    equal(doc.get('addresses[1].city'), 'Minneapolis');
+    equal(doc.get('addresses[1].state'), 'MN');
   });
 
   test("#set() 1-N with an object containing an array", function() {
