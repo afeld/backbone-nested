@@ -340,6 +340,26 @@ $(document).ready(function() {
     sinon.assert.notCalled(changeGender);
   });
 
+  test("change event when unsetting object", function() {
+    var change = sinon.spy();
+    var changeName = sinon.spy();
+    var changeNameFirst = sinon.spy();
+    var changeNameLast = sinon.spy();
+    var changeGender = sinon.spy();
+    
+    doc.bind('change', change);
+    doc.bind('change:name', changeName);
+    doc.bind('change:name.first', changeNameFirst);
+    doc.bind('change:name.last', changeNameLast);
+
+    doc.set({'name': null});
+
+    sinon.assert.calledOnce(change);
+    sinon.assert.calledOnce(changeName);
+    sinon.assert.calledOnce(changeNameFirst);
+    sinon.assert.calledOnce(changeNameLast);
+  });
+
   test("change event doesn't fire on silent", function() {
     var change = sinon.spy();
     var changeName = sinon.spy();
