@@ -356,6 +356,23 @@ $(document).ready(function() {
     sinon.assert.notCalled(changeNameFirst);
   });
 
+  test("change() fires the silenced events", function() {
+    var change = sinon.spy();
+    var changeName = sinon.spy();
+    var changeNameFirst = sinon.spy();
+
+    doc.bind('change', change);
+    doc.bind('change:name', changeName);
+    doc.bind('change:name.first', changeNameFirst);
+
+    doc.set({'name.first': 'Bob'}, {silent: true});
+    doc.change();
+
+    sinon.assert.calledOnce(change);
+    sinon.assert.calledOnce(changeName);
+    sinon.assert.calledOnce(changeNameFirst);
+  });
+
   test("change event doesn't fire if new value matches old value", function() {
     var change = sinon.spy();
     var changeName = sinon.spy();
@@ -817,6 +834,23 @@ $(document).ready(function() {
     sinon.assert.notCalled(change);
     sinon.assert.notCalled(changeName);
     sinon.assert.notCalled(changeNameFirst);
+  });
+
+  test("#clear() silent triggers change events when change() is called", function() {
+    var change = sinon.spy();
+    var changeName = sinon.spy();
+    var changeNameFirst = sinon.spy();
+
+    doc.bind('change', change);
+    doc.bind('change:name', changeName);
+    doc.bind('change:name.first', changeNameFirst);
+
+    doc.clear({silent: true});
+    doc.change();
+
+    sinon.assert.calledOnce(change);
+    sinon.assert.calledOnce(changeName);
+    sinon.assert.calledOnce(changeNameFirst);
   });
 
 
