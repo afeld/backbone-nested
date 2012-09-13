@@ -15,18 +15,11 @@
   Backbone.NestedModel = Backbone.Model.extend({
 
     get: function(attrStrOrPath){
-      var attrPath = Backbone.NestedModel.attrPath(attrStrOrPath),
-        result;
+      var attrPath = Backbone.NestedModel.attrPath(attrStrOrPath);
 
-      Backbone.NestedModel.walkPath(this.attributes, attrPath, function(val, path){
-        var attr = _.last(path);
-        if (path.length === attrPath.length){
-          // attribute found
-          result = val[attr];
-        }
-      });
-
-      return result;
+      return _.reduce(attrPath, function(val, attr) {
+        return _.isObject(val) ? val[attr] : undefined;
+      }, this.attributes);
     },
 
     has: function(attr){
