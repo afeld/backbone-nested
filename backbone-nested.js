@@ -22,12 +22,6 @@
       }, this.attributes);
     },
 
-    has: function(attr){
-      // for some reason this is not how Backbone.Model is implemented - it accesses the attributes object directly
-      var result = this.get(attr);
-      return !(result === null || _.isUndefined(result));
-    },
-
     set: function(key, value, opts){
       var newAttrs = Backbone.NestedModel.deepClone(this.attributes),
         attrPath;
