@@ -674,6 +674,7 @@ $(document).ready(function() {
     var model = new Backbone.Model();
     model.on('change', function() { ok(false); });
     model.change();
+    ok(true); // added to supress warning -AF
   });
 
   test("nested `set` during `'change'`", 6, function() {
