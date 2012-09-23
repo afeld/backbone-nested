@@ -26,7 +26,7 @@ module.exports = function(grunt) {
       index: ['test/index.html']
     },
     watch: {
-      files: '<config:lint.files>',
+      files: ['<config:lint.files>', 'test/**'],
       tasks: 'lint qunit'
     }
   });
