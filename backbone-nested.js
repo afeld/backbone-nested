@@ -204,6 +204,7 @@
         var attrStr = Backbone.NestedModel.createAttrStr(path);
 
         // See if this is a new value being set
+        // TODO this is not an apples-to-apples comparison if not at the leaf
         var isNewValue = !_.isEqual(val[attr], newValue);
 
         if (path.length === fullPathLength){
