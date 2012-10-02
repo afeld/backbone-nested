@@ -16,15 +16,20 @@
 
     get: function(attrStrOrPath){
       var attrPath = Backbone.NestedModel.attrPath(attrStrOrPath),
-        result;
+        childAttr = attrPath[0],
+        result = Backbone.NestedModel.__super__.get.call(this, childAttr);
 
-      Backbone.NestedModel.walkPath(this.attributes, attrPath, function(val, path){
-        var attr = _.last(path);
-        if (path.length === attrPath.length){
-          // attribute found
-          result = val[attr];
+      if (attrPath.length > 1){
+        if (result instanceof Backbone.NestedModel){
+          result = result.get(_.rest(attrPath));
+        } else {
+          result = null;
         }
-      });
+      }
+
+      if (result instanceof Backbone.NestedModel){
+        result = result.toJSON();
+      }
 
       return result;
     },
@@ -36,56 +41,65 @@
     },
 
     set: function(key, value, opts){
-      var newAttrs = Backbone.NestedModel.deepClone(this.attributes),
-        attrPath;
+      // if (_.isArray(key)){
+      //   // shouldn't need to convert back and forth
+      //   key = Backbone.NestedModel.createAttrStr(key);
+      // }
 
-      if (_.isString(key)){
-        // Backbone 0.9.0+ syntax: `model.set(key, val)` - convert the key to an attribute path
-        attrPath = Backbone.NestedModel.attrPath(key);
-      } else if (_.isArray(key)){
-        // attribute path
-        attrPath = key;
-      }
-
-      if (attrPath){
-        opts = opts || {};
-        this._setAttr(newAttrs, attrPath, value, opts);
-      } else { // it's an Object
-        opts = value || {};
-        var attrs = key;
-        for (var _attrStr in attrs) {
-          if (attrs.hasOwnProperty(_attrStr)) {
-            this._setAttr(newAttrs,
-                          Backbone.NestedModel.attrPath(_attrStr),
-                          opts.unset ? null : attrs[_attrStr],
-                          opts);
-          }
-        }
-      }
-
-      if (!this._validate(newAttrs, opts)){
-        // reset changed attributes
-        this.changed = {};
-        return false;
-      }
-
-      if (opts.unset && attrPath && attrPath.length === 1){ // assume it is a singular attribute being unset
-        // unsetting top-level attribute
-        var unsetObj = {};
-        unsetObj[key] = null;
-        Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
+      // normailize arguments into object
+      var attrs;
+      if (_.isObject(key)) {
+        attrs = key;
+        opts = value;
       } else {
-        // normal set(), or an unset of nested attribute
-        if (opts.unset && attrPath){
-          // make sure Backbone.Model won't unset the top-level attribute
-          opts = _.extend({}, opts);
-          delete opts.unset;
-        }
-        Backbone.NestedModel.__super__.set.call(this, newAttrs, opts);
+        attrs = {};
+        attrs[key] = value;
       }
 
-      this._runDelayedTriggers();
-      return this;
+      // TODO run validation on deep arg object
+
+      // for each attr
+      attrs = _.extend({}, attrs); // for some reason _.each() doesn't work unless this is copied
+      var setter = {};
+      _.each(attrs, function(newVal, attrStr){
+        var attrPath = Backbone.NestedModel.attrPath(attrStr),
+          childAttr = attrPath[0],
+          existingVal = this.get(childAttr),
+          childObj;
+
+        if (attrPath.length > 1){
+          if (_.isNumber(childAttr)){
+            // TODO set on child collection, create if not present
+          } else {
+            childObj = this._ensureNestedModel(childAttr);
+            childObj.set(_.rest(attrPath), newVal, {silent: true});
+          }
+        } else if (_.isArray(newVal)){
+          // TODO create nested collection
+        } else if (_.isObject(newVal)){
+          childObj = this._ensureNestedModel(childAttr);
+          childObj.set(newVal, {silent: true});
+        } else {
+          // should be a simple set()
+          setter[childAttr] = newVal;
+        }
+      }, this);
+
+      Backbone.NestedModel.__super__.set.call(this, setter, opts);
+
+      if (opts && !opts.silent) this.change();
+    },
+
+    _ensureNestedModel: function(attr){
+      // set on child obj, create if not present
+      var val = this.get(attr);
+      if (!(val instanceof Backbone.NestedModel)){
+        // replace the nested object with a nested model
+        val = new Backbone.NestedModel();
+        // TODO bind?
+        this.set(attr, val, {silent: true});
+      }
+      return val;
     },
 
     clear: function(options) {
@@ -172,7 +186,11 @@
     },
 
     toJSON: function(){
-      return Backbone.NestedModel.deepClone(this.attributes);
+      var json = {};
+      _.each(this.attributes, function(val, attr){
+        json[attr] = val.toJSON ? val.toJSON() : val;
+      });
+      return json;
     },
 
 
