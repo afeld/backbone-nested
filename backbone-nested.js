@@ -8,303 +8,251 @@
  */
 /*global $, _, Backbone */
 (function(){
-  'use strict';
-
-  var _delayedTriggers = [];
-
-  Backbone.NestedModel = Backbone.Model.extend({
-
-    get: function(attrStrOrPath){
-      var attrPath = Backbone.NestedModel.attrPath(attrStrOrPath);
-
-      return _.reduce(attrPath, function(val, attr) {
-        return _.isObject(val) ? val[attr] : undefined;
+  var _delayedTriggers, NestedModel, toString$ = {}.toString, slice$ = [].slice;
+  _delayedTriggers = [];
+  Backbone.NestedModel = NestedModel = (function(superclass){
+    var prototype = extend$((import$(NestedModel, superclass).displayName = 'NestedModel', NestedModel), superclass).prototype, constructor = NestedModel;
+    function NestedModel(){
+      superclass.apply(this, arguments);
+    }
+    NestedModel.attrPath = makeAttrPath;
+    NestedModel.createAttrStr = makeAttrString;
+    NestedModel.deepClone = deepClone;
+    prototype.get = function(attrStrOrPath){
+      return _(makeAttrPath(attrStrOrPath)).reduce(function(v, k){
+        return v != null ? v[k] : void 8;
       }, this.attributes);
-    },
-
-    set: function(key, value, opts){
-      var newAttrs = Backbone.NestedModel.deepClone(this.attributes),
-        attrPath;
-
-      if (_.isString(key)){
-        // Backbone 0.9.0+ syntax: `model.set(key, val)` - convert the key to an attribute path
-        attrPath = Backbone.NestedModel.attrPath(key);
-      } else if (_.isArray(key)){
-        // attribute path
-        attrPath = key;
+    };
+    prototype.set = function(key, value, options){
+      switch (false) {
+      case !_.isArray(key):
+        return this._setNested({
+          path: key,
+          value: value,
+          options: options
+        });
+      case !_.isObject(key):
+        return this._setNested({
+          attrs: key,
+          options: value
+        });
+      default:
+        return this._setNested({
+          path: makeAttrPath(key),
+          value: value,
+          options: options
+        });
       }
-
-      if (attrPath){
-        opts = opts || {};
-        this._setAttr(newAttrs, attrPath, value, opts);
-      } else { // it's an Object
-        opts = value || {};
-        var attrs = key;
-        for (var _attrStr in attrs) {
-          if (attrs.hasOwnProperty(_attrStr)) {
-            this._setAttr(newAttrs,
-                          Backbone.NestedModel.attrPath(_attrStr),
-                          opts.unset ? null : attrs[_attrStr],
-                          opts);
+    };
+    prototype._setNested = function(arg$){
+      var path, attrs, value, options, newAttrs, key, val, silentOpts, ref$, own$ = {}.hasOwnProperty;
+      path = arg$.path, attrs = arg$.attrs, value = arg$.value, options = arg$.options || {};
+      newAttrs = deepClone(this.attributes);
+      if (attrs) {
+        for (key in attrs) if (own$.call(attrs, key)) {
+          val = attrs[key];
+          if (options.unset) {
+            val = null;
           }
+          this._setAttr(newAttrs, makeAttrPath(key), val, options);
         }
+      } else {
+        this._setAttr(newAttrs, path, value, options);
       }
-
-      if (!this._validate(newAttrs, opts)){
-        // reset changed attributes
+      if (!this._validate(newAttrs, options)) {
         this.changed = {};
         return false;
       }
-
-      if (opts.unset && attrPath && attrPath.length === 1){ // assume it is a singular attribute being unset
-        // unsetting top-level attribute
-        var unsetObj = {};
-        unsetObj[key] = null;
-        Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
+      silentOpts = importAll$(importAll$({}, options), {
+        silent: true
+      });
+      if (options.unset && (path != null ? path.length : void 8) === 1) {
+        superclass.prototype.set.call(this, (ref$ = {}, ref$[path[0] + ""] = null, ref$), silentOpts);
       } else {
-        // normal set(), or an unset of nested attribute
-        if (opts.unset && attrPath){
-          // make sure Backbone.Model won't unset the top-level attribute
-          opts = _.extend({}, opts);
-          delete opts.unset;
+        if (path && silentOpts.unset) {
+          delete silentOpts.unset;
         }
-        Backbone.NestedModel.__super__.set.call(this, newAttrs, opts);
+        superclass.prototype.set.call(this, newAttrs, silentOpts);
       }
-
-      this._runDelayedTriggers();
+      this._checkChanges(options);
       return this;
-    },
-
-    clear: function(options) {
-      // Mostly taken from Backbone.Model.set, modified to work for NestedModel.
-      options = options || {};
-      if (!options.silent && this.validate && !this.validate({}, options)) {
-        return false; // Should maybe return this instead?
+    };
+    prototype.add = function(attrStr, value, opts){
+      var current;
+      current = this.get(attrStr);
+      if (!_.isArray(current)) {
+        throw new Error("current value is not an array");
       }
-
-      var changed = this.changed = {};
-      var model = this;
-
-      var setChanged = function(obj, prefix) {
-        // obj will be an Array or an Object
-        _.each(obj, function(val, attr){
-          var changedPath = prefix;
-          if (_.isArray(obj)){
-            // assume there is a prefix
-            changedPath += '[' + attr + ']';
-          } else if (prefix){
-            changedPath += '.' + attr;
-          } else {
-            changedPath = attr;
-          }
-
-          val = obj[attr];
-          if (_.isObject(val)) { // clear child attrs
-            setChanged(val, changedPath);
-          }
-          model._delayedChange(changedPath, null);
-          changed[changedPath] = null;
-        });
-      };
-      setChanged(this.attributes, '');
-
-      this.attributes = {};
-      this._escapedAttributes = {};
-
-      this._delayedTrigger('change');
-
-      // Fire the `"change"` events.
-      if (!options.silent) this._runDelayedTriggers();
-      return this;
-    },
-
-    change: function() {
-      this._runDelayedTriggers();
-      return Backbone.NestedModel.__super__.change.apply(this, _.toArray(arguments));
-    },
-
-    add: function(attrStr, value, opts){
-      var current = this.get(attrStr);
-      if (!_.isArray(current)) throw new Error('current value is not an array');
-      return this.set(attrStr + '[' + current.length + ']', value, opts);
-    },
-
-    remove: function(attrStr, opts){
-      opts = opts || {};
-
-      var attrPath = Backbone.NestedModel.attrPath(attrStr),
-        aryPath = _.initial(attrPath),
-        val = this.get(aryPath),
-        i = _.last(attrPath);
-
-      if (!_.isArray(val)){
-        throw new Error("remove() must be called on a nested array");
+      return this.set(attrStr + "[" + current.length + "]", value, opts);
+    };
+    prototype.remove = function(attrStr, opts){
+      var attrPath, aryPath, val, i;
+      opts || (opts = {});
+      attrPath = makeAttrPath(attrStr);
+      aryPath = _.initial(attrPath);
+      val = this.get(aryPath).slice(0);
+      i = _.last(attrPath);
+      if (!_.isArray(val)) {
+        throw new Error("remove! must be called on a nested array");
       }
-
-      // only trigger if an element is actually being removed
-      var trigger = !opts.silent && (val.length >= i + 1),
-        oldEl = val[i];
-
-      // remove the element from the array
       val.splice(i, 1);
-      opts.silent = true; // Triggers should only be fired in trigger section below
       this.set(aryPath, val, opts);
-
-      if (trigger){
-        attrStr = Backbone.NestedModel.createAttrStr(aryPath);
-        this.trigger('remove:' + attrStr, this, oldEl);
-        for (var aryCount = aryPath.length; aryCount >= 1; aryCount--) {
-          attrStr = Backbone.NestedModel.createAttrStr(_.first(aryPath, aryCount));
-          this.trigger('change:' + attrStr, this, oldEl);
-        }
-        this.trigger('change', this, oldEl);
-      }
-
       return this;
-    },
-
-    toJSON: function(){
-      return Backbone.NestedModel.deepClone(this.attributes);
-    },
-
-    // private
-    _delayedTrigger: function(/* the trigger args */){
-      _delayedTriggers.push(arguments);
-    },
-
-    _delayedChange: function(attrStr, newVal){
-      this._delayedTrigger('change:' + attrStr, this, newVal);
-      this.changed[attrStr] = newVal;
-    },
-
-    _runDelayedTriggers: function(){
-      while (_delayedTriggers.length > 0){
-        this.trigger.apply(this, _delayedTriggers.shift());
+    };
+    prototype.toJSON = function(){
+      return deepClone(this.attributes);
+    };
+    prototype._checkChanges = function(options){
+      var changes, this$ = this;
+      options == null && (options = {});
+      changes = options.silent
+        ? this._silent
+        : {};
+      if (checkChanges(this._previousAttributes, this.attributes, [])) {
+        if (!options.silent) {
+          this.change(importAll$(options, {
+            changes: changes
+          }));
+        }
       }
-    },
-
-    // note: modifies `newAttrs`
-    _setAttr: function(newAttrs, attrPath, newValue, opts){
-      opts = opts || {};
-
-      var fullPathLength = attrPath.length;
-      var model = this;
-
-      Backbone.NestedModel.walkPath(newAttrs, attrPath, function(val, path){
-        var attr = _.last(path);
-        var attrStr = Backbone.NestedModel.createAttrStr(path);
-
-        // See if this is a new value being set
-        var isNewValue = !_.isEqual(val[attr], newValue);
-
-        if (path.length === fullPathLength){
-          // reached the attribute to be set
-
-          if (opts.unset){
-            // unset the value
-            delete val[attr];
-            delete model._escapedAttributes[attrStr];
-          } else {
-            // Set the new value
-            val[attr] = newValue;
-          }
-
-          // Trigger Change Event if new values are being set
-          if (_.isObject(newValue) && isNewValue){
-            var checkChanges = function(obj, prefix) {
-              var nestedAttr, nestedVal;
-              for (var a in obj){
-                if (obj.hasOwnProperty(a)) {
-                  nestedAttr = prefix + '.' + a;
-                  nestedVal = obj[a];
-                  if (!_.isEqual(model.get(nestedAttr), nestedVal)) {
-                    model._delayedChange(nestedAttr, nestedVal);
-                  }
-                  if (_.isObject(nestedVal)) {
-                    checkChanges(nestedVal, nestedAttr);
-                  }
-                }
+      function checkChanges(prev, now, path){
+        var hasChanged, hasRemoved, hasAdded, parentArrayS, i$, ref$, len$, a, ref1$, oldVal, newVal, attrP, attrS;
+        hasChanged = false;
+        hasRemoved = false;
+        hasAdded = false;
+        if (_.isArray(prev)) {
+          parentArrayS = makeAttrString(path);
+        }
+        for (i$ = 0, len$ = (ref$ = _.uniq(_.keys(prev || {}).concat(_.keys(now || {})))).length; i$ < len$; ++i$) {
+          a = ref$[i$];
+          oldVal = (ref1$ = prev != null ? prev[a] : void 8) != null ? ref1$ : null;
+          newVal = (ref1$ = now != null ? now[a] : void 8) != null ? ref1$ : null;
+          if (!_.isEqual(newVal, oldVal)) {
+            attrP = path.concat([numericArrayAccessors(a)]);
+            attrS = makeAttrString(attrP);
+            hasChanged = true;
+            this$.changed[attrS] = newVal;
+            if (parentArrayS) {
+              if (newVal == null && !hasRemoved) {
+                this$.trigger("remove:" + parentArrayS, this$, null, options);
+                hasRemoved = true;
+              } else if (oldVal == null && !hasAdded) {
+                this$.trigger("add:" + parentArrayS, this$, newVal, options);
+                hasAdded = true;
+              } else {
+                changes[attrS] = newVal;
               }
-            };
-            checkChanges(newValue, attrStr);
-
+            } else {
+              changes[attrS] = newVal;
+            }
+            if (isDeep(oldVal) || isDeep(newVal)) {
+              checkChanges(oldVal, newVal, attrP);
+            }
           }
-
-          // Trigger Remove Event if array being set to null
-          if (newValue === null){
-            var parentPath = Backbone.NestedModel.createAttrStr(_.initial(attrPath));
-            model._delayedTrigger('remove:' + parentPath, model, val[attr]);
-          }
-
-        } else if (!val[attr]){
-          if (_.isNumber(attr)){
-            val[attr] = [];
+        }
+        return hasChanged;
+      }
+      function isDeep(obj){
+        return _.isObject(obj) || _.isArray(obj);
+      }
+    };
+    prototype._setAttr = function(newAttrs, attrPath, newValue, opts){
+      var fullPathLength, path, val, attrsLeft, i$, len$, attr, attrStr, oldValue, value;
+      opts || (opts = {});
+      fullPathLength = attrPath.length;
+      path = [];
+      val = newAttrs;
+      attrsLeft = attrPath.length;
+      for (i$ = 0, len$ = attrPath.length; i$ < len$; ++i$) {
+        attr = attrPath[i$];
+        path.push(attr);
+        attrStr = makeAttrString(path);
+        value = oldValue = val[attr];
+        --attrsLeft;
+        if (attrsLeft === 0) {
+          if (opts.unset) {
+            delete val[attr];
+            delete this._escapedAttributes[attrStr];
           } else {
-            val[attr] = {};
+            val[attr] = value = newValue;
+          }
+        } else if (!value) {
+          if (_.isNumber(attr)) {
+            val[attr] = value = [];
+          } else {
+            val[attr] = value = {};
           }
         }
-
-        if (!opts.silent) {
-          // let the superclass handle change events for top-level attributes
-          if (path.length > 1 && isNewValue){
-            model._delayedChange(attrStr, val[attr]);
-          }
-
-          if (_.isArray(val[attr])){
-            model._delayedTrigger('add:' + attrStr, model, val[attr]);
-          }
-        }
-
-      });
-    }
-
-  }, {
-    // class methods
-
-    attrPath: function(attrStrOrPath){
-      var path;
-
-      if (_.isString(attrStrOrPath)){
-        // TODO this parsing can probably be more efficient
-        path = (attrStrOrPath === '') ? [''] : attrStrOrPath.match(/[^\.\[\]]+/g);
-        path = _.map(path, function(val){
-          // convert array accessors to numbers
-          return val.match(/^\d+$/) ? parseInt(val, 10) : val;
-        });
-      } else {
-        path = attrStrOrPath;
+        val = value;
       }
-
-      return path;
-    },
-
-    createAttrStr: function(attrPath){
-      var attrStr = attrPath[0];
-      _.each(_.rest(attrPath), function(attr){
-        attrStr += _.isNumber(attr) ? ('[' + attr + ']') : ('.' + attr);
-      });
-
-      return attrStr;
-    },
-
-    deepClone: function(obj){
-      return $.extend(true, {}, obj);
-    },
-
-    walkPath: function(obj, attrPath, callback, scope){
-      var val = obj,
-        childAttr;
-
-      // walk through the child attributes
-      for (var i = 0; i < attrPath.length; i++){
-        callback.call(scope || this, val, attrPath.slice(0, i + 1));
-
-        childAttr = attrPath[i];
-        val = val[childAttr];
-        if (!val) break; // at the leaf
+    };
+    return NestedModel;
+  }(Backbone.Model));
+  function makeAttrPath(attrStrOrPath){
+    var i$, ref$, len$, attr, results$ = [];
+    if (attrStrOrPath === '') {
+      return [''];
+    } else if (toString$.call(attrStrOrPath).slice(8, -1) === 'String') {
+      for (i$ = 0, len$ = (ref$ = attrStrOrPath.match(/[^\.\[\]]+/g)).length; i$ < len$; ++i$) {
+        attr = ref$[i$];
+        results$.push(numericArrayAccessors(attr));
       }
+      return results$;
+    } else {
+      return attrStrOrPath;
     }
-
-  });
-
-}());
+  }
+  function numericArrayAccessors(attr){
+    if (attr.match(/^\d+$/)) {
+      return parseInt(attr, 10);
+    } else {
+      return attr;
+    }
+  }
+  function makeAttrString(arg$){
+    var attrStr, rest, i$, len$, attr;
+    attrStr = arg$[0], rest = slice$.call(arg$, 1);
+    for (i$ = 0, len$ = rest.length; i$ < len$; ++i$) {
+      attr = rest[i$];
+      attrStr += toString$.call(attr).slice(8, -1) === 'Number'
+        ? "[" + attr + "]"
+        : "." + attr;
+    }
+    return attrStr;
+  }
+  function deepClone(obj){
+    var a, k, v, o, own$ = {}.hasOwnProperty;
+    if (_.isArray(obj)) {
+      a = [];
+      for (k in obj) if (own$.call(obj, k)) {
+        v = obj[k];
+        a[k] = deepClone(v);
+      }
+      return a;
+    } else if (Object(obj) === obj) {
+      o = {};
+      for (k in obj) if (own$.call(obj, k)) {
+        v = obj[k];
+        o[k] = deepClone(v);
+      }
+      return o;
+    } else {
+      return obj;
+    }
+  }
+  function extend$(sub, sup){
+    function fun(){} fun.prototype = (sub.superclass = sup).prototype;
+    (sub.prototype = new fun).constructor = sub;
+    if (typeof sup.extended == 'function') sup.extended(sub);
+    return sub;
+  }
+  function import$(obj, src){
+    var own = {}.hasOwnProperty;
+    for (var key in src) if (own.call(src, key)) obj[key] = src[key];
+    return obj;
+  }
+  function importAll$(obj, src){
+    for (var key in src) obj[key] = src[key];
+    return obj;
+  }
+}).call(this);
