@@ -219,7 +219,7 @@
           }
 
           // Trigger Change Event if new values are being set
-          if (_.isObject(newValue) && isNewValue){
+          if (!opts.silent && _.isObject(newValue) && isNewValue){
             var checkChanges = function(obj, prefix) {
               var nestedAttr, nestedVal;
               for (var a in obj){
