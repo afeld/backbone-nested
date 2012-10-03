@@ -20,7 +20,7 @@ module.exports = function(grunt) {
       }
     },
     lint: {
-      files: ['grunt.js', '*.js', 'test/nested-model.js']
+      files: ['grunt.js', 'test/nested-model.js']
     },
     qunit: {
       index: ['test/index.html']
