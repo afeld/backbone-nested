@@ -1289,7 +1289,7 @@
   function bind(func){
     var contextAndArgs, context, args, ctor, bound;
     contextAndArgs = slice$.call(arguments, 1);
-    if (func.bind === Function.prototype.bind) {
+    if (func.bind === Function.prototype.bind && Function.prototype.bind) {
       return Function.prototype.bind.apply(func, contextAndArgs);
     } else if (toString$.call(func).slice(8, -1) !== 'Function') {
       throw TypeError();
