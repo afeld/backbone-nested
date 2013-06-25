@@ -31,6 +31,35 @@ $(document).ready(function() {
     }
   });
 
+  // ----- INSTANTIATION --------
+
+  test("add to collection does not throw exception", function() {
+    var NestedCollection = Backbone.Collection.extend({
+      model: Klass
+    });
+
+    /* At instantiation. */
+    var collection = new NestedCollection([{
+      attr1: ['attr1[0]', 'attr1[1]'],
+      attr2: {
+        attr3: 'attr2.attr3',
+        attr4: {
+          attr5: 'attr2.attr4.attr5'
+        }
+      }
+    }]);
+
+    /* using #add() */
+    collection.add([{
+      attr1: {
+        attr1_1: ['foo', 'bar']
+      },
+      attr2: ['baz', 'quux']
+    }]);
+
+    // Didn't throw an exception!
+    ok(true);
+  });
 
   // ----- ATTR_PATH --------
 
@@ -48,7 +77,7 @@ $(document).ready(function() {
 
   test("#get() 1-1 returns attributes object", function() {
     var name = doc.get('name');
-    
+
     deepEqual(name, {
       first: 'Aidan',
       middle: {
@@ -322,7 +351,7 @@ $(document).ready(function() {
     var changeNameFirst = sinon.spy();
     var changeNameLast = sinon.spy();
     var changeGender = sinon.spy();
-    
+
     doc.bind('change', change);
     doc.bind('change:name', changeName);
     doc.bind('change:name.first', changeNameFirst);
@@ -504,7 +533,7 @@ $(document).ready(function() {
     var changeNameMiddleInitial = sinon.spy();
     var changeNameMiddleFull = sinon.spy();
     var changeNameFirst = sinon.spy();
-    
+
     doc.bind('change', change);
     doc.bind('change:name', changeName);
     doc.bind('change:name.middle', changeNameMiddle);
@@ -536,12 +565,12 @@ $(document).ready(function() {
     var changeAddresses0City = sinon.spy();
     var changeAddresses0State = sinon.spy();
     var changeAddresses1 = sinon.spy();
-    
+
     doc.bind('change', change);
     doc.bind('change:addresses', changeAddresses);
     doc.bind('change:addresses[0]', changeAddresses0);
     doc.bind('change:addresses[0].city', changeAddresses0City);
-    
+
     doc.bind('change:addresses[0].state', changeAddresses0State);
     doc.bind('change:addresses[1]', changeAddresses1);
 
@@ -563,7 +592,7 @@ $(document).ready(function() {
     var change = sinon.spy();
     var changeAddresses = sinon.spy();
     var addAddresses = sinon.spy();
-    
+
     doc.bind('change', change);
     doc.bind('change:addresses', changeAddresses);
     doc.bind('add:addresses', addAddresses);
@@ -585,7 +614,7 @@ $(document).ready(function() {
     var change = sinon.spy();
     var changeAddresses = sinon.spy();
     var removeAddresses = sinon.spy();
-    
+
     doc.bind('change', change);
     doc.bind('change:addresses', changeAddresses);
     doc.bind('remove:addresses', removeAddresses);
@@ -601,7 +630,7 @@ $(document).ready(function() {
     var change = sinon.spy();
     var changeAddresses = sinon.spy();
     var removeAddresses = sinon.spy();
-    
+
     doc.bind('change', change);
     doc.bind('change:addresses', changeAddresses);
     doc.bind('remove:addresses', removeAddresses);
@@ -625,7 +654,7 @@ $(document).ready(function() {
       full: 'Limburger',
       fullAlternates: ['Danger', 'Funny', 'Responsible']
     });
-    
+
     doc.bind('change', change);
     doc.bind('change:name', changeName);
     doc.bind('change:name.middle', changeNameMiddle);
@@ -662,7 +691,7 @@ $(document).ready(function() {
         'name.middle.full': 'Limburger'
       });
     });
-    
+
     doc.set({'name.middle.full': 'Limburger'});
   });
 
@@ -684,7 +713,7 @@ $(document).ready(function() {
         'name.middle.full': 'Limburger'
       });
     });
-    
+
     //Set using conventional JSON - emulates a model fetch
     doc.set({
       gender: 'M',
@@ -708,7 +737,7 @@ $(document).ready(function() {
       ]
     });
   });
-  
+
   test("#changedAttributes() should clear the nested attributes between change events", function() {
     doc.set({'name.first': 'Bob'});
 
@@ -735,7 +764,7 @@ $(document).ready(function() {
         return "First name is too long";
       }
     };
-  
+
     doc.set({'name.first': 'TooLongFirstName'});
 
     doc.bind('change', function(){
@@ -957,7 +986,7 @@ $(document).ready(function() {
     doc.bind('remove:addresses', removeAddresses);
 
     doc.remove('addresses[0]');
-    
+
     sinon.assert.calledOnce(removeAddresses);
     equal(doc.get('addresses').length, 1);
 
