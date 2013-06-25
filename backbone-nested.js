@@ -183,6 +183,13 @@
 
     _delayedChange: function(attrStr, newVal){
       this._delayedTrigger('change:' + attrStr, this, newVal);
+
+      // Check if `change` even *exists*, as it won't when the model is
+      // freshly created.
+      if (!this.changed) {
+        this.changed = {};
+      }
+
       this.changed[attrStr] = newVal;
     },
 
