@@ -6,10 +6,18 @@
  * Copyright (c) 2011-2012 Aidan Feldman
  * MIT Licensed (LICENSE)
  */
-/*global $, _, Backbone */
+/*global require, module, $, _, Backbone */
 (function(){
   'use strict';
 
+  var $ = this.$;
+  var _ = (typeof require === "function" ? require('underscore') : void 0) || this._;
+  var Backbone = (typeof require === "function" ? require('backbone') : void 0) || this.Backbone;
+  var deepExtendPlainObjects = (typeof require === "function" ? require('bal-util').deepExtendPlainObjects : void 0) || function(){
+    var args = Array.prototype.slice.call(arguments);
+    args.unshift(true);
+    return $.extend.apply($,args);
+  };
   var _delayedTriggers = [];
 
   Backbone.NestedModel = Backbone.Model.extend({
@@ -303,7 +311,7 @@
     },
 
     deepClone: function(obj){
-      return $.extend(true, {}, obj);
+      return deepExtendPlainObjects({}, obj);
     },
 
     walkPath: function(obj, attrPath, callback, scope){
@@ -322,4 +330,10 @@
 
   });
 
-}());
+
+  // Node Export
+  if ( module && module.exports ) {
+    module.exports = Backbone;
+  }
+
+}).call(this);

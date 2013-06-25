@@ -1,9 +1,13 @@
 {
   "name": "backbone-nested",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "A plugin to make Backbone.js keep track of nested attributes.",
   "dependencies": {
-    "backbone": "0.9.x"
+    "bal-util": "~1.16.1"
+  },
+  "peerDependencies": {
+    "underscore": "~1.4.4",
+    "backbone": "0.9.2"
   },
   "devDependencies": {
     "grunt": "0.3.x"
@@ -12,9 +16,18 @@
   "main": "backbone-nested.js",
   "repositories": [
     {
-      "type": "git", 
+      "type": "git",
       "url": "https://github.com/afeld/backbone-nested.git"
     }
   ],
-  "github": "https://github.com/afeld/backbone-nested"
+  "github": "https://github.com/afeld/backbone-nested",
+	"author": "Aidan Feldman <aidan.feldman@gmail.com> (https://github.com/afeld)",
+	"maintainers": [
+    "Aidan Feldman <aidan.feldman@gmail.com> (https://github.com/afeld)",
+    "Benjamin Lupton <b@lupton.cc> (https://github.com/balupton)"
+	],
+	"contributors": [
+    "Aidan Feldman <aidan.feldman@gmail.com> (https://github.com/afeld)",
+		"Benjamin Lupton <b@lupton.cc> (https://github.com/balupton)"
+	]
 }
