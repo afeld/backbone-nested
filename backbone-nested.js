@@ -15,24 +15,11 @@
   Backbone.NestedModel = Backbone.Model.extend({
 
     get: function(attrStrOrPath){
-      var attrPath = Backbone.NestedModel.attrPath(attrStrOrPath),
-        result;
+      var attrPath = Backbone.NestedModel.attrPath(attrStrOrPath);
 
-      Backbone.NestedModel.walkPath(this.attributes, attrPath, function(val, path){
-        var attr = _.last(path);
-        if (path.length === attrPath.length){
-          // attribute found
-          result = val[attr];
-        }
-      });
-
-      return result;
-    },
-
-    has: function(attr){
-      // for some reason this is not how Backbone.Model is implemented - it accesses the attributes object directly
-      var result = this.get(attr);
-      return !(result === null || _.isUndefined(result));
+      return _.reduce(attrPath, function(val, attr) {
+        return _.isObject(val) ? val[attr] : undefined;
+      }, this.attributes);
     },
 
     set: function(key, value, opts){
@@ -115,7 +102,7 @@
           if (_.isObject(val)) { // clear child attrs
             setChanged(val, changedPath);
           }
-          if (!options.silent) model._delayedChange(changedPath, null);
+          model._delayedChange(changedPath, null);
           changed[changedPath] = null;
         });
       };
@@ -124,11 +111,16 @@
       this.attributes = {};
       this._escapedAttributes = {};
 
-      // Fire the `"change"` events.
-      if (!options.silent) this._delayedTrigger('change');
+      this._delayedTrigger('change');
 
-      this._runDelayedTriggers();
+      // Fire the `"change"` events.
+      if (!options.silent) this._runDelayedTriggers();
       return this;
+    },
+
+    change: function() {
+      this._runDelayedTriggers();
+      return Backbone.NestedModel.__super__.change.apply(this, _.toArray(arguments));
     },
 
     add: function(attrStr, value, opts){
@@ -174,7 +166,6 @@
     toJSON: function(){
       return Backbone.NestedModel.deepClone(this.attributes);
     },
-
 
     // private
     _delayedTrigger: function(/* the trigger args */){
@@ -260,7 +251,7 @@
           }
         }
 
-        if (!opts.silent){
+        if (!opts.silent) {
           // let the superclass handle change events for top-level attributes
           if (path.length > 1 && isNewValue){
             model._delayedChange(attrStr, val[attr]);
@@ -270,6 +261,7 @@
             model._delayedTrigger('add:' + attrStr, model, val[attr]);
           }
         }
+
       });
     }
 
