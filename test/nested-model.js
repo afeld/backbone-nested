@@ -670,6 +670,33 @@ $(document).ready(function() {
     sinon.assert.calledOnce(removeNameMiddleFullAlternates);
   });
 
+  test("#set() options passed through to #trigger()", function() {
+    var callback = function(model, newVal, options){
+      ok(options)
+      deepEqual(options.meta, {
+        user: 'Matt',
+        time: '14:58'
+      });
+    };
+
+    doc.bind('change:gender', callback);
+
+    doc.set('gender', 'F', {meta: {user: 'Matt', time: '14:58'}});
+  });
+
+  test("#set() options passed through to #trigger() when setting a nested attribute", function() {
+    var callback = function(model, newVal, options){
+      ok(options);
+      deepEqual(options.meta, {
+        user: 'Scott',
+        time: '15:04'
+      });
+    };
+
+    doc.bind('change:name.first', callback);
+
+    doc.set('name.first', 'Dan', {meta: {user: 'Scott', time: '15:04'}});
+  });
 
   // ----- CHANGED_ATTRIBUTES --------
 
