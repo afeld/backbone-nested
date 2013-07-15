@@ -369,6 +369,22 @@ $(document).ready(function() {
     sinon.assert.notCalled(changeGender);
   });
 
+  test("change events on nested Backbone collection", function() {
+    // Set up a circular reference - models inside a collection have a
+    // `collection` property and collections have '0' property pointing
+    // to the collection/model, respectively
+    var children = new Backbone.Collection();
+    var child = new Backbone.NestedModel();
+    children.add(child);
+
+    var change = sinon.spy();
+
+    doc.bind('change:children', change);
+    doc.set({'children': children});
+
+    sinon.assert.called(change);
+  });
+
   test("change event doesn't fire on silent", function() {
     var change = sinon.spy();
     var changeName = sinon.spy();

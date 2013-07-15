@@ -227,7 +227,15 @@
 
           // Trigger Change Event if new values are being set
           if (!opts.silent && _.isObject(newValue) && isNewValue){
+            var visited = [];
             var checkChanges = function(obj, prefix) {
+              // Don't choke on circular references
+              if(visited.indexOf(obj) > -1) {
+                return;
+              } else {
+                visited.push(obj);
+              }
+
               var nestedAttr, nestedVal;
               for (var a in obj){
                 if (obj.hasOwnProperty(a)) {
