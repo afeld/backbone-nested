@@ -98,7 +98,7 @@
       var changed = this.changed = {};
       var model = this;
 
-      var setChanged = function(obj, prefix) {
+      var setChanged = function(obj, prefix, options) {
         // obj will be an Array or an Object
         _.each(obj, function(val, attr){
           var changedPath = prefix;
@@ -115,11 +115,11 @@
           if (_.isObject(val)) { // clear child attrs
             setChanged(val, changedPath);
           }
-          if (!options.silent) model._delayedChange(changedPath, null);
+          if (!options.silent) model._delayedChange(changedPath, null, options);
           changed[changedPath] = null;
         });
       };
-      setChanged(this.attributes, '');
+      setChanged(this.attributes, '', options);
 
       this.attributes = {};
       this._escapedAttributes = {};
@@ -181,8 +181,8 @@
       _delayedTriggers.push(arguments);
     },
 
-    _delayedChange: function(attrStr, newVal){
-      this._delayedTrigger('change:' + attrStr, this, newVal);
+    _delayedChange: function(attrStr, newVal, options){
+      this._delayedTrigger('change:' + attrStr, this, newVal, options);
 
       // Check if `change` even *exists*, as it won't when the model is
       // freshly created.
@@ -242,7 +242,7 @@
                   nestedAttr = prefix + '.' + a;
                   nestedVal = obj[a];
                   if (!_.isEqual(model.get(nestedAttr), nestedVal)) {
-                    model._delayedChange(nestedAttr, nestedVal);
+                    model._delayedChange(nestedAttr, nestedVal, opts);
                   }
                   if (_.isObject(nestedVal)) {
                     checkChanges(nestedVal, nestedAttr);
@@ -271,7 +271,7 @@
         if (!opts.silent){
           // let the superclass handle change events for top-level attributes
           if (path.length > 1 && isNewValue){
-            model._delayedChange(attrStr, val[attr]);
+            model._delayedChange(attrStr, val[attr], opts);
           }
 
           if (_.isArray(val[attr])){
