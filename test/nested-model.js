@@ -512,6 +512,17 @@ $(document).ready(function() {
     doc.set({'name.first': 'Bob'});
   });
 
+  test("attribute change event receives options witch set by model.set method", function() {
+    doc.bind('change:name', function(model, newVal, options){
+        strictEqual(options.someOption, true);
+    });
+    doc.bind('change:name.first', function(model, newVal, options){
+        strictEqual(options.someOption, true);
+    });
+
+    doc.set({'name.first': 'Bob'}, {someOption: true});
+  });
+
   test("change event on deeply nested attribute", function() {
     var change = sinon.spy();
     var changeName = sinon.spy();
@@ -685,7 +696,6 @@ $(document).ready(function() {
     sinon.assert.calledOnce(changeNameMiddleFullAlternates);
     sinon.assert.calledOnce(removeNameMiddleFullAlternates);
   });
-
 
   // ----- CHANGED_ATTRIBUTES --------
 
