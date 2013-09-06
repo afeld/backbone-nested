@@ -113,7 +113,7 @@
 
           val = obj[attr];
           if (_.isObject(val)) { // clear child attrs
-            setChanged(val, changedPath);
+            setChanged(val, changedPath, options);
           }
           if (!options.silent) model._delayedChange(changedPath, null, options);
           changed[changedPath] = null;
