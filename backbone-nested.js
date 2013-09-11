@@ -230,7 +230,7 @@
             var visited = [];
             var checkChanges = function(obj, prefix) {
               // Don't choke on circular references
-              if(visited.indexOf(obj) > -1) {
+              if(_.indexOf(visited, obj) > -1) {
                 return;
               } else {
                 visited.push(obj);
