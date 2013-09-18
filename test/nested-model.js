@@ -385,6 +385,15 @@ $(document).ready(function() {
     sinon.assert.called(change);
   });
 
+  test("stack overflow on circular references after assignment", function(){
+    var father = {name: 'bob'};
+    var child = {name: 'danny', father: father};
+    father.children = [child];
+    var family = new Backbone.NestedModel({lastName: 'Smith', head: father});
+    family.set({'head.name': 'Rob'});
+    // ==> RangeError: Maximum call stack size exceeded
+  });
+
   test("change event doesn't fire on silent", function() {
     var change = sinon.spy();
     var changeName = sinon.spy();
