@@ -1,4 +1,4 @@
-/*global document, $, _, Backbone, sinon, module, deepEqual, test, equal, ok */
+/*global document, $, _, Backbone, sinon, module, deepEqual, strictEqual, test, equal, ok */
 $(document).ready(function() {
 
   var Klass = Backbone.NestedModel.extend(),
