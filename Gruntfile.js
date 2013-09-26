@@ -14,11 +14,12 @@ module.exports = function(grunt) {
         sub: true,
         undef: true,
         boss: true,
-        eqnull: true
+        eqnull: true,
+
+        globals: {
+          jQuery: true
+        }
       },
-      globals: {
-        jQuery: true
-      }
     },
     qunit: {
       index: ['test/index.html']
