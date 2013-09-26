@@ -3,6 +3,7 @@ module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
     jshint: {
+      files: ['grunt.js', '*.js', 'test/nested-model.js'],
       options: {
         curly: false,
         eqeqeq: true,
@@ -19,18 +20,18 @@ module.exports = function(grunt) {
         jQuery: true
       }
     },
-    lint: {
-      files: ['grunt.js', '*.js', 'test/nested-model.js']
-    },
     qunit: {
       index: ['test/index.html']
     },
     watch: {
       files: ['<config:lint.files>', 'test/**'],
-      tasks: 'lint qunit'
+      tasks: ['jshint', 'qunit']
     }
   });
 
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-qunit');
+
   // Default task.
-  grunt.registerTask('default', 'lint qunit');
+  grunt.registerTask('default', ['jshint', 'qunit']);
 };
