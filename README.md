@@ -157,6 +157,10 @@ user.remove('addresses[0]');
 user.get('addresses').length; //=> 1
 ```
 
+## Associations
+
+Note, this plugin does *not* handle non-embedded relations, which keeps it relatively simple.  If you support for more complex relationships between models, see [the Backbone plugin wiki page](https://github.com/jashkenas/backbone/wiki/Extensions,-Plugins,-Resources#relations).
+
 ## Changelog
 
 #### HEAD ([diff](https://github.com/afeld/backbone-nested/compare/v1.1.2...master?w=1))
