@@ -5,4 +5,4 @@ node_js:
   - "0.10"
   - "0.11"
 before_install:
-- npm install grunt-cli -g
+- npm install grunt-cli bower -g
