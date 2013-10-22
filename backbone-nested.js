@@ -122,7 +122,6 @@
       setChanged(this.attributes, '', options);
 
       this.attributes = {};
-      this._escapedAttributes = {};
 
       // Fire the `"change"` events.
       if (!options.silent) this._delayedTrigger('change');
@@ -219,7 +218,6 @@
           if (opts.unset){
             // unset the value
             delete val[attr];
-            delete model._escapedAttributes[attrStr];
           } else {
             // Set the new value
             val[attr] = newValue;

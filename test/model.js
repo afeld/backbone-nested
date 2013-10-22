@@ -4,9 +4,9 @@ var runModelTests = function(options) {
 
   // test Backbone.NestedModel instead of Backbone.Model - reset at end of function
   var oldModel = Backbone.Model;
-  //if (options.nested) {
-    //Backbone.Model = Backbone.NestedModel;
-  //}
+  if (options.nested) {
+    Backbone.Model = Backbone.NestedModel;
+  }
 
 
   // Variable to catch the last request.
