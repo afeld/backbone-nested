@@ -1,9 +1,12 @@
 // yanked from Backbone 0.9.2 test suite
-$(document).ready(function() {
+var runModelTests = function(options) {
+  options = options || {};
 
   // test Backbone.NestedModel instead of Backbone.Model - reset at end of function
   var oldModel = Backbone.Model;
-  Backbone.Model = Backbone.NestedModel;
+  //if (options.nested) {
+    //Backbone.Model = Backbone.NestedModel;
+  //}
 
 
   // Variable to catch the last request.
@@ -20,7 +23,7 @@ $(document).ready(function() {
   });
   var doc, collection;
 
-  module("Backbone.Model", {
+  module("Backbone." + (options.nested ? "Nested" : "") + "Model", {
 
     setup: function() {
       doc = new proxy({
@@ -192,7 +195,7 @@ $(document).ready(function() {
     a.validate = function(attrs) {
       equal(attrs.foo, void 0, "don't ignore values when unsetting");
     };
-    a.unset('foo');
+    a.unset('foo', {validate: true});
     equal(a.get('foo'), void 0, "Foo should have changed");
     delete a.validate;
     ok(changeCount == 2, "Change count should have incremented for unset.");
@@ -288,7 +291,7 @@ $(document).ready(function() {
     model.set({name : 'Rob'}, {silent : true});
     equal(model.hasChanged(), true);
     equal(model.hasChanged('name'), true);
-    model.change();
+    //model.change();
     equal(model.get('name'), 'Rob');
   });
 
@@ -299,18 +302,18 @@ $(document).ready(function() {
     equal(model.changedAttributes({a: 'b'}).a, 'b');
   });
 
-  test("Model: change with options", function() {
-    var value;
-    var model = new Backbone.Model({name: 'Rob'});
-    model.on('change', function(model, options) {
-      value = options.prefix + model.get('name');
-    });
-    model.set({name: 'Bob'}, {silent: true});
-    model.change({prefix: 'Mr. '});
-    equal(value, 'Mr. Bob');
-    model.set({name: 'Sue'}, {prefix: 'Ms. '});
-    equal(value, 'Ms. Sue');
-  });
+  //test("Model: change with options", function() {
+    //var value;
+    //var model = new Backbone.Model({name: 'Rob'});
+    //model.on('change', function(model, options) {
+      //value = options.prefix + model.get('name');
+    //});
+    //model.set({name: 'Bob'}, {silent: true});
+    ////model.change({prefix: 'Mr. '});
+    //equal(value, 'Mr. Bob');
+    //model.set({name: 'Sue'}, {prefix: 'Ms. '});
+    //equal(value, 'Ms. Sue');
+  //});
 
   test("Model: change after initialize", function () {
     var changed = 0;
@@ -332,15 +335,16 @@ $(document).ready(function() {
 
   test("Model: validate after save", function() {
     var lastError, model = new Backbone.Model();
+    model.on('invalid', function(model, error) {
+      lastError = error;
+    });
     model.validate = function(attrs) {
       if (attrs.admin) return "Can't change admin status.";
     };
     model.sync = function(method, model, options) {
       options.success.call(this, {admin: true});
     };
-    model.save(null, {error: function(model, error) {
-      lastError = error;
-    }});
+    model.save(null);
 
     equal(lastError, "Can't change admin status.");
   });
@@ -351,8 +355,8 @@ $(document).ready(function() {
       if (!attrs.valid) return "invalid";
     };
     equal(model.isValid(), true);
-    equal(model.set({valid: false}), false);
-    equal(model.isValid(), true);
+    model.set({valid: false});
+    equal(model.isValid(), false);
     ok(model.set('valid', false, {silent: true}));
     equal(model.isValid(), false);
   });
@@ -402,7 +406,7 @@ $(document).ready(function() {
     model.validate = function(attrs) {
       if (attrs.admin != this.get('admin')) return "Can't change admin status.";
     };
-    model.on('error', function(model, error) {
+    model.on('invalid', function(model, error) {
       lastError = error;
     });
     var result = model.set({a: 100});
@@ -411,7 +415,7 @@ $(document).ready(function() {
     equal(lastError, undefined);
     result = model.set({admin: true}, {silent: true});
     equal(model.get('admin'), true);
-    result = model.set({a: 200, admin: false});
+    result = model.set({a: 200, admin: false}, {validate: true});
     equal(lastError, "Can't change admin status.");
     equal(result, false);
     equal(model.get('a'), 100);
@@ -429,38 +433,13 @@ $(document).ready(function() {
     model.set({name: "Two"});
     equal(model.get('name'), 'Two');
     equal(error, undefined);
-    model.unset('name');
+    model.unset('name', {validate: true});
     equal(error, true);
     equal(model.get('name'), 'Two');
     model.clear();
-    equal(model.get('name'), 'Two');
     delete model.validate;
     model.clear();
     equal(model.get('name'), undefined);
-  });
-
-  test("Model: validate with error callback", function() {
-    var lastError, boundError;
-    var model = new Backbone.Model();
-    model.validate = function(attrs) {
-      if (attrs.admin) return "Can't change admin status.";
-    };
-    var callback = function(model, error) {
-      lastError = error;
-    };
-    model.on('error', function(model, error) {
-      boundError = true;
-    });
-    var result = model.set({a: 100}, {error: callback});
-    equal(result, model);
-    equal(model.get('a'), 100);
-    equal(lastError, undefined);
-    equal(boundError, undefined);
-    result = model.set({a: 200, admin: true}, {error: callback});
-    equal(result, false);
-    equal(model.get('a'), 100);
-    equal(lastError, "Can't change admin status.");
-    equal(boundError, undefined);
   });
 
   test("Model: defaults always extend attrs (#459)", function() {
@@ -567,7 +546,7 @@ $(document).ready(function() {
   });
 
   test("unset fires change for undefined attributes", 1, function() {
-    var model = new Backbone.Model({x: undefined});
+    var model = new Backbone.Model({x: null});
     model.on('change:x', function(){ ok(true); });
     model.unset('x');
   });
@@ -579,18 +558,9 @@ $(document).ready(function() {
 
   test("change fires change:attr", 1, function() {
     var model = new Backbone.Model({x: 1});
-    model.set({x: 2}, {silent: true});
     model.on('change:x', function(){ ok(true); });
-    model.change();
-  });
-
-  test("hasChanged is false after original values are set", function() {
-    var model = new Backbone.Model({x: 1});
-    model.on('change:x', function(){ ok(false); });
-    model.set({x: 2}, {silent: true});
-    ok(model.hasChanged());
-    model.set({x: 1}, {silent: true});
-    ok(!model.hasChanged());
+    model.set({x: 2});
+    //model.change();
   });
 
   test("save with `wait` succeeds without `validate`", function() {
@@ -657,7 +627,8 @@ $(document).ready(function() {
     model.set({x: true});
     deepEqual(events, ['change:y', 'change:x', 'change']);
     events = [];
-    model.change();
+    //model.change();
+    model.set({z: false});
     deepEqual(events, ['change:z', 'change']);
   });
 
@@ -665,7 +636,7 @@ $(document).ready(function() {
     var model = new Backbone.Model();
     model.on('change', function() {
       ok(true);
-      model.change();
+      //model.change();
     });
     model.set({x: true});
   });
@@ -673,11 +644,11 @@ $(document).ready(function() {
   test("no `'change'` event if no changes", function() {
     var model = new Backbone.Model();
     model.on('change', function() { ok(false); });
-    model.change();
+    //model.change();
     ok(true); // added to supress warning -AF
   });
 
-  test("nested `set` during `'change'`", 6, function() {
+  test("nested `set` during `'change'`", 4, function() {
     var count = 0;
     var model = new Backbone.Model();
     model.on('change', function() {
@@ -688,13 +659,11 @@ $(document).ready(function() {
           model.set({y: true});
           break;
         case 1:
-          deepEqual(this.changedAttributes(), {y: true});
-          equal(model.previous('x'), true);
+          deepEqual(this.changedAttributes(), {x: true, y: true});
           model.set({z: true});
           break;
         case 2:
-          deepEqual(this.changedAttributes(), {z: true});
-          equal(model.previous('y'), true);
+          deepEqual(this.changedAttributes(), {x: true, y: true, z: true});
           break;
         default:
           ok(false);
@@ -703,7 +672,7 @@ $(document).ready(function() {
     model.set({x: true});
   });
 
-  test("nested `'change'` with silent", 3, function() {
+  test("nested `'change'` with silent", 2, function() {
     var count = 0;
     var model = new Backbone.Model();
     model.on('change:y', function() { ok(true); });
@@ -714,7 +683,7 @@ $(document).ready(function() {
           model.set({y: true}, {silent: true});
           break;
         case 1:
-          deepEqual(this.changedAttributes(), {y: true, z: true});
+          deepEqual(this.changedAttributes(), {z: true});
           break;
         default:
           ok(false);
@@ -724,14 +693,22 @@ $(document).ready(function() {
     model.set({z: true});
   });
 
-  test("nested `'change:attr'` with silent", 1, function() {
+  asyncTest("nested `'change:attr'` with silent", 1, function() {
+    var yCalled = false;
     var model = new Backbone.Model();
-    model.on('change:y', function(){ ok(true); });
+    model.on('change:y', function(){
+      yCalled = true;
+      ok(true);
+    });
     model.on('change', function() {
       model.set({y: true}, {silent: true});
       model.set({z: true});
     });
     model.set({x: true});
+    setTimeout(function() {
+      equal(yCalled, false, "change:y should not be called since it's silent");
+      start();
+    }, 50);
   });
 
   test("multiple nested changes with silent", 1, function() {
@@ -744,7 +721,7 @@ $(document).ready(function() {
       equal(val, 2);
     });
     model.set({x: true});
-    model.change();
+    //model.change();
   });
 
   test("multiple nested changes with silent", function() {
@@ -752,13 +729,11 @@ $(document).ready(function() {
     var model = new Backbone.Model();
     model.on('change:b', function(model, val) { changes.push(val); });
     model.on('change', function() {
-      model.set({b: 1});
+      model.set({b: 1}, {silent: changes.length > 2});
       model.set({b: 2}, {silent: true});
     });
     model.set({b: 0});
     deepEqual(changes, [0, 1, 1]);
-    model.change();
-    deepEqual(changes, [0, 1, 1, 2, 1]);
   });
 
   test("nested set multiple times", 1, function() {
@@ -773,26 +748,28 @@ $(document).ready(function() {
     model.set({a: true});
   });
 
-  test("Backbone.wrapError triggers `'error'`", 12, function() {
-    var resp = {};
-    var options = {};
-    var model = new Backbone.Model();
-    model.on('error', error);
-    var callback = Backbone.wrapError(null, model, options);
-    callback(model, resp);
-    callback(resp);
-    callback = Backbone.wrapError(error, model, options);
-    callback(model, resp);
-    callback(resp);
-    function error(_model, _resp, _options) {
-      ok(model === _model);
-      ok(resp === _resp);
-      ok(options === _options);
-    }
-  });
+  //test("Backbone.wrapError triggers `'error'`", 12, function() {
+    //var resp = {};
+    //var options = {};
+    //var model = new Backbone.Model();
+    //model.on('error', error);
+    //var callback = Backbone.wrapError(null, model, options);
+    //callback(model, resp);
+    //callback(resp);
+    //callback = Backbone.wrapError(error, model, options);
+    //callback(model, resp);
+    //callback(resp);
+    //function error(_model, _resp, _options) {
+      //ok(model === _model);
+      //ok(resp === _resp);
+      //ok(options === _options);
+    //}
+  //});
 
 
-  // reset the Model
-  Backbone.Model = oldModel;
+  if (options.nested) {
+    // reset the Model
+    Backbone.Model = oldModel;
+  }
   
-});
+};

@@ -10,17 +10,20 @@
   <script src="../vendor/qunit/qunit/qunit.js"></script>
   <script src="../vendor/sinonjs/sinon.js"></script>
   <script src="../vendor/sinon-qunit/lib/sinon-qunit.js"></script>
-  <script>
-    QUnit.config.reorder = false;
-  </script>
   <script src="../vendor/lodash/dist/lodash.underscore.js"></script>
   <script src="../vendor/backbone/backbone.js"></script>
-  <script src="../backbone-nested.js"></script>
+  <!--<script src="../backbone-nested.js"></script>-->
 
   <!-- tests -->
   <script src="model.js"></script>
-  <script src="nested-model.js"></script>
-  <script src="speed.js"></script>
+  <script>
+    $(document).ready(function() {
+      runModelTests();
+      runModelTests({nested: true})
+    })
+  </script>
+  <!--<script src="nested-model.js"></script>-->
+  <!--<script src="speed.js"></script>-->
   <script>
     var _gaq = _gaq || [];
     _gaq.push(['_setAccount', 'UA-19048260-5']);
