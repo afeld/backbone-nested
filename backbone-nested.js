@@ -218,6 +218,12 @@
           if (opts.unset){
             // unset the value
             delete val[attr];
+
+            // Trigger Remove Event if array being set to null
+            if (_.isArray(val)){
+              var parentPath = Backbone.NestedModel.createAttrStr(_.initial(attrPath));
+              model._delayedTrigger('remove:' + parentPath, model, val[attr]);
+            }
           } else {
             // Set the new value
             val[attr] = newValue;
@@ -252,11 +258,6 @@
 
           }
 
-          // Trigger Remove Event if array being set to null
-          if (newValue === null){
-            var parentPath = Backbone.NestedModel.createAttrStr(_.initial(attrPath));
-            model._delayedTrigger('remove:' + parentPath, model, val[attr]);
-          }
 
         } else if (!val[attr]){
           if (_.isNumber(attr)){
