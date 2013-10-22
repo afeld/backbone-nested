@@ -23,7 +23,7 @@ var runModelTests = function(options) {
   });
   var doc, collection;
 
-  module("Backbone." + (options.nested ? "Nested" : "") + "Model", {
+  module("Backbone.Model" + (options.nested ? "+Nested" : ""), {
 
     setup: function() {
       doc = new proxy({
