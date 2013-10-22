@@ -459,7 +459,7 @@ $(document).ready(function() {
     doc.bind('change:name', changeName);
     doc.bind('change:name.first', changeNameFirst);
 
-    doc.set({'gender': 'Unknown'});
+    doc.set({'gender': 'Unknown'}, {validate: true});
 
     sinon.assert.notCalled(change);
     sinon.assert.notCalled(changeName);
@@ -486,7 +486,7 @@ $(document).ready(function() {
     doc.set({'name.middle': {
       initial: 'ThisIsTooLong',
       full: 'Lee'
-    }});
+    }}, {validate: true});
 
     sinon.assert.notCalled(change);
     sinon.assert.notCalled(changeName);
@@ -704,17 +704,12 @@ $(document).ready(function() {
       deepEqual(this.changedAttributes(), {
         name: {
           first: 'Aidan',
+          last: 'Feldman',
           middle: {
             initial: 'L',
             full: 'Limburger'
-          },
-          last: 'Feldman'
-        },
-        'name.middle': {
-          initial: 'L',
-          full: 'Limburger'
-        },
-        'name.middle.full': 'Limburger'
+          }
+        }
       });
     });
 
@@ -726,17 +721,12 @@ $(document).ready(function() {
       deepEqual(this.changedAttributes(), {
         name: {
           first: 'Aidan',
+          last: 'Feldman',
           middle: {
             initial: 'L',
             full: 'Limburger'
-          },
-          last: 'Feldman'
-        },
-        'name.middle': {
-          initial: 'L',
-          full: 'Limburger'
-        },
-        'name.middle.full': 'Limburger'
+          }
+        }
       });
     });
 
@@ -745,11 +735,11 @@ $(document).ready(function() {
       gender: 'M',
       name: {
         first: 'Aidan',
+        last: 'Feldman',
         middle: {
           initial: 'L',
           full: 'Limburger'
-        },
-        last: 'Feldman'
+        }
       },
       addresses: [
         {
@@ -771,13 +761,12 @@ $(document).ready(function() {
       deepEqual(this.changedAttributes(), {
         name: {
           first: 'Bob',
+          last: 'Dylan',
           middle: {
             initial: 'L',
             full: 'Lee'
-          },
-          last: 'Dylan'
-        },
-        'name.last': 'Dylan'
+          }
+        }
       });
     });
 
@@ -791,23 +780,22 @@ $(document).ready(function() {
       }
     };
 
-    doc.set({'name.first': 'TooLongFirstName'});
+    doc.set({'name.first': 'TooLongFirstName'}, {validate: true});
 
     doc.bind('change', function(){
       deepEqual(this.changedAttributes(), {
         name: {
           first: 'Aidan',
+          last: 'Dylan',
           middle: {
             initial: 'L',
             full: 'Lee'
-          },
-          last: 'Dylan'
-        },
-        'name.last': 'Dylan'
+          }
+        }
       });
     });
 
-    doc.set({'name.last': 'Dylan'});
+    doc.set({'name.last': 'Dylan'}, {validate: true});
   });
 
   // ----- CLEAR --------
@@ -987,7 +975,7 @@ $(document).ready(function() {
       state: 'Nebraska' // Longer than 2 letters, validation should fail
     };
 
-    doc.add('addresses', attrs);
+    doc.add('addresses', attrs, {validate: true});
 
     sinon.assert.notCalled(addAddresses);
     equal(doc.get('addresses[2]'), undefined);
