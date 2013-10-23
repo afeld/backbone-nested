@@ -38,7 +38,8 @@
     set: function(key, value, opts){
       var newAttrs = Backbone.NestedModel.deepClone(this.attributes),
         attrPath,
-        unsetObj;
+        unsetObj,
+        validated;
 
       if (_.isString(key)){
         // Backbone 0.9.0+ syntax: `model.set(key, val)` - convert the key to an attribute path
@@ -64,17 +65,11 @@
         }
       }
 
-      if (!this._validate(newAttrs, opts)){
-        // reset changed attributes
-        this.changed = {};
-        return false;
-      }
-
       if (opts.unset && attrPath && attrPath.length === 1){ // assume it is a singular attribute being unset
         // unsetting top-level attribute
         unsetObj = {};
         unsetObj[key] = null;
-        Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
+        validated = Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
       } else {
         unsetObj = newAttrs;
 
@@ -86,11 +81,23 @@
         } else if (opts.unset && _.isObject(key)) {
           unsetObj = key;
         }
-        Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
+        validated = Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
       }
+
+
+      if (!validated){
+        // reset changed attributes
+        this.changed = {};
+        return false;
+      }
+
 
       this._runDelayedTriggers();
       return this;
+    },
+
+    unset: function(attr, options) {
+      return this.set(attr, void 0, _.extend({}, options, {unset: true}));
     },
 
     clear: function(options) {
