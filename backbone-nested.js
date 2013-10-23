@@ -37,7 +37,8 @@
 
     set: function(key, value, opts){
       var newAttrs = Backbone.NestedModel.deepClone(this.attributes),
-        attrPath;
+        attrPath,
+        unsetObj;
 
       if (_.isString(key)){
         // Backbone 0.9.0+ syntax: `model.set(key, val)` - convert the key to an attribute path
@@ -71,11 +72,11 @@
 
       if (opts.unset && attrPath && attrPath.length === 1){ // assume it is a singular attribute being unset
         // unsetting top-level attribute
-        var unsetObj = {};
+        unsetObj = {};
         unsetObj[key] = null;
         Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
       } else {
-        var unsetObj = newAttrs;
+        unsetObj = newAttrs;
 
         // normal set(), or an unset of nested attribute
         if (opts.unset && attrPath){
