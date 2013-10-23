@@ -75,13 +75,17 @@
         unsetObj[key] = null;
         Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
       } else {
+        var unsetObj = newAttrs;
+
         // normal set(), or an unset of nested attribute
         if (opts.unset && attrPath){
           // make sure Backbone.Model won't unset the top-level attribute
           opts = _.extend({}, opts);
           delete opts.unset;
+        } else if (opts.unset && _.isObject(key)) {
+          unsetObj = key;
         }
-        Backbone.NestedModel.__super__.set.call(this, newAttrs, opts);
+        Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
       }
 
       this._runDelayedTriggers();
