@@ -95,7 +95,8 @@
     clear: function(options) {
       // Mostly taken from Backbone.Model.set, modified to work for NestedModel.
       options = options || {};
-      if (!options.silent && this.validate && !this.validate({}, options)) {
+      var attrs = _.clone(this.attributes);
+      if (!options.silent && this.validate && !this.validate(attrs, options)) {
         return false; // Should maybe return this instead?
       }
 
