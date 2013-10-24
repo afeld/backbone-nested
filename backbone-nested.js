@@ -59,7 +59,7 @@
           if (attrs.hasOwnProperty(_attrStr)) {
             this._setAttr(newAttrs,
                           Backbone.NestedModel.attrPath(_attrStr),
-                          opts.unset ? null : attrs[_attrStr],
+                          opts.unset ? void 0 : attrs[_attrStr],
                           opts);
           }
         }
@@ -68,7 +68,7 @@
       if (opts.unset && attrPath && attrPath.length === 1){ // assume it is a singular attribute being unset
         // unsetting top-level attribute
         unsetObj = {};
-        unsetObj[key] = null;
+        unsetObj[key] = void 0;
         validated = Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
       } else {
         unsetObj = newAttrs;
