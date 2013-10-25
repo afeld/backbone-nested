@@ -2,24 +2,26 @@
 <html>
 <head>
   <title>Backbone-Nested Test Suite</title>
-  <link rel="stylesheet" href="vendor/qunit.css" type="text/css" media="screen" />
-  <script type="text/javascript" src="../vendor/jquery.min.js"></script>
-  <script type="text/javascript" src="vendor/qunit.js"></script>
-  <script src="../vendor/jslitmus.js"></script>
-  <script type="text/javascript" src="vendor/sinon.js"></script>
-  <script type="text/javascript" src="vendor/sinon-qunit.js"></script>
-  <script type="text/javascript">
+  <link href="../vendor/qunit/qunit/qunit.css" rel="stylesheet" type="text/css" media="screen" />
+
+  <script src="../node_modules/jslitmus/jslitmus.js"></script>
+
+  <script src="../vendor/jquery/jquery.min.js"></script>
+  <script src="../vendor/qunit/qunit/qunit.js"></script>
+  <script src="../vendor/sinonjs/sinon.js"></script>
+  <script src="../vendor/sinon-qunit/lib/sinon-qunit.js"></script>
+  <script>
     QUnit.config.reorder = false;
   </script>
-  <script type="text/javascript" src="../vendor/underscore.js"></script>
-  <script type="text/javascript" src="../vendor/backbone.js"></script>
-  <script type="text/javascript" src="../backbone-nested.js"></script>
+  <script src="../vendor/lodash/dist/lodash.underscore.js"></script>
+  <script src="../vendor/backbone/backbone.js"></script>
+  <script src="../backbone-nested.js"></script>
 
   <!-- tests -->
-  <script type="text/javascript" src="model.js"></script>
-  <script type="text/javascript" src="nested-model.js"></script>
-  <script type="text/javascript" src="speed.js"></script>
-  <script type="text/javascript">
+  <script src="model.js"></script>
+  <script src="nested-model.js"></script>
+  <script src="speed.js"></script>
+  <script>
     var _gaq = _gaq || [];
     _gaq.push(['_setAccount', 'UA-19048260-5']);
     _gaq.push(['_trackPageview']);

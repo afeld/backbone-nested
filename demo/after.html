@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script type="text/javascript" src="../vendor/jquery.min.js"></script>
-    <script type="text/javascript" src="../vendor/underscore.js"></script>
-    <script type="text/javascript" src="../vendor/backbone.js"></script>
-    <script type="text/javascript" src="../backbone-nested.js"></script>
+    <script src="../vendor/jquery/jquery.min.js"></script>
+    <script src="../vendor/lodash/dist/lodash.underscore.js"></script>
+    <script src="../vendor/backbone/backbone.js"></script>
+    <script src="../backbone-nested.js"></script>
+
     <script>
       var person = new Backbone.NestedModel({
         name: {
@@ -16,7 +17,7 @@
       person.bind('change:name', function(){
         alert("hooray!");
       });
-      
+
       person.set('name.first', 'Bob');
     </script>
   </head>
