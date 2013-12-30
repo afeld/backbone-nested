@@ -291,7 +291,6 @@ var runModelTests = function(options) {
     model.set({name : 'Rob'}, {silent : true});
     equal(model.hasChanged(), true);
     equal(model.hasChanged('name'), true);
-    //model.change();
     equal(model.get('name'), 'Rob');
   });
 
@@ -301,19 +300,6 @@ var runModelTests = function(options) {
     equal(model.changedAttributes({a: 'a'}), false);
     equal(model.changedAttributes({a: 'b'}).a, 'b');
   });
-
-  //test("Model: change with options", function() {
-    //var value;
-    //var model = new Backbone.Model({name: 'Rob'});
-    //model.on('change', function(model, options) {
-      //value = options.prefix + model.get('name');
-    //});
-    //model.set({name: 'Bob'}, {silent: true});
-    ////model.change({prefix: 'Mr. '});
-    //equal(value, 'Mr. Bob');
-    //model.set({name: 'Sue'}, {prefix: 'Ms. '});
-    //equal(value, 'Ms. Sue');
-  //});
 
   test("Model: change after initialize", function () {
     var changed = 0;
@@ -560,7 +546,6 @@ var runModelTests = function(options) {
     var model = new Backbone.Model({x: 1});
     model.on('change:x', function(){ ok(true); });
     model.set({x: 2});
-    //model.change();
   });
 
   test("save with `wait` succeeds without `validate`", function() {
@@ -627,7 +612,6 @@ var runModelTests = function(options) {
     model.set({x: true});
     deepEqual(events, ['change:y', 'change:x', 'change']);
     events = [];
-    //model.change();
     model.set({z: false});
     deepEqual(events, ['change:z', 'change']);
   });
@@ -636,7 +620,6 @@ var runModelTests = function(options) {
     var model = new Backbone.Model();
     model.on('change', function() {
       ok(true);
-      //model.change();
     });
     model.set({x: true});
   });
@@ -644,7 +627,6 @@ var runModelTests = function(options) {
   test("no `'change'` event if no changes", function() {
     var model = new Backbone.Model();
     model.on('change', function() { ok(false); });
-    //model.change();
     ok(true); // added to supress warning -AF
   });
 
@@ -721,7 +703,6 @@ var runModelTests = function(options) {
       equal(val, 2);
     });
     model.set({x: true});
-    //model.change();
   });
 
   test("multiple nested changes with silent", function() {
@@ -747,25 +728,6 @@ var runModelTests = function(options) {
     });
     model.set({a: true});
   });
-
-  //test("Backbone.wrapError triggers `'error'`", 12, function() {
-    //var resp = {};
-    //var options = {};
-    //var model = new Backbone.Model();
-    //model.on('error', error);
-    //var callback = Backbone.wrapError(null, model, options);
-    //callback(model, resp);
-    //callback(resp);
-    //callback = Backbone.wrapError(error, model, options);
-    //callback(model, resp);
-    //callback(resp);
-    //function error(_model, _resp, _options) {
-      //ok(model === _model);
-      //ok(resp === _resp);
-      //ok(options === _options);
-    //}
-  //});
-
 
   if (options.nested) {
     // reset the Model
