@@ -531,7 +531,7 @@ var runModelTests = function(options) {
     ok(model.get('x') === a);
   });
 
-  test("unset fires change for undefined attributes", 1, function() {
+  test("unset fires change for null attributes", 1, function() {
     var model = new Backbone.Model({x: null});
     model.on('change:x', function(){ ok(true); });
     model.unset('x');
