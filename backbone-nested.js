@@ -10,7 +10,8 @@
 (function(){
   'use strict';
 
-  var _delayedTriggers = [];
+  var _delayedTriggers = [],
+    nestedChanges;
 
   Backbone.NestedModel = Backbone.Model.extend({
 
@@ -64,6 +65,8 @@
           }
         }
       }
+
+      nestedChanges = this.changed;
 
       if (opts.unset && attrPath && attrPath.length === 1){ // assume it is a singular attribute being unset
         // unsetting top-level attribute
@@ -181,6 +184,11 @@
       }
 
       return this;
+    },
+
+    changedAttributes: function() {
+      var backboneChanged = Backbone.NestedModel.__super__.changedAttributes.call(this);
+      return _.extend({}, nestedChanges, backboneChanged);
     },
 
     toJSON: function(){

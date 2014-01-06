@@ -709,7 +709,12 @@ $(document).ready(function() {
             initial: 'L',
             full: 'Limburger'
           }
-        }
+        },
+        'name.middle': {
+          initial: 'L',
+          full: 'Limburger'
+        },
+        'name.middle.full': 'Limburger'
       });
     });
 
@@ -726,7 +731,12 @@ $(document).ready(function() {
             initial: 'L',
             full: 'Limburger'
           }
-        }
+        },
+        'name.middle': {
+          initial: 'L',
+          full: 'Limburger'
+        },
+        'name.middle.full': 'Limburger'
       });
     });
 
@@ -766,7 +776,8 @@ $(document).ready(function() {
             initial: 'L',
             full: 'Lee'
           }
-        }
+        },
+        'name.last': 'Dylan'
       });
     });
 
@@ -791,7 +802,8 @@ $(document).ready(function() {
             initial: 'L',
             full: 'Lee'
           }
-        }
+        },
+        'name.last': 'Dylan'
       });
     });
 
