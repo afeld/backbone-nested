@@ -4,9 +4,6 @@ var runModelTests = function(options) {
 
   // test Backbone.NestedModel instead of Backbone.Model - reset at end of function
   var oldModel = Backbone.Model;
-  if (options.nested) {
-    Backbone.Model = Backbone.NestedModel;
-  }
 
 
   // Variable to catch the last request.
@@ -26,6 +23,11 @@ var runModelTests = function(options) {
   module("Backbone.Model" + (options.nested ? "+Nested" : ""), {
 
     setup: function() {
+      // test Backbone.NestedModel instead of Backbone.Model - reset at teardown
+      if (options.nested) {
+        Backbone.Model = Backbone.NestedModel;
+      }
+
       doc = new proxy({
         id     : '1-the-tempest',
         title  : "The Tempest",
@@ -52,6 +54,11 @@ var runModelTests = function(options) {
       Backbone.sync = sync;
       $.ajax = ajax;
       Backbone.Model.prototype.urlRoot = urlRoot;
+
+      if (options.nested) {
+        // reset the Model
+        Backbone.Model = oldModel;
+      }
     }
 
   });
@@ -728,10 +735,4 @@ var runModelTests = function(options) {
     });
     model.set({a: true});
   });
-
-  if (options.nested) {
-    // reset the Model
-    Backbone.Model = oldModel;
-  }
-  
 };
