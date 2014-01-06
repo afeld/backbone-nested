@@ -104,6 +104,8 @@
     },
 
     clear: function(options) {
+      nestedChanges = {};
+
       // Mostly taken from Backbone.Model.set, modified to work for NestedModel.
       options = options || {};
       var attrs = _.clone(this.attributes);
