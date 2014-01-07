@@ -66,12 +66,13 @@
         }
       }
 
-      nestedChanges = this.changed;
+      nestedChanges = Backbone.NestedModel.__super__.changedAttributes.call(this);
 
       if (opts.unset && attrPath && attrPath.length === 1){ // assume it is a singular attribute being unset
         // unsetting top-level attribute
         unsetObj = {};
         unsetObj[key] = void 0;
+        nestedChanges = _.omit(nestedChanges, _.keys(unsetObj));
         validated = Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
       } else {
         unsetObj = newAttrs;
@@ -84,6 +85,7 @@
         } else if (opts.unset && _.isObject(key)) {
           unsetObj = key;
         }
+        nestedChanges = _.omit(nestedChanges, _.keys(unsetObj));
         validated = Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
       }
 
@@ -91,6 +93,7 @@
       if (!validated){
         // reset changed attributes
         this.changed = {};
+        nestedChanges = {};
         return false;
       }
 
