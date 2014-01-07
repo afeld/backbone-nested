@@ -188,9 +188,12 @@
       return this;
     },
 
-    changedAttributes: function() {
-      var backboneChanged = Backbone.NestedModel.__super__.changedAttributes.call(this);
-      return _.extend({}, nestedChanges, backboneChanged);
+    changedAttributes: function(diff) {
+      var backboneChanged = Backbone.NestedModel.__super__.changedAttributes.call(this, diff);
+      if (_.isObject(backboneChanged)) {
+        return _.extend({}, nestedChanges, backboneChanged);
+      }
+      return false;
     },
 
     toJSON: function(){
