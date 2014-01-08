@@ -1,3 +1,4 @@
+<!-- yanked from Backbone 1.1.0 test suite -->
 <!doctype html>
 <html>
 <head>
@@ -18,11 +19,15 @@
   <script src="../vendor/backbone/test/vendor/qunit.js"></script>
   <script src="../vendor/backbone/test/vendor/underscore.js"></script>
   <script src="../vendor/backbone/test/../backbone.js"></script>
+
+  <!-- Backbone.Nested overrides -->
   <script src="../backbone-nested.js"></script>
   <script>
     var oldModel = Backbone.Model;
     Backbone.Model = Backbone.NestedModel;
   </script>
+  <!-- ######################### -->
+
   <script src="../vendor/backbone/test/environment.js"></script>
   <script src="../vendor/backbone/test/noconflict.js"></script>
   <script src="../vendor/backbone/test/model.js"></script>
