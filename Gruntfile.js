@@ -22,7 +22,7 @@ module.exports = function(grunt) {
       },
     },
     qunit: {
-      index: ['test/index.html', 'test/backbone.html']
+      index: ['test/index.html']
     },
     watch: {
       files: ['<config:lint.files>', 'test/**'],
