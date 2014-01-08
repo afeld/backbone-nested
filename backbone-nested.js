@@ -10,7 +10,8 @@
 (function(){
   'use strict';
 
-  var _delayedTriggers = [];
+  var _delayedTriggers = [],
+    nestedChanges;
 
   Backbone.NestedModel = Backbone.Model.extend({
 
@@ -37,7 +38,9 @@
 
     set: function(key, value, opts){
       var newAttrs = Backbone.NestedModel.deepClone(this.attributes),
-        attrPath;
+        attrPath,
+        unsetObj,
+        validated;
 
       if (_.isString(key)){
         // Backbone 0.9.0+ syntax: `model.set(key, val)` - convert the key to an attribute path
@@ -57,41 +60,60 @@
           if (attrs.hasOwnProperty(_attrStr)) {
             this._setAttr(newAttrs,
                           Backbone.NestedModel.attrPath(_attrStr),
-                          opts.unset ? null : attrs[_attrStr],
+                          opts.unset ? void 0 : attrs[_attrStr],
                           opts);
           }
         }
       }
 
-      if (!this._validate(newAttrs, opts)){
-        // reset changed attributes
-        this.changed = {};
-        return false;
-      }
+      nestedChanges = Backbone.NestedModel.__super__.changedAttributes.call(this);
 
       if (opts.unset && attrPath && attrPath.length === 1){ // assume it is a singular attribute being unset
         // unsetting top-level attribute
-        var unsetObj = {};
-        unsetObj[key] = null;
-        Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
+        unsetObj = {};
+        unsetObj[key] = void 0;
+        nestedChanges = _.omit(nestedChanges, _.keys(unsetObj));
+        validated = Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
       } else {
+        unsetObj = newAttrs;
+
         // normal set(), or an unset of nested attribute
         if (opts.unset && attrPath){
           // make sure Backbone.Model won't unset the top-level attribute
           opts = _.extend({}, opts);
           delete opts.unset;
+        } else if (opts.unset && _.isObject(key)) {
+          unsetObj = key;
         }
-        Backbone.NestedModel.__super__.set.call(this, newAttrs, opts);
+        nestedChanges = _.omit(nestedChanges, _.keys(unsetObj));
+        validated = Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
       }
+
+
+      if (!validated){
+        // reset changed attributes
+        this.changed = {};
+        nestedChanges = {};
+        return false;
+      }
+
 
       this._runDelayedTriggers();
       return this;
     },
 
+    unset: function(attr, options) {
+      return this.set(attr, void 0, _.extend({}, options, {unset: true}));
+    },
+
     clear: function(options) {
+      nestedChanges = {};
+
       // Mostly taken from Backbone.Model.set, modified to work for NestedModel.
       options = options || {};
-      if (!options.silent && this.validate && !this.validate({}, options)) {
+      // clone attributes so validate method can't mutate it from underneath us.
+      var attrs = _.clone(this.attributes);
+      if (!options.silent && this.validate && !this.validate(attrs, options)) {
         return false; // Should maybe return this instead?
       }
 
@@ -122,7 +144,6 @@
       setChanged(this.attributes, '', options);
 
       this.attributes = {};
-      this._escapedAttributes = {};
 
       // Fire the `"change"` events.
       if (!options.silent) this._delayedTrigger('change');
@@ -169,6 +190,14 @@
       }
 
       return this;
+    },
+
+    changedAttributes: function(diff) {
+      var backboneChanged = Backbone.NestedModel.__super__.changedAttributes.call(this, diff);
+      if (_.isObject(backboneChanged)) {
+        return _.extend({}, nestedChanges, backboneChanged);
+      }
+      return false;
     },
 
     toJSON: function(){
@@ -219,7 +248,12 @@
           if (opts.unset){
             // unset the value
             delete val[attr];
-            delete model._escapedAttributes[attrStr];
+
+            // Trigger Remove Event if array being set to null
+            if (_.isArray(val)){
+              var parentPath = Backbone.NestedModel.createAttrStr(_.initial(attrPath));
+              model._delayedTrigger('remove:' + parentPath, model, val[attr]);
+            }
           } else {
             // Set the new value
             val[attr] = newValue;
@@ -254,11 +288,6 @@
 
           }
 
-          // Trigger Remove Event if array being set to null
-          if (newValue === null){
-            var parentPath = Backbone.NestedModel.createAttrStr(_.initial(attrPath));
-            model._delayedTrigger('remove:' + parentPath, model, val[attr]);
-          }
 
         } else if (!val[attr]){
           if (_.isNumber(attr)){
