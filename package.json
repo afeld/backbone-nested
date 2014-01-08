@@ -7,14 +7,14 @@
     "test": "grunt"
   },
   "dependencies": {
-    "backbone": "0.9.x",
-    "jslitmus": "~0.1.0"
+    "backbone": "~1.1.0"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-qunit": "~0.2.2",
     "grunt-contrib-jshint": "~0.6.4",
-    "grunt-contrib-watch": "~0.5.3"
+    "grunt-contrib-watch": "~0.5.3",
+    "jslitmus": "~0.1.0"
   },
   "peerDependencies": {
     "grunt-cli": "*",
