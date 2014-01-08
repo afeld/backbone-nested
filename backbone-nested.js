@@ -111,6 +111,7 @@
 
       // Mostly taken from Backbone.Model.set, modified to work for NestedModel.
       options = options || {};
+      // clone attributes so validate method can't mutate it from underneath us.
       var attrs = _.clone(this.attributes);
       if (!options.silent && this.validate && !this.validate(attrs, options)) {
         return false; // Should maybe return this instead?
