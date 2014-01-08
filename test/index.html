@@ -14,17 +14,23 @@
   <script src="../vendor/backbone/backbone.js"></script>
   <script src="../backbone-nested.js"></script>
 
+
   <!-- tests -->
-  <script src="model.js"></script>
-  <script>
-    // Run backbone-nested against backbone's tests to make sure we're a drop-in replacement
-    // Also, run our tests using backbone's Model to make sure our tests are correct
-    $(document).ready(function() {
-      runModelTests();
-      runModelTests({nested: true})
-    })
-  </script>
   <script src="nested-model.js"></script>
+
+  <!-- ensure Backbone.NestedModel backwards compatability by running against Backbone tests -->
+  <script>
+    var oldModel = Backbone.Model;
+    Backbone.Model = Backbone.NestedModel;
+  </script>
+  <script src="../vendor/backbone/test/environment.js"></script>
+  <script src="../vendor/backbone/test/noconflict.js"></script>
+  <script src="../vendor/backbone/test/model.js"></script>
+  <script src="../vendor/backbone/test/collection.js"></script>
+  <script src="../vendor/backbone/test/view.js"></script>
+  <script src="../vendor/backbone/test/sync.js"></script>
+
+
   <!--<script src="speed.js"></script>-->
   <script>
     var _gaq = _gaq || [];
