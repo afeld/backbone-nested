@@ -1,6 +1,8 @@
 #### HEAD ([diff](https://github.com/afeld/backbone-nested/compare/v1.1.2...master?w=1))
 
-* fix `remove()` not firing `'remove'` event when last element of array is removed (thanks @Kmandr)
+* Backbone 1.x support ([#96](https://github.com/afeld/backbone-nested/pull/96))
+* add option to test from command line and run tests on Travis CI
+* fix `remove()` not firing `'remove'` event when last element of array is removed ([#19](https://github.com/afeld/backbone-nested/issues/19))
 * fix `clear()` and set nested attributes on `changedAttributes()` (thanks @isakb)
 * `'change'` events will no longer fire if new value matches the old
 
