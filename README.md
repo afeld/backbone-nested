@@ -1,6 +1,6 @@
 # Backbone-Nested [![Build Status](https://secure.travis-ci.org/afeld/backbone-nested.png?branch=master)](http://travis-ci.org/afeld/backbone-nested)
 
-A plugin to make [Backbone.js](http://documentcloud.github.com/backbone) keep track of nested attributes.  [Download minified version](https://github.com/afeld/backbone-nested/downloads).
+A plugin to make [Backbone.js](http://documentcloud.github.com/backbone) keep track of nested attributes.  Download the latest version and see the changelog/history/release notes on the [Releases](https://github.com/afeld/backbone-nested/releases) page.
 
 ## The Need
 
