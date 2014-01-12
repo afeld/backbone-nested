@@ -1,6 +1,6 @@
 # Backbone-Nested [![Build Status](https://secure.travis-ci.org/afeld/backbone-nested.png?branch=master)](http://travis-ci.org/afeld/backbone-nested)
 
-A plugin to make [Backbone.js](http://documentcloud.github.com/backbone) keep track of nested attributes.  Download the latest version and see the changelog/history/release notes on the [Releases](https://github.com/afeld/backbone-nested/releases) page.
+A plugin to make [Backbone.js](http://documentcloud.github.com/backbone) keep track of nested attributes.  Download the latest version and see the changelog/history/release notes on the [Releases](https://github.com/afeld/backbone-nested/releases) page.  **Supports Backbone 0.9.x and 1.x.**
 
 ## The Need
 
@@ -28,19 +28,35 @@ Wouldn't it be awesome if you could do this?
 user.bind('change:name.first', function(){ ... });
 ```
 
-## Usage
+## Installation
 
-1. Download the latest version [here](https://github.com/afeld/backbone-nested/tags), and add `backbone-nested.js` to your HTML `<head>`.  **Supports Backbone 0.9.x and 1.x.**
+### [Bower](http://bower.io/)
 
-    ```html
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-    <script type="text/javascript" src="underscore.js"></script>
-    <script type="text/javascript" src="backbone.js"></script>
-    <!-- must be after backbone.js -->
-    <script type="text/javascript" src="backbone-nested.js"></script>
+Recommended.
+
+1. Install the latest version:
+
+    ```bash
+    bower install backbone backbone-nested-model jquery underscore --save
     ```
 
-2. Change your models to extend from `Backbone.NestedModel`, e.g.
+2. Add `backbone-nested.js` to your HTML `<head>`:
+
+    ```html
+    <!-- must loaded in this order -->
+    <script type="text/javascript" src="/bower_components/jquery/jquery.js"></script>
+    <script type="text/javascript" src="/bower_components/underscore/underscore.js"></script>
+    <script type="text/javascript" src="/bower_components/backbone/backbone.js"></script>
+    <script type="text/javascript" src="/bower_components/backbone-nested-model/backbone-nested.js"></script>
+    ```
+
+### Manual
+
+Download the latest [release](https://github.com/afeld/backbone-nested/releases) and the dependencies listed above, then include with script tags in your HTML.
+
+## Usage
+
+1. Change your models to extend from `Backbone.NestedModel`, e.g.
 
     ```javascript
     var Person = Backbone.Model.extend({ ... });
@@ -50,7 +66,7 @@ user.bind('change:name.first', function(){ ... });
     var Person = Backbone.NestedModel.extend({ ... });
     ```
 
-3. Change your getters and setters to not access nested attributes directly, e.g.
+2. Change your getters and setters to not access nested attributes directly, e.g.
 
     ```javascript
     user.get('name').first = 'Bob';
