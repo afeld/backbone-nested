@@ -97,6 +97,10 @@
         return false;
       }
 
+      // check if native `idAttribute` not work
+      if (this.id == null){
+        this.id = this.get(this.idAttribute);
+      }
 
       this._runDelayedTriggers();
       return this;

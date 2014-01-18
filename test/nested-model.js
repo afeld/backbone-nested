@@ -1065,4 +1065,15 @@ $(document).ready(function() {
     equal(model, doc);
   });
 
+
+  // ----- idAttribute --------
+
+  test("#idAttribute properly work", function() {
+    doc.idAttribute = 'name.middle.full';
+
+    doc.set('gender', 'M');
+
+    strictEqual(doc.id, doc.get('name.middle.full'));
+  });
+
 });
