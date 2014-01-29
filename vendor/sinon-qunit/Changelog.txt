@@ -1,0 +1,5 @@
+== 1.0.0 / 2010-12-06
+* Hooked assertions into QUnit's assertion counter
+* Added documentation
+== 0.1.0 / 2010-10-31
+* Initial release

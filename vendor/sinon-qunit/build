@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+require "fileutils"
+require "pathname"
+
+def add_license(file, version)
+  contents = File.read(file)
+
+  File.open(file, "w") do |f|
+    f.puts <<PREAMBLE
+/**
+ * sinon-qunit #{version}, #{Time.now.strftime("%Y/%m/%d")}
+ *
+ * @author Christian Johansen (christian@cjohansen.no)
+ *
+ * #{File.read("LICENSE").split("\n").join("\n * ")}
+ */
+PREAMBLE
+
+    f.puts(contents)
+  end
+end
+
+Dir.chdir(File.dirname(__FILE__)) do
+  version = File.read("package.json").match(/"version":\s+"(.*)"/)[1]
+  version_string = ARGV[0] == "plain" ? "" : "-#{version}"
+  output = "pkg/sinon-qunit#{version_string}.js"
+
+  FileUtils.mkdir("pkg") unless File.exists?("pkg")
+  FileUtils.cp("lib/sinon-qunit.js", "pkg/sinon-qunit#{version_string}.js")
+  add_license("pkg/sinon-qunit#{version_string}.js", version)
+
+  puts "Built sinon-qunit #{version}"
+end
