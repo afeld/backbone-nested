@@ -6,7 +6,7 @@
  * Copyright (c) 2011-2012 Aidan Feldman
  * MIT Licensed (LICENSE)
  */
-/*global $, _, Backbone */
+/*global define, require, module */
 (function(root, factory){
   if (typeof exports !== 'undefined') {
       // Define as CommonJS export:
