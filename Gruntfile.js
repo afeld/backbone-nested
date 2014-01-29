@@ -24,6 +24,9 @@ module.exports = function(grunt) {
     qunit: {
       index: ['test/index.html']
     },
+    tape: {
+        files: ['test/tape-*.js']
+    },
     watch: {
       files: ['<config:lint.files>', 'test/**'],
       tasks: ['jshint', 'qunit']
@@ -32,7 +35,8 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-qunit');
+  grunt.loadNpmTasks('grunt-tape');
 
   // Default task.
-  grunt.registerTask('default', ['jshint', 'qunit']);
+  grunt.registerTask('default', ['jshint', 'qunit', 'tape']);
 };
