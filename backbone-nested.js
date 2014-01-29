@@ -7,7 +7,18 @@
  * MIT Licensed (LICENSE)
  */
 /*global $, _, Backbone */
-(function(){
+(function(root, factory){
+  if (typeof exports !== 'undefined') {
+      // Define as CommonJS export:
+      module.exports = factory(require("jquery"), require("underscore"), require("backbone"));
+  } else if (typeof define === 'function' && define.amd) {
+      // Define as AMD:
+      define(["jquery", "underscore", "backbone"], factory);
+  } else {
+      // Just run it:
+      factory(root.$, root._, root.Backbone);
+  }
+}(this, function($, _, Backbone) {
   'use strict';
 
   var _delayedTriggers = [],
@@ -359,4 +370,5 @@
 
   });
 
-}());
+  return Backbone;
+}));
