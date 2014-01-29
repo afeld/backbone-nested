@@ -22,11 +22,9 @@
   },
   "homepage": "http://afeld.github.com/backbone-nested/",
   "main": "backbone-nested.js",
-  "repositories": [
-    {
-      "type": "git",
-      "url": "https://github.com/afeld/backbone-nested.git"
-    }
-  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/afeld/backbone-nested.git"
+  },
   "github": "https://github.com/afeld/backbone-nested"
 }
