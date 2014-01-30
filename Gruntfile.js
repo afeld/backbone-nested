@@ -24,8 +24,10 @@ module.exports = function(grunt) {
     qunit: {
       index: ['test/index.html']
     },
-    tape: {
-        files: ['test/tape-*.js']
+    mochaTest: {
+        test: {
+            src: ['test/mocha-*.js']
+        }
     },
     watch: {
       files: ['<config:lint.files>', 'test/**'],
@@ -35,8 +37,8 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-qunit');
-  grunt.loadNpmTasks('grunt-tape');
+  grunt.loadNpmTasks('grunt-mocha-test');
 
   // Default task.
-  grunt.registerTask('default', ['jshint', 'qunit', 'tape']);
+  grunt.registerTask('default', ['jshint', 'qunit', 'mochaTest']);
 };
