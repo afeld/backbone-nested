@@ -326,7 +326,7 @@ $(document).ready(function() {
     var provider = new Klass({
       "fields.0.key": 'LOGIN2'
     });
-    equal(provider.get('fields.0..key'), 'LOGIN2');
+    equal(provider.get('fields.0.key'), 'LOGIN2');
 
     deepEqual(provider.toJSON(), {
       "fields": [{
@@ -334,7 +334,6 @@ $(document).ready(function() {
       }]
     });
   });
-
 
 
   // ----- CHANGE EVENTS --------

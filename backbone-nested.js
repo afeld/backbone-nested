@@ -250,7 +250,6 @@
         var attr = _.last(path);
         var attrStr = Backbone.NestedModel.createAttrStr(path);
 
-
         // See if this is a new value being set
         var isNewValue = !_.isEqual(val[attr], newValue);
 
