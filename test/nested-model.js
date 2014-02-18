@@ -309,6 +309,33 @@ $(document).ready(function() {
     deepEqual(json, doc.attributes);
   });
 
+  test("#toJSON() after an 1-N set using brackets", function() {
+    var provider = new Klass({
+      "fields[0].key": 'LOGIN'
+    });
+    equal(provider.get('fields[0].key'), 'LOGIN');
+
+    deepEqual(provider.toJSON(), {
+      "fields": [{
+        "key": "LOGIN"
+      }]
+    });
+  });
+
+  test("#toJSON() after an 1-N set using dots", function() {
+    var provider = new Klass({
+      "fields.0.key": 'LOGIN2'
+    });
+    equal(provider.get('fields.0..key'), 'LOGIN2');
+
+    deepEqual(provider.toJSON(), {
+      "fields": [{
+        "key": "LOGIN2"
+      }]
+    });
+  });
+
+
 
   // ----- CHANGE EVENTS --------
 
