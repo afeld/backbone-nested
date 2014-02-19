@@ -246,7 +246,7 @@
       var fullPathLength = attrPath.length;
       var model = this;
 
-      Backbone.NestedModel.walkPath(newAttrs, attrPath, function(val, path){
+      Backbone.NestedModel.walkPath(newAttrs, attrPath, function(val, path, next){
         var attr = _.last(path);
         var attrStr = Backbone.NestedModel.createAttrStr(path);
 
@@ -301,7 +301,7 @@
 
 
         } else if (!val[attr]){
-          if (_.isNumber(attr)){
+          if (_.isNumber(next)){
             val[attr] = [];
           } else {
             val[attr] = {};
@@ -360,7 +360,7 @@
 
       // walk through the child attributes
       for (var i = 0; i < attrPath.length; i++){
-        callback.call(scope || this, val, attrPath.slice(0, i + 1));
+        callback.call(scope || this, val, attrPath.slice(0, i + 1), attrPath[i + 1]);
 
         childAttr = attrPath[i];
         val = val[childAttr];
