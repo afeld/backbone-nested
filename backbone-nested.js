@@ -245,6 +245,13 @@
 
       var fullPathLength = attrPath.length;
       var model = this;
+      var shouldTriggerAdd;
+
+      var parentPath = Backbone.NestedModel.createAttrStr(_.initial(attrPath));
+      if (parentPath && _.isArray(this.get(parentPath)) &&
+        this.get(Backbone.NestedModel.createAttrStr(attrPath)) === undefined) {
+        shouldTriggerAdd = true;
+      }
 
       Backbone.NestedModel.walkPath(newAttrs, attrPath, function(val, path, next){
         var attr = _.last(path);
@@ -314,7 +321,7 @@
             model._delayedChange(attrStr, val[attr], opts);
           }
 
-          if (_.isArray(val[attr])){
+          if (_.isArray(val[attr]) && shouldTriggerAdd){
             model._delayedTrigger('add:' + attrStr, model, val[attr]);
           }
         }
