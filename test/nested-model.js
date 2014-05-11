@@ -301,6 +301,24 @@ $(document).ready(function() {
     deepEqual(doc.get('addresses[0].areaCodes'), []);
   });
 
+  test("#set() 1-1 inside an array should not trigger the add event", function () {
+    var entity = new Klass({
+      names: [
+        { first: 'John' }
+      ]
+    });
+
+    var callbackFired = false;
+
+    entity.on('add:names', function () {
+      callbackFired = true;
+    });
+
+    entity.set('names[0].first', 'Steve');
+
+    ok(!callbackFired, "Callback should not have been fired");
+  });
+
 
   // ----- TO_JSON --------
 
