@@ -17,9 +17,7 @@
     "grunt-mocha-test": "~0.8.2",
     "grunt-contrib-watch": "~0.5.3",
     "jslitmus": "~0.1.0",
-    "mocha": "~1.17.1"
-  },
-  "peerDependencies": {
+    "mocha": "~1.17.1",
     "grunt-cli": "*",
     "bower": "*"
   },
