@@ -69,6 +69,11 @@
         var attrs = key;
         for (var _attrStr in attrs) {
           if (attrs.hasOwnProperty(_attrStr)) {
++            // Apply custom opts, related to a specific field
++           if (opts.byField && opts.byField[_attrStr]) {
++             opts = _.extend(opts, opts.byField[_attrStr]);
++           }
+            
             this._setAttr(newAttrs,
                           Backbone.NestedModel.attrPath(_attrStr),
                           opts.unset ? void 0 : attrs[_attrStr],
