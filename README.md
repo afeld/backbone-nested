@@ -176,7 +176,7 @@ user.get('addresses').length; //=> 1
 
 ## See also
 
-Note, this plugin does *not* handle non-embedded relations (a.k.a. relations), which keeps it relatively simple.  If you support for more complex relationships between models, see [the Backbone plugin wiki page](https://github.com/jashkenas/backbone/wiki/Extensions,-Plugins,-Resources#relations). There is also an outstanding discussion of [merging this project with backbone-deep-model](https://github.com/powmedia/backbone-deep-model/issues/14).
+Note, this plugin does *not* handle non-embedded relations (a.k.a. relations), which keeps it relatively simple.  If you support for more complex relationships between models, see [the Backbone plugin wiki page](https://github.com/jashkenas/backbone/wiki/Extensions,-Plugins,-Resources#relations). There is also an open discussion about [merging this project with backbone-deep-model](https://github.com/powmedia/backbone-deep-model/issues/14).
 
 ## Contributing
 
