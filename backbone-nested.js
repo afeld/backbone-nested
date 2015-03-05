@@ -284,7 +284,11 @@
               var nestedAttr, nestedVal;
               for (var a in obj){
                 if (obj.hasOwnProperty(a)) {
-                  nestedAttr = prefix + '.' + a;
+                  if (_.isArray(obj)) {
+                    nestedAttr = prefix + '[' + a + ']';
+                  } else {
+                    nestedAttr = prefix + '.' + a;
+                  }
                   nestedVal = obj[a];
                   if (!_.isEqual(model.get(nestedAttr), nestedVal)) {
                     model._delayedChange(nestedAttr, nestedVal, opts);
