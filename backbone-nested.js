@@ -27,18 +27,11 @@
   Backbone.NestedModel = Backbone.Model.extend({
 
     get: function(attrStrOrPath){
-      var attrPath = Backbone.NestedModel.attrPath(attrStrOrPath),
-        result;
+      return Backbone.NestedModel.walkThenGet(this.attributes, attrStrOrPath);
+    },
 
-      Backbone.NestedModel.walkPath(this.attributes, attrPath, function(val, path){
-        var attr = _.last(path);
-        if (path.length === attrPath.length){
-          // attribute found
-          result = val[attr];
-        }
-      });
-
-      return result;
+    previous: function(attrStrOrPath){
+      return Backbone.NestedModel.walkThenGet(this._previousAttributes, attrStrOrPath);
     },
 
     has: function(attr){
@@ -366,6 +359,21 @@
         val = val[childAttr];
         if (!val) break; // at the leaf
       }
+    },
+
+    walkThenGet: function(attributes, attrStrOrPath){
+      var attrPath = Backbone.NestedModel.attrPath(attrStrOrPath),
+        result;
+
+      Backbone.NestedModel.walkPath(attributes, attrPath, function(val, path){
+        var attr = _.last(path);
+        if (path.length === attrPath.length){
+          // attribute found
+          result = val[attr];
+        }
+      });
+
+      return result;
     }
 
   });

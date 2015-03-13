@@ -121,6 +121,32 @@ $(document).ready(function() {
   });
 
 
+  // ----- PREVIOUS --------
+
+  test("$previous() 1-1 undefined previous at init", function() {
+    equal(doc.previous("gender"), undefined);
+    equal(doc.previous("name"), undefined);
+    equal(doc.previous("name.first"), undefined);
+    equal(doc.previous("unknown"), undefined);
+    equal(doc.previous("unknown2.field"), undefined);
+  });
+
+  test("$previous() 1-1 previous returning last value", function() {
+    doc.set("gender", 'F');
+    equal(doc.previous("gender"), 'M');
+
+    doc.set("name.first", "blah");
+    equal(doc.previous("name.first"), 'Aidan');
+
+    doc.set("unknown", "blah");
+    equal(doc.previous("unknown"), undefined);
+
+    doc.set("unknown2.field", "blah");
+    equal(doc.previous("unknown2.field"), undefined);
+    doc.set("unknown2.field", "bleh");
+    equal(doc.previous("unknown2.field"), "blah");
+  });
+
   // ----- HAS --------
 
   test("#get() 1-1", function() {
