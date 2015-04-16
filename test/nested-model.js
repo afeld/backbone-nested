@@ -301,6 +301,57 @@ $(document).ready(function() {
     deepEqual(doc.get('addresses[0].areaCodes'), []);
   });
 
+  test("#construct with idAttribute with simple path (non regression test)", function(){
+    var Clazz = Backbone.NestedModel.extend({
+      idAttribute: "foo"
+    });
+
+    var d1 = new Clazz({ bar: 'bar' });
+    var d2 = new Clazz({ foo: 'foo' });
+
+    equal(d1.id, null);
+    equal(d2.id, 'foo');
+  });
+
+  test("#set() with idAttribute with simple path (non regression test)", function(){
+    var Clazz = Backbone.NestedModel.extend({
+      idAttribute: "foo"
+    });
+
+    var d1 = new Clazz(); d1.set({ bar: 'bar' });
+    var d2 = new Clazz(); d2.set({ foo: 'foo' });
+
+    equal(d1.id, null);
+    equal(d2.id, 'foo');
+  });
+
+  test("#construct with idAttribute and nested path", function(){
+    var Clazz = Backbone.NestedModel.extend({
+      idAttribute: "foo.bar"
+    });
+
+    var d1 = new Clazz({ bar: 'bar' });
+    var d2 = new Clazz({ foo: { foo2: 'foo-bar' } });
+    var d3 = new Clazz({ foo: { bar: 'foo-bar' } });
+
+    equal(d1.id, null);
+    equal(d2.id, null);
+    equal(d3.id, 'foo-bar');
+  });
+
+  test("#set() with idAttribute and nested path", function(){
+    var Clazz = Backbone.NestedModel.extend({
+      idAttribute: "foo.bar"
+    });
+
+    var d1 = new Clazz(); d1.set({ bar: 'bar' });
+    var d2 = new Clazz(); d2.set({ foo: { foo2: 'foo-bar' } });
+    var d3 = new Clazz(); d3.set({ foo: { bar: 'foo-bar' } });
+
+    equal(d1.id, null);
+    equal(d2.id, null);
+    equal(d3.id, 'foo-bar');
+  });
 
   // ----- TO_JSON --------
 
