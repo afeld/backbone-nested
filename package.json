@@ -1,6 +1,6 @@
 {
   "name": "backbone-nested",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "A plugin to make Backbone.js keep track of nested attributes.",
   "scripts": {
     "test": "bower install; grunt"
