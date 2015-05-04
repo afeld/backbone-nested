@@ -3,7 +3,8 @@
   "version": "2.0.3",
   "description": "A plugin to make Backbone.js keep track of nested attributes.",
   "scripts": {
-    "test": "bower install; grunt"
+    "pretest": "npm install && bower install",
+    "test": "grunt"
   },
   "dependencies": {
     "jquery": ">=1.8.3",
