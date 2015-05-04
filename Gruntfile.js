@@ -17,8 +17,7 @@ module.exports = function(grunt) {
         eqnull: true,
 
         globals: {
-          jQuery: true,
-          require: true
+          jQuery: true
         }
       },
     },
@@ -40,11 +39,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-qunit');
   grunt.loadNpmTasks('grunt-mocha-test');
 
-  grunt.registerTask('install', function() {
-    var exec = require('child_process').exec;
-    exec('bower install');
-  });
-
   // Default task.
-  grunt.registerTask('default', ['install', 'jshint', 'qunit', 'mochaTest']);
+  grunt.registerTask('default', ['jshint', 'qunit', 'mochaTest']);
 };
