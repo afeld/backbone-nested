@@ -3,7 +3,7 @@
   "version": "2.0.3",
   "description": "A plugin to make Backbone.js keep track of nested attributes.",
   "scripts": {
-    "test": "bower install; grunt"
+    "test": "grunt"
   },
   "dependencies": {
     "jquery": ">=1.8.3",
@@ -11,15 +11,18 @@
     "backbone": ">=0.9.2"
   },
   "devDependencies": {
+    "bower": "*",
     "grunt": "~0.4.1",
-    "grunt-contrib-qunit": "~0.2.2",
-    "grunt-contrib-jshint": "~0.6.4",
-    "grunt-mocha-test": "~0.8.2",
-    "grunt-contrib-watch": "~0.5.3",
-    "jslitmus": "~0.1.0",
-    "mocha": "~1.17.1",
     "grunt-cli": "*",
-    "bower": "*"
+    "grunt-contrib-jshint": "~0.6.4",
+    "grunt-contrib-qunit": "~0.2.2",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-mocha-test": "~0.8.2",
+    "jslitmus": "~0.1.0",
+    "lodash": "~2.4.2",
+    "mocha": "~1.17.1",
+    "qunit": "~0.7.6",
+    "sinon": "~1.14.1"
   },
   "homepage": "http://afeld.github.com/backbone-nested/",
   "main": "backbone-nested.js",
