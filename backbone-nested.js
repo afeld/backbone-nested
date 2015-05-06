@@ -267,8 +267,13 @@
           if (!opts.silent && _.isObject(newValue) && isNewValue){
             var visited = [];
             var checkChanges = function(obj, prefix) {
-              // Don't choke on circular references
-              if(_.indexOf(visited, obj) > -1) {
+              // Not checking changes on sub-Backbone.Models/Collection props
+              // in order to avoid to put observers on potential heavy objects
+              // (typically, Backbone.Models have _events properties which may have lots of things inside it, and
+              // we should not put useless observers on it)
+              if(obj instanceof Backbone.Model || obj instanceof Backbone.Collection) {
+                return;
+              } else if(_.indexOf(visited, obj) > -1) { // Don't choke on circular references
                 return;
               } else {
                 visited.push(obj);
