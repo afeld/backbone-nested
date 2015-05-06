@@ -1117,4 +1117,40 @@ $(document).ready(function() {
     equal(model, doc);
   });
 
+  test("#walkPath() should not observe Backbone.Models properties, you should observe this by yourself directly by binding watchers on submodels", function(){
+    var nonAttributeChange = sinon.spy();
+    var changeFromRootModel = sinon.spy();
+    var changeFromSubModel = sinon.spy();
+
+    var model = new Backbone.NestedModel({
+      submodel: new Backbone.Model({ foo: "bar" })
+    });
+
+    // submodel.cid is amongst the Backbone.Model fields which should not be observable
+    model.bind('change:submodel.cid', nonAttributeChange);
+
+    // By defining a new Backbone.Model instance, we're implicitely changing submodel.cid field
+    model.set("submodel", new Backbone.Model(model.get("submodel").toJSON()));
+    sinon.assert.notCalled(nonAttributeChange);
+
+    // We should avoid setting sub backbone models watchers directly through model props
+    // because it may lead to lots of observers set up on Backbone.Model props
+    // particularly _events props which may contain huge objects
+    model.bind("change:submodel.attributes", changeFromRootModel);
+
+    // Trying to update submodel attributes as well... but this should not be allowed either
+    // because here, we won't trigger any submodel's event (only model's event)
+    // We'll see a better way to handle this below...
+    model.set("submodel.attributes.foo", "bar");
+    sinon.assert.calledOnce(changeFromRootModel);
+
+
+    // We should rather consider binding the change event directly on the submodel
+    model.get("submodel").bind("change:foo", changeFromSubModel);
+
+    // This will be far better and will trigger an update this time
+    model.get("submodel").set("foo", "quix");
+    sinon.assert.calledOnce(changeFromSubModel);
+  });
+
 });
