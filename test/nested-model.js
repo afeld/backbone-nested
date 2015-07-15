@@ -1134,7 +1134,7 @@ $(document).ready(function() {
       // trigger a set on modelB when modelA is changed to create the issue of singleton _delayedTriggers 
       // the buggy behavior cause modelB to trigger modelA _delayedTriggers
       modelA.on("change:name", function(){
-          modelB.set("and.now.for.something.completly", "different");
+          modelB.set("and.now.for.something.completely", "different");
       });
       // assert true (expected behavior)
       modelA.on("change:name.first", function(){
