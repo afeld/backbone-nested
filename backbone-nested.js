@@ -21,8 +21,6 @@
 }(this, function($, _, Backbone) {
   'use strict';
 
-  var _delayedTriggers = [],
-    nestedChanges;
 
   Backbone.NestedModel = Backbone.Model.extend({
 
@@ -70,13 +68,13 @@
         }
       }
 
-      nestedChanges = Backbone.NestedModel.__super__.changedAttributes.call(this);
+      this._nestedChanges = Backbone.NestedModel.__super__.changedAttributes.call(this);
 
       if (opts.unset && attrPath && attrPath.length === 1){ // assume it is a singular attribute being unset
         // unsetting top-level attribute
         unsetObj = {};
         unsetObj[key] = void 0;
-        nestedChanges = _.omit(nestedChanges, _.keys(unsetObj));
+        this._nestedChanges = _.omit(this._nestedChanges, _.keys(unsetObj));
         validated = Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
       } else {
         unsetObj = newAttrs;
@@ -89,7 +87,7 @@
         } else if (opts.unset && _.isObject(key)) {
           unsetObj = key;
         }
-        nestedChanges = _.omit(nestedChanges, _.keys(unsetObj));
+        this._nestedChanges = _.omit(this._nestedChanges, _.keys(unsetObj));
         validated = Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
       }
 
@@ -97,7 +95,7 @@
       if (!validated){
         // reset changed attributes
         this.changed = {};
-        nestedChanges = {};
+        this._nestedChanges = {};
         return false;
       }
 
@@ -111,7 +109,7 @@
     },
 
     clear: function(options) {
-      nestedChanges = {};
+      this._nestedChanges = {};
 
       // Mostly taken from Backbone.Model.set, modified to work for NestedModel.
       options = options || {};
@@ -199,7 +197,7 @@
     changedAttributes: function(diff) {
       var backboneChanged = Backbone.NestedModel.__super__.changedAttributes.call(this, diff);
       if (_.isObject(backboneChanged)) {
-        return _.extend({}, nestedChanges, backboneChanged);
+        return _.extend({}, this._nestedChanges, backboneChanged);
       }
       return false;
     },
@@ -210,8 +208,14 @@
 
 
     // private
+    _getDelayedTriggers: function(){
+        if (typeof this._delayedTriggers === "undefined"){
+            this._delayedTriggers = [];
+        }
+        return this._delayedTriggers;
+    },
     _delayedTrigger: function(/* the trigger args */){
-      _delayedTriggers.push(arguments);
+      this._getDelayedTriggers().push(arguments);
     },
 
     _delayedChange: function(attrStr, newVal, options){
@@ -227,8 +231,8 @@
     },
 
     _runDelayedTriggers: function(){
-      while (_delayedTriggers.length > 0){
-        this.trigger.apply(this, _delayedTriggers.shift());
+      while (this._getDelayedTriggers().length > 0){
+        this.trigger.apply(this, this._getDelayedTriggers().shift());
       }
     },
 

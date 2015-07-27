@@ -1116,5 +1116,35 @@ $(document).ready(function() {
 
     equal(model, doc);
   });
+  test("issue #68 - _delayedTriggers is a singleton", function() {
+      var modelA = new Klass({ 
+        modelName: "modelA",
+        name: {
+            first: "andrew",
+            last: "goldis"
+        }
+      });
+      var modelB = new Klass({ 
+        modelName: "modelB",
+        name: {
+            first: "eyal",
+            last: "keren"
+        }
+      });
+      // trigger a set on modelB when modelA is changed to create the issue of singleton _delayedTriggers 
+      // the buggy behavior cause modelB to trigger modelA _delayedTriggers
+      modelA.on("change:name", function(){
+          modelB.set("and.now.for.something.completely", "different");
+      });
+      // assert true (expected behavior)
+      modelA.on("change:name.first", function(){
+          ok(true, "event change:name.first from modelA was triggered on modelA - great!");
+      });
+      // assert false (buggy behavior)
+      modelB.on("change:name.first", function(){
+          ok(false, "event change:name.first from modelA was triggered on modelB - ouch!");
+      });
 
+      modelA.set("name.first", "s");
+    });
 });
