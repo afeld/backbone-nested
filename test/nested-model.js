@@ -351,6 +351,34 @@ $(document).ready(function() {
     sinon.assert.calledOnce(changeGender);
   });
 
+  test("change event on top-level attribute with array", function() {
+    var change = sinon.spy();
+    var changeAddresses = sinon.spy();
+    var changeAddresses0 = sinon.spy();
+    var changeAddresses0City = sinon.spy();
+    var changeAddresses0State = sinon.spy();
+
+    doc.bind('change', change);
+    doc.bind('change:addresses', changeAddresses);
+    doc.bind('change:addresses[0]', changeAddresses0);
+    doc.bind('change:addresses[0].city', changeAddresses0City);
+    doc.bind('change:addresses[0].state', changeAddresses0State);
+
+    doc.set({'addresses': [
+      {
+        city: 'Seattle',
+        state: 'WA'
+      }
+    ]});
+
+    // Confirm all triggers fire once that should
+    sinon.assert.calledOnce(change);
+    sinon.assert.calledOnce(changeAddresses);
+    sinon.assert.calledOnce(changeAddresses0);
+    sinon.assert.calledOnce(changeAddresses0City);
+    sinon.assert.calledOnce(changeAddresses0State);
+  });
+
   test("change event should fire after attribute is set", function() {
     var callback = function(model){
       equal(model.get('name.first'), 'Bob');
