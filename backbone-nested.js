@@ -59,7 +59,7 @@
         opts = value || {};
         var attrs = key;
         for (var _attrStr in attrs) {
-          if (attrs.hasOwnProperty(_attrStr)) {
+          if (Object.hasOwnProperty.call(attrs, _attrStr)) {
             this._setAttr(newAttrs,
                           Backbone.NestedModel.attrPath(_attrStr),
                           opts.unset ? void 0 : attrs[_attrStr],
