@@ -58,7 +58,7 @@
       } else { // it's an Object
         opts = value || {};
         var attrs = key;
-        for (var _attrStr in attrs) {
+        for (var _attrStr in attrs) { 
           if (Object.hasOwnProperty.call(attrs, _attrStr)) {
             this._setAttr(newAttrs,
                           Backbone.NestedModel.attrPath(_attrStr),
@@ -280,7 +280,7 @@
 
               var nestedAttr, nestedVal;
               for (var a in obj){
-                if (obj.hasOwnProperty(a)) {
+                if (Object.hasOwnProperty.call(obj, a)) {
                   nestedAttr = prefix + '.' + a;
                   nestedVal = obj[a];
                   if (!_.isEqual(model.get(nestedAttr), nestedVal)) {
