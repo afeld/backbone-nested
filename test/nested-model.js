@@ -121,6 +121,32 @@ $(document).ready(function() {
   });
 
 
+  // ----- PREVIOUS --------
+
+  test("$previous() 1-1 undefined previous at init", function() {
+    equal(doc.previous("gender"), undefined);
+    equal(doc.previous("name"), undefined);
+    equal(doc.previous("name.first"), undefined);
+    equal(doc.previous("unknown"), undefined);
+    equal(doc.previous("unknown2.field"), undefined);
+  });
+
+  test("$previous() 1-1 previous returning last value", function() {
+    doc.set("gender", 'F');
+    equal(doc.previous("gender"), 'M');
+
+    doc.set("name.first", "blah");
+    equal(doc.previous("name.first"), 'Aidan');
+
+    doc.set("unknown", "blah");
+    equal(doc.previous("unknown"), undefined);
+
+    doc.set("unknown2.field", "blah");
+    equal(doc.previous("unknown2.field"), undefined);
+    doc.set("unknown2.field", "bleh");
+    equal(doc.previous("unknown2.field"), "blah");
+  });
+
   // ----- HAS --------
 
   test("#get() 1-1", function() {
@@ -307,6 +333,32 @@ $(document).ready(function() {
   test("#toJSON()", function() {
     var json = doc.toJSON();
     deepEqual(json, doc.attributes);
+  });
+
+  test("#toJSON() after an 1-N set using brackets", function() {
+    var provider = new Klass({
+      "fields[0].key": 'LOGIN'
+    });
+    equal(provider.get('fields[0].key'), 'LOGIN');
+
+    deepEqual(provider.toJSON(), {
+      "fields": [{
+        "key": "LOGIN"
+      }]
+    });
+  });
+
+  test("#toJSON() after an 1-N set using dots", function() {
+    var provider = new Klass({
+      "fields.0.key": 'LOGIN2'
+    });
+    equal(provider.get('fields.0.key'), 'LOGIN2');
+
+    deepEqual(provider.toJSON(), {
+      "fields": [{
+        "key": "LOGIN2"
+      }]
+    });
   });
 
 
@@ -1064,5 +1116,35 @@ $(document).ready(function() {
 
     equal(model, doc);
   });
+  test("issue #68 - _delayedTriggers is a singleton", function() {
+      var modelA = new Klass({ 
+        modelName: "modelA",
+        name: {
+            first: "andrew",
+            last: "goldis"
+        }
+      });
+      var modelB = new Klass({ 
+        modelName: "modelB",
+        name: {
+            first: "eyal",
+            last: "keren"
+        }
+      });
+      // trigger a set on modelB when modelA is changed to create the issue of singleton _delayedTriggers 
+      // the buggy behavior cause modelB to trigger modelA _delayedTriggers
+      modelA.on("change:name", function(){
+          modelB.set("and.now.for.something.completely", "different");
+      });
+      // assert true (expected behavior)
+      modelA.on("change:name.first", function(){
+          ok(true, "event change:name.first from modelA was triggered on modelA - great!");
+      });
+      // assert false (buggy behavior)
+      modelB.on("change:name.first", function(){
+          ok(false, "event change:name.first from modelA was triggered on modelB - ouch!");
+      });
 
+      modelA.set("name.first", "s");
+    });
 });

@@ -1,33 +1,35 @@
 /**
- * Backbone-Nested 2.0.0 - An extension of Backbone.js that keeps track of nested attributes
+ * Backbone-Nested 2.0.4 - An extension of Backbone.js that keeps track of nested attributes
  *
  * http://afeld.github.com/backbone-nested/
  *
  * Copyright (c) 2011-2012 Aidan Feldman
  * MIT Licensed (LICENSE)
  */
-/*global $, _, Backbone */
-(function(){
+/*global define, require, module */
+(function(root, factory){
+  if (typeof exports !== 'undefined') {
+      // Define as CommonJS export:
+      module.exports = factory(require("jquery"), require("underscore"), require("backbone"));
+  } else if (typeof define === 'function' && define.amd) {
+      // Define as AMD:
+      define(["jquery", "underscore", "backbone"], factory);
+  } else {
+      // Just run it:
+      factory(root.$, root._, root.Backbone);
+  }
+}(this, function($, _, Backbone) {
   'use strict';
 
-  var _delayedTriggers = [],
-    nestedChanges;
 
   Backbone.NestedModel = Backbone.Model.extend({
 
     get: function(attrStrOrPath){
-      var attrPath = Backbone.NestedModel.attrPath(attrStrOrPath),
-        result;
+      return Backbone.NestedModel.walkThenGet(this.attributes, attrStrOrPath);
+    },
 
-      Backbone.NestedModel.walkPath(this.attributes, attrPath, function(val, path){
-        var attr = _.last(path);
-        if (path.length === attrPath.length){
-          // attribute found
-          result = val[attr];
-        }
-      });
-
-      return result;
+    previous: function(attrStrOrPath){
+      return Backbone.NestedModel.walkThenGet(this._previousAttributes, attrStrOrPath);
     },
 
     has: function(attr){
@@ -66,13 +68,13 @@
         }
       }
 
-      nestedChanges = Backbone.NestedModel.__super__.changedAttributes.call(this);
+      this._nestedChanges = Backbone.NestedModel.__super__.changedAttributes.call(this);
 
       if (opts.unset && attrPath && attrPath.length === 1){ // assume it is a singular attribute being unset
         // unsetting top-level attribute
         unsetObj = {};
         unsetObj[key] = void 0;
-        nestedChanges = _.omit(nestedChanges, _.keys(unsetObj));
+        this._nestedChanges = _.omit(this._nestedChanges, _.keys(unsetObj));
         validated = Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
       } else {
         unsetObj = newAttrs;
@@ -85,7 +87,7 @@
         } else if (opts.unset && _.isObject(key)) {
           unsetObj = key;
         }
-        nestedChanges = _.omit(nestedChanges, _.keys(unsetObj));
+        this._nestedChanges = _.omit(this._nestedChanges, _.keys(unsetObj));
         validated = Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
       }
 
@@ -93,7 +95,7 @@
       if (!validated){
         // reset changed attributes
         this.changed = {};
-        nestedChanges = {};
+        this._nestedChanges = {};
         return false;
       }
 
@@ -107,7 +109,7 @@
     },
 
     clear: function(options) {
-      nestedChanges = {};
+      this._nestedChanges = {};
 
       // Mostly taken from Backbone.Model.set, modified to work for NestedModel.
       options = options || {};
@@ -195,7 +197,7 @@
     changedAttributes: function(diff) {
       var backboneChanged = Backbone.NestedModel.__super__.changedAttributes.call(this, diff);
       if (_.isObject(backboneChanged)) {
-        return _.extend({}, nestedChanges, backboneChanged);
+        return _.extend({}, this._nestedChanges, backboneChanged);
       }
       return false;
     },
@@ -206,8 +208,14 @@
 
 
     // private
+    _getDelayedTriggers: function(){
+        if (typeof this._delayedTriggers === "undefined"){
+            this._delayedTriggers = [];
+        }
+        return this._delayedTriggers;
+    },
     _delayedTrigger: function(/* the trigger args */){
-      _delayedTriggers.push(arguments);
+      this._getDelayedTriggers().push(arguments);
     },
 
     _delayedChange: function(attrStr, newVal, options){
@@ -223,8 +231,8 @@
     },
 
     _runDelayedTriggers: function(){
-      while (_delayedTriggers.length > 0){
-        this.trigger.apply(this, _delayedTriggers.shift());
+      while (this._getDelayedTriggers().length > 0){
+        this.trigger.apply(this, this._getDelayedTriggers().shift());
       }
     },
 
@@ -235,7 +243,7 @@
       var fullPathLength = attrPath.length;
       var model = this;
 
-      Backbone.NestedModel.walkPath(newAttrs, attrPath, function(val, path){
+      Backbone.NestedModel.walkPath(newAttrs, attrPath, function(val, path, next){
         var attr = _.last(path);
         var attrStr = Backbone.NestedModel.createAttrStr(path);
 
@@ -290,7 +298,7 @@
 
 
         } else if (!val[attr]){
-          if (_.isNumber(attr)){
+          if (_.isNumber(next)){
             val[attr] = [];
           } else {
             val[attr] = {};
@@ -349,14 +357,30 @@
 
       // walk through the child attributes
       for (var i = 0; i < attrPath.length; i++){
-        callback.call(scope || this, val, attrPath.slice(0, i + 1));
+        callback.call(scope || this, val, attrPath.slice(0, i + 1), attrPath[i + 1]);
 
         childAttr = attrPath[i];
         val = val[childAttr];
         if (!val) break; // at the leaf
       }
+    },
+
+    walkThenGet: function(attributes, attrStrOrPath){
+      var attrPath = Backbone.NestedModel.attrPath(attrStrOrPath),
+        result;
+
+      Backbone.NestedModel.walkPath(attributes, attrPath, function(val, path){
+        var attr = _.last(path);
+        if (path.length === attrPath.length){
+          // attribute found
+          result = val[attr];
+        }
+      });
+
+      return result;
     }
 
   });
 
-}());
+  return Backbone;
+}));
