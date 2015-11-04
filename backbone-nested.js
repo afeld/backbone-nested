@@ -22,14 +22,14 @@
   'use strict';
 
 
-  Backbone.NestedModel = Backbone.Model.extend({
+  var NestedModel = Backbone.Model.extend({
 
     get: function(attrStrOrPath){
-      return Backbone.NestedModel.walkThenGet(this.attributes, attrStrOrPath);
+      return NestedModel.walkThenGet(this.attributes, attrStrOrPath);
     },
 
     previous: function(attrStrOrPath){
-      return Backbone.NestedModel.walkThenGet(this._previousAttributes, attrStrOrPath);
+      return NestedModel.walkThenGet(this._previousAttributes, attrStrOrPath);
     },
 
     has: function(attr){
@@ -39,14 +39,14 @@
     },
 
     set: function(key, value, opts){
-      var newAttrs = Backbone.NestedModel.deepClone(this.attributes),
+      var newAttrs = NestedModel.deepClone(this.attributes),
         attrPath,
         unsetObj,
         validated;
 
       if (_.isString(key)){
         // Backbone 0.9.0+ syntax: `model.set(key, val)` - convert the key to an attribute path
-        attrPath = Backbone.NestedModel.attrPath(key);
+        attrPath = NestedModel.attrPath(key);
       } else if (_.isArray(key)){
         // attribute path
         attrPath = key;
@@ -61,21 +61,21 @@
         for (var _attrStr in attrs) {
           if (attrs.hasOwnProperty(_attrStr)) {
             this._setAttr(newAttrs,
-                          Backbone.NestedModel.attrPath(_attrStr),
+                          NestedModel.attrPath(_attrStr),
                           opts.unset ? void 0 : attrs[_attrStr],
                           opts);
           }
         }
       }
 
-      this._nestedChanges = Backbone.NestedModel.__super__.changedAttributes.call(this);
+      this._nestedChanges = NestedModel.__super__.changedAttributes.call(this);
 
       if (opts.unset && attrPath && attrPath.length === 1){ // assume it is a singular attribute being unset
         // unsetting top-level attribute
         unsetObj = {};
         unsetObj[key] = void 0;
         this._nestedChanges = _.omit(this._nestedChanges, _.keys(unsetObj));
-        validated = Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
+        validated = NestedModel.__super__.set.call(this, unsetObj, opts);
       } else {
         unsetObj = newAttrs;
 
@@ -88,7 +88,7 @@
           unsetObj = key;
         }
         this._nestedChanges = _.omit(this._nestedChanges, _.keys(unsetObj));
-        validated = Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
+        validated = NestedModel.__super__.set.call(this, unsetObj, opts);
       }
 
 
@@ -163,7 +163,7 @@
     remove: function(attrStr, opts){
       opts = opts || {};
 
-      var attrPath = Backbone.NestedModel.attrPath(attrStr),
+      var attrPath = NestedModel.attrPath(attrStr),
         aryPath = _.initial(attrPath),
         val = this.get(aryPath),
         i = _.last(attrPath);
@@ -182,10 +182,10 @@
       this.set(aryPath, val, opts);
 
       if (trigger){
-        attrStr = Backbone.NestedModel.createAttrStr(aryPath);
+        attrStr = NestedModel.createAttrStr(aryPath);
         this.trigger('remove:' + attrStr, this, oldEl);
         for (var aryCount = aryPath.length; aryCount >= 1; aryCount--) {
-          attrStr = Backbone.NestedModel.createAttrStr(_.first(aryPath, aryCount));
+          attrStr = NestedModel.createAttrStr(_.first(aryPath, aryCount));
           this.trigger('change:' + attrStr, this, oldEl);
         }
         this.trigger('change', this, oldEl);
@@ -195,7 +195,7 @@
     },
 
     changedAttributes: function(diff) {
-      var backboneChanged = Backbone.NestedModel.__super__.changedAttributes.call(this, diff);
+      var backboneChanged = NestedModel.__super__.changedAttributes.call(this, diff);
       if (_.isObject(backboneChanged)) {
         return _.extend({}, this._nestedChanges, backboneChanged);
       }
@@ -203,7 +203,7 @@
     },
 
     toJSON: function(){
-      return Backbone.NestedModel.deepClone(this.attributes);
+      return NestedModel.deepClone(this.attributes);
     },
 
 
@@ -243,9 +243,9 @@
       var fullPathLength = attrPath.length;
       var model = this;
 
-      Backbone.NestedModel.walkPath(newAttrs, attrPath, function(val, path, next){
+      NestedModel.walkPath(newAttrs, attrPath, function(val, path, next){
         var attr = _.last(path);
-        var attrStr = Backbone.NestedModel.createAttrStr(path);
+        var attrStr = NestedModel.createAttrStr(path);
 
         // See if this is a new value being set
         var isNewValue = !_.isEqual(val[attr], newValue);
@@ -259,7 +259,7 @@
 
             // Trigger Remove Event if array being set to null
             if (_.isArray(val)){
-              var parentPath = Backbone.NestedModel.createAttrStr(_.initial(attrPath));
+              var parentPath = NestedModel.createAttrStr(_.initial(attrPath));
               model._delayedTrigger('remove:' + parentPath, model, val[attr]);
             }
           } else {
@@ -366,10 +366,10 @@
     },
 
     walkThenGet: function(attributes, attrStrOrPath){
-      var attrPath = Backbone.NestedModel.attrPath(attrStrOrPath),
+      var attrPath = NestedModel.attrPath(attrStrOrPath),
         result;
 
-      Backbone.NestedModel.walkPath(attributes, attrPath, function(val, path){
+      NestedModel.walkPath(attributes, attrPath, function(val, path){
         var attr = _.last(path);
         if (path.length === attrPath.length){
           // attribute found
@@ -382,5 +382,7 @@
 
   });
 
-  return Backbone;
+  Backbone.NestedModel = NestedModel;
+
+  return NestedModel;
 }));
