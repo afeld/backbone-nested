@@ -346,10 +346,31 @@
 
       return attrStr;
     },
-
+    // TODO
     deepClone: function(obj){
-      return $.extend(true, {}, obj);
+      function deeperClone(obj) {
+
+        var destination = _.isArray(obj) ? [] : {},
+            keys = (_.allKeys || _.keys)(obj),
+            l    = keys.length;
+
+        for (var i = 0; i < l; i++) {
+          var key   = keys[i];
+          var value = obj[key];
+          if( typeof value === "object" ) {
+
+            destination[key] = deeperClone(value);
+
+          } else {
+            destination[key] = value;
+          }
+
+        }
+        return destination;
+      }
+      return deeperClone(obj);
     },
+
 
     walkPath: function(obj, attrPath, callback, scope){
       var val = obj,
