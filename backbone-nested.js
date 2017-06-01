@@ -348,7 +348,7 @@
     },
 
     deepClone: function(obj){
-      return $.extend(true, {}, obj);
+      return JSON.parse(JSON.stringify(obj));
     },
 
     walkPath: function(obj, attrPath, callback, scope){
