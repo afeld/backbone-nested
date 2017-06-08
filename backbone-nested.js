@@ -10,15 +10,15 @@
 (function(root, factory){
   if (typeof exports !== 'undefined') {
       // Define as CommonJS export:
-      module.exports = factory(require("jquery"), require("underscore"), require("backbone"));
+      module.exports = factory(require("underscore"), require("backbone"));
   } else if (typeof define === 'function' && define.amd) {
       // Define as AMD:
-      define(["jquery", "underscore", "backbone"], factory);
+      define(["underscore", "backbone"], factory);
   } else {
       // Just run it:
-      factory(root.$, root._, root.Backbone);
+      factory(root._, root.Backbone);
   }
-}(this, function($, _, Backbone) {
+}(this, function(_, Backbone) {
   'use strict';
 
 
@@ -348,7 +348,7 @@
     },
 
     deepClone: function(obj){
-      return $.extend(true, {}, obj);
+      return JSON.parse(JSON.stringify(obj));
     },
 
     walkPath: function(obj, attrPath, callback, scope){
