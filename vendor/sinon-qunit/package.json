@@ -1,0 +1,22 @@
+{ 
+  "name": "sinon-qunit",
+  "description": "QUnit adapter for Sinon.JS: JavaScript test spies, stubs and mocks.",
+  "version": "1.0.0",
+  "homepage": "http://cjohansen.no/sinon/sinon-qunit/",
+  "author": "Christian Johansen",
+  "repository": { 
+    "type": "git",
+    "url": "http://github.com/cjohansen/sinon-qunit.git"
+  },
+  "bugs": { 
+    "mail": "christian@cjohansen.no",
+    "web": "http://github.com/cjohansen/sinon-qunit/issues"
+  },
+  "licenses": [ 
+     { "type": "BSD",
+       "url": "http://github.com/cjohansen/sinon-qunit/blob/master/LICENSE",
+     }
+  ],
+  "main": "./lib/sinon-qunit.js",
+  "engines": { "node": ">=0.1.103" }
+}

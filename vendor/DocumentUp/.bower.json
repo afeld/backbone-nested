@@ -1,0 +1,15 @@
+{
+  "name": "DocumentUp",
+  "homepage": "https://github.com/jeromegn/DocumentUp",
+  "version": "0.1.1",
+  "_release": "0.1.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.1.1",
+    "commit": "52aa00fdc4597769f366f01102eeab3bfb78de58"
+  },
+  "_source": "git@github.com:jeromegn/DocumentUp.git",
+  "_target": "~0.1.1",
+  "_originalSource": "git@github.com:jeromegn/DocumentUp.git",
+  "_direct": true
+}
