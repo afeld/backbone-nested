@@ -268,7 +268,7 @@
           }
 
           // Trigger Change Event if new values are being set
-          if (!opts.silent && _.isObject(newValue) && isNewValue){
+          if (!opts.silent && _.isObject(newValue) && !newValue instanceof Backbone.Model && isNewValue){
             var visited = [];
             var checkChanges = function(obj, prefix) {
               // Don't choke on circular references
