@@ -91,6 +91,7 @@
         validated = Backbone.NestedModel.__super__.set.call(this, unsetObj, opts);
       }
 
+      if(this.idAttribute && this.idAttribute.indexOf(".") !== -1) this.id = this.get(this.idAttribute);
 
       if (!validated){
         // reset changed attributes
