@@ -861,6 +861,21 @@ test("#changedAttributes() should clear the nested attributes between change eve
     doc.set({'name.last': 'Dylan'}, {validate: true});
 });
 
+test("#changedAttributes() should clear the nested attributes between change events", function() {
+    doc.bind('change', function(){
+        deepEqual(this.changedAttributes(), {
+            addresses: [
+                {
+                    city: 'Brooklyn',
+                    state: 'NY'
+                }
+            ]
+        });
+    });
+
+    doc.remove('addresses[1]');
+});
+
 // ----- CLEAR --------
 
 test("#clear()", function() {
@@ -1145,5 +1160,39 @@ test("issue #68 - _delayedTriggers is a singleton", function() {
     });
 
     modelA.set("name.first", "s");
+});
+test("issue #146 - Changing nested array variables does not set 'changedAttributes'", function() {
+    var model = new Klass({
+        structure: {
+            abc: [
+                {
+                    items: [1, 2, 3],
+                    groupId: 123
+                },
+                {
+                    items: [4 ,5, 6],
+                    groupId: 456
+                }
+            ]
+        }
+    });
+    model.bind('change', function () {
+        deepEqual(this.changedAttributes(), {
+            structure: {
+                abc: [
+                    {
+                        items: [1, 2, 3],
+                        groupId: 123
+                    },
+                    {
+                        items: [4 ,5],
+                        groupId: 456
+                    }
+                ]
+            }
+        });
+    });
+
+    model.remove('structure.abc[1].items[2]');
 });
 

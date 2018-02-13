@@ -176,10 +176,12 @@
       var trigger = !opts.silent && (val.length >= i + 1),
         oldEl = val[i];
 
+      // we should not change the original value
+      var aryVal = Backbone.NestedModel.deepClone(val);
       // remove the element from the array
-      val.splice(i, 1);
+      aryVal.splice(i, 1);
       opts.silent = true; // Triggers should only be fired in trigger section below
-      this.set(aryPath, val, opts);
+      this.set(aryPath, aryVal, opts);
 
       if (trigger){
         attrStr = Backbone.NestedModel.createAttrStr(aryPath);
