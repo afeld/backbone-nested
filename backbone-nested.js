@@ -231,7 +231,10 @@
     },
 
     _runDelayedTriggers: function(){
-      this._getDelayedTriggers().map((delayedTrigger) => this.trigger.apply(this, delayedTrigger));
+      var self = this;
+      this._getDelayedTriggers().map(function (delayedTrigger) {
+        self.trigger.apply(self, delayedTrigger)
+      });
       this._delayedTriggers = [];
     },
 
