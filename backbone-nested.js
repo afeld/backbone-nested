@@ -231,9 +231,11 @@
     },
 
     _runDelayedTriggers: function(){
-      while (this._getDelayedTriggers().length > 0){
-        this.trigger.apply(this, this._getDelayedTriggers().shift());
-      }
+      var self = this;
+      this._getDelayedTriggers().map(function (delayedTrigger) {
+        self.trigger.apply(self, delayedTrigger)
+      });
+      this._delayedTriggers = [];
     },
 
     // note: modifies `newAttrs`
